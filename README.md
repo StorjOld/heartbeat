@@ -20,7 +20,9 @@ The file is split up into chunks of chunk_size (from 0 to N where N=filesize/chu
     get_stripes(file_path, seed, chunk_size, num_chunks)
     
 Gets the hash of data returned from get_stripes() plus the seed.
+
     hash_challenge(data, seed)
     
 Generates a list of random seeds. Returns a list of 2-tuples containing the seed, and its corresponding hash_challenge. 
+
     gen_challenges(file_path, num)

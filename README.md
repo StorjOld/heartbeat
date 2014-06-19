@@ -16,4 +16,7 @@ Deterministically generate list of seeds from a root seed.
 Generate the specified number of hash challenges.
 
 	gen_challenges(file_path, num, root_seed)
-	
+
+Check if the returned hash is in our challenges list. 
+
+	check_challenge(challenges, hash_response)

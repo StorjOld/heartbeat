@@ -5,7 +5,7 @@ import hashlib # For SHA-256 Encoding
 
 def hash_challenge(file_path, seed = ""):
 	"""
-	Get the the sha256 hash of a file plus some seed data.
+	Get the the SHA256 hash of a file plus some seed data.
 
  	Arguments:
     file_path -- Path to the file we want to generate hashes for.
@@ -68,19 +68,31 @@ def gen_challenges(file_path, num, root_seed):
 
 	return challenges
 
+def check_challenge(challenges, hash_response):
+	"""
+	Check if the returned hash is in our challenges list. 
 
-file_path = "test.txt"
-file_path2 = "test2.txt"
-root_seed = "myroot"
+	Arguments:
+	challenges -- 2-tuples(seed, hash) list from gen_challenges()
+	hash_response -- a hash that we compare to our list of challenges.
+	"""
+	for a_challenge in challenges:
+		if a_challenge[1] == hash_response:
+			return True
+	return False
 
+if __name__ == "__main__":
+	file_path = "test.txt"
+	file_path2 = "test2.txt"
+	root_seed = "myroot"
 
-cha1 = gen_challenges(file_path, 1, root_seed)
-print("Node A - Genereate Root Seed: "  + root_seed)
-print("Node A - Find 1st Seed: "  + str(cha1[0][0]))
-print("Node A - Find 1st Seed's Hash: "  + str(cha1[0][1]))
-print("Node B - Pass File to Node B")
-print("Node A - Ask Node B for the Hash to 1st Seed: " + str(cha1[0][0]))
-cha2 = hash_challenge(file_path2, str(cha1[0][0]))
-print("Node B - Find Seed's Hash: " + str(cha2))
-print("Node B - Reply with Hash: " + str(cha2))
-print("Node A - Check to see if Hash Matches: " + str( cha1[0][1] == cha2 ))
+	cha1 = gen_challenges(file_path, 10, root_seed)
+	print("Node A - Genereate Root Seed: "  + root_seed)
+	print("Node A - Find 1st Seed: "  + str(cha1[0][0]))
+	print("Node A - Find 1st Seed's Hash: "  + str(cha1[0][1]))
+	print("Node B - Pass File to Node B")
+	print("Node A - Ask Node B for the Hash to 1st Seed: " + str(cha1[0][0]))
+	cha2 = hash_challenge(file_path2, str(cha1[0][0]))
+	print("Node B - Find Seed's Hash: " + str(cha2))
+	print("Node B - Reply with Hash: " + str(cha2))
+	print("Node A - Check to see if Hash Matches: " + str( check_challenge(cha1, cha2) ))

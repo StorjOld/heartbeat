@@ -17,7 +17,7 @@ def hash_challenge(file_path, seed = ""):
 	with open(file_path, "r", encoding='utf-8') as f:
 		m = hashlib.sha256()
 		# File + Seed
-		m.update(f.read().encode('utf-8') + seed.encode('utf-8'))
+		m.update(f.read().encode('utf-8') + str(seed).encode('utf-8'))
 		sha = m.digest()
 		res = base64.b64encode(sha)
 	return res
@@ -25,7 +25,7 @@ def hash_challenge(file_path, seed = ""):
 
 def gen_seeds(num, root_seed):
 	"""
-	Deterministically generate a series of seeds. 
+	Deterministically generate list of seeds from a root seed. 
 
 	Arguments:
 	num -- Numbers of seeds to generate.
@@ -44,7 +44,16 @@ def gen_seeds(num, root_seed):
 
 	return seeds
 
+
 def gen_challenges(file_path, num, root_seed):
+	"""
+	Generate the specified number of hash challenges.
+
+	Arguments:
+	file_path -- Path to the file we want to generate hashes for.
+	num -- The number of hash challenges we want to generate.
+	root_seed -- Some value that we use to generate our seeds from.
+	"""
 
 	# Generate a series of seeds
 	seeds = gen_seeds(num, root_seed)
@@ -52,15 +61,18 @@ def gen_challenges(file_path, num, root_seed):
 	# List of 2-tuples (seed, hash)
 	challenges = []
 
+	# Generate the corresponding hash for each seed
 	for a_seed in seeds:
-		result_hash = hash_challenge(file_path, str(a_seed))
+		result_hash = hash_challenge(file_path, a_seed)
 		challenges.append((a_seed, result_hash))
 
 	return challenges
 
+
 file_path = "test.txt"
 file_path2 = "test2.txt"
 root_seed = "myroot"
+
 
 cha1 = gen_challenges(file_path, 1, root_seed)
 print("Node A - Genereate Root Seed: "  + root_seed)

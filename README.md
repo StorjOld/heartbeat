@@ -1,28 +1,19 @@
 heartbeat
 =========
 
-Python library for verifying existence of a file. Works with other Storj libraries and wrappers to allow to allow for Node A to trustlessly verify that Node B has a file by comparing hashes.
-
-Yes, we should be using Merkle trees for the challege verification. 
+Python library for verifying existence of a file. Works with other Storj libraries and wrappers to allow to allow for Node A to trustlessly verify that Node B has a file by comparing hashes. This should be expanded to use Merkle trees, and data striping to optimize I/O. 
 
 #### Functions
 
-Get the hash of some data. Defaults to the SHA256 hashing algorithm. 
+Get the the SHA256 hash of a file plus some seed data.
 
-    data_hash(data, algorithm)
-    
-Get the hash of a file plus some arbitrary data appended. If there is no data specified, just get the hash of the file.
+	hash_challenge(file_path, seed = "")
 
-    full_hash(file_path, data)
-    
-The file is split up into chunks of chunk_size (from 0 to N where N=filesize/chunk_size). If the file is below the chunk size we use the whole file. We use the seed to deterministically generate a series of chunks to access up to num_chunks. We return the data from the chunks.
+Deterministically generate list of seeds from a root seed. 
 
-    get_stripes(file_path, seed, chunk_size, num_chunks)
-    
-Gets the hash of data returned from get_stripes() plus the seed.
+	gen_seeds(num, root_seed)
 
-    hash_challenge(data, seed)
-    
-Generates a list of random seeds. Returns a list of 2-tuples containing the seed, and its corresponding hash_challenge. 
+Generate the specified number of hash challenges.
 
-    gen_challenges(file_path, num)
+	gen_challenges(file_path, num, root_seed)
+	

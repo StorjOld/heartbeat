@@ -4,6 +4,7 @@ import random
 import hashlib # For SHA-256 Encoding
 import os.path
 
+
 class HeartBeat:
 	"""
 	A small library used to create and verify hash challenges

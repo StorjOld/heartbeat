@@ -1,3 +1,4 @@
+import sys
 import base64
 import random
 import hashlib # For SHA-256 Encoding
@@ -5,8 +6,8 @@ import os.path
 
 class HeartBeat:
 	"""
-	A small library used to create and verify hash challenges so 
-	Node A can verify that Node B has a specified file.
+	A small library used to create and verify hash challenges
+	so Node A can verify that Node B has a specified file.
 	"""
 
 	def __init__(self, file_path):
@@ -42,7 +43,7 @@ class HeartBeat:
 		# Save challenges
 		self.challenges = challenges
 
-	def hash_challenge(self, seed = ""):
+	def hash_challenge(self, seed):
 		"""
 		Get the the SHA256 hash of a file plus some seed data.
 
@@ -82,13 +83,12 @@ class HeartBeat:
 
 		return seeds
 
-	def check_challenge(self, hash_response):
+	def check_challenge(self, hash_answer):
 		"""
 		Check if the returned hash is in our challenges list. 
 
 		Arguments:
-		challenges -- 2-tuples(seed, hash) list from gen_challenges()
-		hash_response -- a hash that we compare to our list of challenges.
+		hash_answer -- a hash that we compare to our list of challenges.
 		"""
 		for a_challenge in self.challenges:
 			if a_challenge[1] == hash_response:
@@ -96,8 +96,12 @@ class HeartBeat:
 		return False
 
 	def get_challenge(self):
-		"""Accessor for the challenge list"""
+		"""Get a random challenge."""
 		return random.choice(self.challenges)
+
+	def challenges_size(self):
+		"""Get bytes size of our challenges."""
+		return sys.getsizeof(self.challenges)
 
 if __name__ == "__main__":
 	# Config vars
@@ -107,7 +111,7 @@ if __name__ == "__main__":
 
 	# Create challenges from file
 	file1 = HeartBeat(file_path)
-	file1.gen_challenges(10, root_seed)
+	file1.gen_challenges(1000, root_seed)
 	seed, hash_response = file1.get_challenge()
 
 	# Create hash_response from seed and duplicate file
@@ -116,3 +120,6 @@ if __name__ == "__main__":
 
 	# Check to see if they match
 	print(file1.check_challenge(hash_answer))
+
+	# Debug
+	print( str(file1.challenges_size() / 1024) + " kilobytes" )

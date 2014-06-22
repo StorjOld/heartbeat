@@ -7,7 +7,7 @@ Python library for verifying existence of a file. Works with other Storj librari
 
 Get the the SHA256 hash of a file plus some seed data.
 
-	hash_challenge(file_path, seed = "")
+	hash_challenge(seed)
 
 Deterministically generate list of seeds from a root seed. 
 
@@ -15,8 +15,12 @@ Deterministically generate list of seeds from a root seed.
 
 Generate the specified number of hash challenges.
 
-	gen_challenges(file_path, num, root_seed)
+	gen_challenges(num, root_seed)
 
 Check if the returned hash is in our challenges list. 
 
-	check_challenge(challenges, hash_response)
+	check_challenge(hash_answer)
+
+Get a random challenge.
+
+	get_challenge()

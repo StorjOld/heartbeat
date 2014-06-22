@@ -33,7 +33,7 @@ Delete challenge from our list of challenges.
 
 	delete_challenge(hash_answer)
 
- #### Usage
+#### Usage
 
  	# Config vars
 	file_path = "test.txt"

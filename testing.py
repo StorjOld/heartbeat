@@ -54,6 +54,8 @@ def size1():
 	num_challenges(1000) # 731 hours in a month
 def size2():
 	num_challenges(10000) # 8766 hours in a year
+def size3():
+	num_challenges(100000) # 87,658 hours in a decade
 	
 
 if __name__ == "__main__":

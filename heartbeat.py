@@ -91,7 +91,19 @@ class HeartBeat:
 		hash_answer -- a hash that we compare to our list of challenges.
 		"""
 		for a_challenge in self.challenges:
-			if a_challenge[1] == hash_response:
+			if a_challenge[1] == hash_answer:
+				# If we don't disgard a used challenge then a node
+				# could fake having the file because it already 
+				# knows the proper response
+				#self.delete_challenge(hash_answer)
+				return True
+		return False
+
+	def delete_challenge(self, hash_answer):
+		"""Delete challenge from our list of challenges."""
+		for a_challenge in self.challenges:
+			if a_challenge[1] == hash_answer:
+				self.challenges.remove(a_challenge)
 				return True
 		return False
 
@@ -102,24 +114,3 @@ class HeartBeat:
 	def challenges_size(self):
 		"""Get bytes size of our challenges."""
 		return sys.getsizeof(self.challenges)
-
-if __name__ == "__main__":
-	# Config vars
-	file_path = "test.txt"
-	file_path2 = "test2.txt"
-	root_seed = "myroot"
-
-	# Create challenges from file
-	file1 = HeartBeat(file_path)
-	file1.gen_challenges(1000, root_seed)
-	seed, hash_response = file1.get_challenge()
-
-	# Create hash_response from seed and duplicate file
-	file2 = HeartBeat(file_path2)
-	hash_answer = file2.hash_challenge(seed)
-
-	# Check to see if they match
-	print(file1.check_challenge(hash_answer))
-
-	# Debug
-	print( str(file1.challenges_size() / 1024) + " kilobytes" )

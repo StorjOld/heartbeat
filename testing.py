@@ -32,7 +32,7 @@ def unit_test():
 	file3 = HeartBeat(file_path3)
 	hash_answer = file3.hash_challenge(seed)
 
-	# Theis should not match
+	# This should not match
 	assert(not file1.check_challenge(hash_answer))
 
 

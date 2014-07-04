@@ -54,13 +54,15 @@ class HeartBeat:
 	    a particular file.  
 		"""
 
-		with open(self.file_path, "r", encoding='utf-8') as f:
-			m = hashlib.sha256()
-			# File + Seed
-			m.update(f.read().encode('utf-8') + str(seed).encode('utf-8'))
-			sha = m.digest()
-			res = base64.b64encode(sha)
-		return res
+		h = hashlib.sha256()
+		CHUNK_SIZE = 8 * 1024
+		seed = bytes(str(seed), 'utf-8')
+
+		with open(self.file_path, "rb") as f:
+			for chunk in iter(lambda: f.read(CHUNK_SIZE), b''):
+				h.update(chunk+seed)
+
+		return h.hexdigest()
 
 
 	def gen_seeds(self, num, root_seed):

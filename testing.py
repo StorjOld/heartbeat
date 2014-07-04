@@ -1,5 +1,5 @@
 import timeit
-from HeartBeat import HeartBeat
+from heartbeat import HeartBeat
 
 
 # Config Vars
@@ -12,6 +12,7 @@ root_seed = "myroot"
 
 # Unit Test
 def unit_test():
+
 	# Create challenges from file
 	file1 = HeartBeat(file_path)
 	file1.gen_challenges(10, root_seed)
@@ -19,7 +20,7 @@ def unit_test():
 
 	# Check Seed and Hash Response
 	assert(seed == 0.8872430607393933)
-	assert(hash_response == b'BMyTj3+not3a7it1Omg7LFAg3n4O1eihOsIV0pAoJRk=')
+	assert(hash_response == '852f9c0167c00b1d6dd322c7307f2df7eb19403c7a510199434c62d7d354c961')
 
 	# Create hash_response from seed and duplicate file
 	file2 = HeartBeat(file_path2)
@@ -34,6 +35,18 @@ def unit_test():
 
 	# This should not match
 	assert(not file1.check_challenge(hash_answer))
+
+
+# Unit Test 2
+def unit_test2():
+	# Config Vars
+	file_path = "python-3.4.1.msi"
+	root_seed = "myroot"
+
+	# Create challenges from file
+	file1 = HeartBeat(file_path)
+	file1.gen_challenges(10, root_seed)
+	seed, hash_response = file1.get_challenge()
 
 
 # Size Tests
@@ -52,15 +65,15 @@ def num_challenges(number):
 
 def size1():
 	num_challenges(1000) # 731 hours in a month
+
 def size2():
 	num_challenges(10000) # 8766 hours in a year
-def size3():
-	num_challenges(100000) # 87,658 hours in a decade
 	
 
 if __name__ == "__main__":
 	try:
 		unit_test()
+		#unit_test2()
 		size_test()
 	except AssertionError:
 		print("Failed Unit Testing...")

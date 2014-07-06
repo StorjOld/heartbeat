@@ -14,7 +14,8 @@ class HeartBeat:
 	def __init__(self, file_path):
 		# Check if the file exists
 		if os.path.isfile(file_path):
-			self.file_path = file_path
+			self.file_size = os.path.getsize(file_path)
+			self.file_object = open(file_path, "rb")
 		else:
 			raise IOError("File Not Found.")
 
@@ -32,35 +33,43 @@ class HeartBeat:
 
 		# Generate a series of seeds
 		seeds = self.gen_seeds(num, root_seed)
+		blocks = self.pick_blocks(num, root_seed)
 
 		# List of 2-tuples (seed, hash_response)
 		challenges = []
 
 		# Generate the corresponding hash for each seed
-		for a_seed in seeds:
-			result_hash = self.hash_challenge(a_seed)
-			challenges.append((a_seed, result_hash))
+		for i in range(num):
+			result_hash = self.hash_challenge(blocks[i], seeds[i])
+			challenges.append((blocks[i], seeds[i], result_hash))
 
 		# Save challenges
 		self.challenges = challenges
 
-	def hash_challenge(self, seed):
-		"""
-		Get the the SHA256 hash of a file plus some seed data.
 
-	 	Arguments:
-		seed -- Extra data appended to the file. By using a seed
-		and file we can generate unique hashes to verify that we hold
-		a particular file.  
+	def hash_challenge(self, position, seed):
 		"""
+		Get the SHA256 hash of a specific file block plus the provided
+		seed.
 
+		The default block size is one tenth of the file. If the file is
+		larger than 10KB, 1KB is used as the block size.
+		"""
 		h = hashlib.sha256()
-		CHUNK_SIZE = 8 * 1024
+		CHUNK_SIZE = min(1024, self.file_size // 10)
 		seed = bytes(str(seed), 'utf-8')
 
-		with open(self.file_path, "rb") as f:
-			for chunk in iter(lambda: f.read(CHUNK_SIZE), b''):
-				h.update(chunk+seed)
+		self.file_object.seek(position)
+
+		if (position > self.file_size - CHUNK_SIZE):
+			end_slice = position - (self.file_size - CHUNK_SIZE)
+			h.update(self.file_object.read(end_slice))
+			self.file_object.seek(0)
+			h.update(self.file_object.read(CHUNK_SIZE - end_slice))
+		else:
+			h.update(self.file_object.read(CHUNK_SIZE))
+
+		h.update(seed)
 
 		return h.hexdigest()
 
@@ -86,6 +95,23 @@ class HeartBeat:
 
 		return seeds
 
+
+	def pick_blocks(self, num, root_seed):
+		"""
+		Pick a set of positions to start reading blocks from the
+		file that challenges are created for.
+
+		Positions are gaurunteed to be within the bounds of the file.
+		"""
+		blocks = []
+		random.seed(root_seed)		
+
+		for i in range(num):
+			blocks.append(random.randint(0, self.file_size - 1))
+
+		return blocks
+
+
 	def check_challenge(self, hash_answer):
 		"""
 		Check if the returned hash is in our challenges list. 
@@ -94,7 +120,7 @@ class HeartBeat:
 		hash_answer -- a hash that we compare to our list of challenges.
 		"""
 		for a_challenge in self.challenges:
-			if a_challenge[1] == hash_answer:
+			if a_challenge[2] == hash_answer:
 				# If we don't disgard a used challenge then a node
 				# could fake having the file because it already 
 				# knows the proper response
@@ -105,7 +131,7 @@ class HeartBeat:
 	def delete_challenge(self, hash_answer):
 		"""Delete challenge from our list of challenges."""
 		for a_challenge in self.challenges:
-			if a_challenge[1] == hash_answer:
+			if a_challenge[2] == hash_answer:
 				self.challenges.remove(a_challenge)
 				return True
 		return False

@@ -8,7 +8,7 @@ Python library for verifying existence of a file. Works with other Storj librari
 Create a heartbeat using a filepath.
 
 ````
-beat = HeartBeat(file\_path)
+beat = HeartBeat(file_path)
 ````
 
 A beat represents a file. To see if another file matches this file (in practice,
@@ -16,22 +16,22 @@ if another node has the file), generate challenges. Only nodes with the same fil
 in full will be likely to match the file's beat.
 
 ````
-beat.gen\_challenges()
-a\_challenge = beat.get\_challenge()
+beat.gen_challenges()
+a_challenge = beat.get_challenge()
 ````
 
 Once there is a challenge, it can be posed to other beats who can meet the
 challenge.
 
 ````
-another\_beat = HeartBeat(another\_file\_path)
-answer = another\_beat.meet\_challenge(a\_challenge)
+another_beat = HeartBeat(another_file_path)
+answer = another_beat.meet_challenge(a_challenge)
 ````
 
 The original beat can verify the other beat's answer.
 
 ````
-if beat.check\_answer(answer):
+if beat.check_answer(answer):
 	print('The beat matches.')
 else:
 	print('The beat does not match.')
@@ -40,7 +40,7 @@ else:
 The byte size of all a beat's challenges can be found using
 
 ```` 
-beat.challenges\_size()
+beat.challenges_size()
 ````
 
 Refer to ````testing.py```` for simple and up to date code examples.

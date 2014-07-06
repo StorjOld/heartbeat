@@ -5,49 +5,42 @@ Python library for verifying existence of a file. Works with other Storj librari
 
 #### Functions
 
-Get the the SHA256 hash of a file plus some seed data.
+Create a heartbeat using a filepath.
 
-	hash_challenge(seed)
+````
+beat = HeartBeat(file\_path)
+````
 
-Deterministically generate list of seeds from a root seed. 
+A beat represents a file. To see if another file matches this file (in practice,
+if another node has the file), generate challenges. Only nodes with the same file
+in full will be likely to match the file's beat.
 
-	gen_seeds(num, root_seed)
+````
+beat.gen\_challenges()
+a\_challenge = beat.get\_challenge()
+````
 
-Generate the specified number of hash challenges.
+Once there is a challenge, it can be posed to other beats who can meet the
+challenge.
 
-	gen_challenges(num, root_seed)
+````
+another\_beat = HeartBeat(another\_file\_path)
+answer = another\_beat.meet\_challenge(a\_challenge)
+````
 
-Check if the returned hash is in our challenges list. 
+The original beat can verify the other beat's answer.
 
-	check_challenge(hash_answer)
+````
+if beat.check\_answer(answer):
+	print('The beat matches.')
+else:
+	print('The beat does not match.')
+````
 
-Get a random challenge.
+The byte size of all a beat's challenges can be found using
 
-	get_challenge()
+```` 
+beat.challenges\_size()
+````
 
-Get bytes size of our challenges.
- 
- 	challenges_size()
-
-Delete challenge from our list of challenges.
-
-	delete_challenge(hash_answer)
-
-#### Usage
-
- 	# Config vars
-	file_path = "test.txt"
-	file_path2 = "test2.txt"
-	root_seed = "myroot"
-
-	# Create challenges from file
-	file1 = HeartBeat(file_path)
-	file1.gen_challenges(1000, root_seed)
-	seed, hash_response = file1.get_challenge()
-
-	# Create hash_response from seed and duplicate file
-	file2 = HeartBeat(file_path2)
-	hash_answer = file2.hash_challenge(seed)
-
-	# Check to see if they match
-	print(file1.check_challenge(hash_answer))
+Refer to ````testing.py```` for simple and up to date code examples.

@@ -4,6 +4,44 @@ import random
 import hashlib # For SHA-256 Encoding
 import os.path
 
+class Challenge:
+	"""
+	Challenge represents a challenge on node can pose to another
+	when requesting verification that they have a complete version
+	of a specific file.
+	"""
+
+	def __init__(self, position, seed):
+		self.position = position
+		self.seed = seed
+		self.response = None
+
+
+	def get_without_answer(self):
+		"""Provide a challenge for sending to other nodes."""
+		return Challenge(self.position, self.seed)
+
+
+	def get_position(self):
+		"""Provide the position in the file this challenge focuses on."""
+		return self.position
+
+
+	def get_seed(self):
+		"""Provide the seed used as input to this challenge block's hash."""
+		return self.seed
+
+
+	def get_response(self):
+		"""
+		Provide the expected response; a succesfully completed challenge.
+		will match this.
+		"""
+		return self.response
+
+
+	def set_response(self, response):
+		self.response = response
 
 class HeartBeat:
 	"""
@@ -40,14 +78,15 @@ class HeartBeat:
 
 		# Generate the corresponding hash for each seed
 		for i in range(num):
-			result_hash = self.hash_challenge(blocks[i], seeds[i])
-			challenges.append((blocks[i], seeds[i], result_hash))
+			challenges.append(Challenge(blocks[i], seeds[i]))
+			response = self.hash_challenge(challenges[i])
+			challenges[i].set_response(response)
 
 		# Save challenges
 		self.challenges = challenges
 
 
-	def hash_challenge(self, position, seed):
+	def hash_challenge(self, challenge):
 		"""
 		Get the SHA256 hash of a specific file block plus the provided
 		seed.
@@ -57,12 +96,12 @@ class HeartBeat:
 		"""
 		h = hashlib.sha256()
 		CHUNK_SIZE = min(1024, self.file_size // 10)
-		seed = bytes(str(seed), 'utf-8')
+		seed = bytes(str(challenge.get_seed()), 'utf-8')
 
-		self.file_object.seek(position)
+		self.file_object.seek(challenge.get_position())
 
-		if (position > self.file_size - CHUNK_SIZE):
-			end_slice = position - (self.file_size - CHUNK_SIZE)
+		if (challenge.get_position() > self.file_size - CHUNK_SIZE):
+			end_slice = challenge.get_position() - (self.file_size - CHUNK_SIZE)
 			h.update(self.file_object.read(end_slice))
 			self.file_object.seek(0)
 			h.update(self.file_object.read(CHUNK_SIZE - end_slice))
@@ -120,7 +159,7 @@ class HeartBeat:
 		hash_answer -- a hash that we compare to our list of challenges.
 		"""
 		for a_challenge in self.challenges:
-			if a_challenge[2] == hash_answer:
+			if a_challenge.get_response() == hash_answer:
 				# If we don't disgard a used challenge then a node
 				# could fake having the file because it already 
 				# knows the proper response
@@ -131,14 +170,14 @@ class HeartBeat:
 	def delete_challenge(self, hash_answer):
 		"""Delete challenge from our list of challenges."""
 		for a_challenge in self.challenges:
-			if a_challenge[2] == hash_answer:
+			if a_challenge.get_response() == hash_answer:
 				self.challenges.remove(a_challenge)
 				return True
 		return False
 
 	def get_challenge(self):
 		"""Get a random challenge."""
-		return random.choice(self.challenges)
+		return random.choice(self.challenges).get_without_answer()
 
 	def challenges_size(self):
 		"""Get bytes size of our challenges."""

@@ -49,9 +49,9 @@ class HeartBeat:
 		Get the the SHA256 hash of a file plus some seed data.
 
 	 	Arguments:
-	    seed -- Extra data appended to the file. By using a seed
-	    and file we can generate unique hashes to verify that we hold
-	    a particular file.  
+		seed -- Extra data appended to the file. By using a seed
+		and file we can generate unique hashes to verify that we hold
+		a particular file.  
 		"""
 
 		h = hashlib.sha256()

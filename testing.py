@@ -1,4 +1,5 @@
 import timeit
+import sys
 from heartbeat import HeartBeat
 
 
@@ -33,12 +34,8 @@ def unit_test():
 	assert(not file1.check_challenge(hash_answer))
 
 
-# Unit Test 2
-def unit_test2():
-	# Config Vars
-	file_path = "big_buck_bunny_480p_h264.mov"
-	root_seed = "myroot"
-
+# Unit Test on a Custom File
+def custom_unit_test(file_path):
 	# Create challenges from file
 	file1 = HeartBeat(file_path)
 	file1.gen_challenges(10, root_seed)
@@ -69,7 +66,8 @@ def size2():
 if __name__ == "__main__":
 	try:
 		unit_test()
-		#unit_test2()
+		if (len(sys.argv) == 2):
+			custom_unit_test(sys.argv[1])
 		size_test()
 	except AssertionError:
 		print("Failed Unit Testing...")

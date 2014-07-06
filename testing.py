@@ -1,4 +1,5 @@
 import timeit
+import sys
 from heartbeat import HeartBeat
 
 
@@ -16,33 +17,29 @@ def unit_test():
 	# Create challenges from file
 	file1 = HeartBeat(file_path)
 	file1.gen_challenges(10, root_seed)
-	position, seed, hash_response = file1.get_challenge()
+	challenge = file1.get_challenge()
 
 	# Create hash_response from seed and duplicate file
 	file2 = HeartBeat(file_path2)
-	hash_answer = file2.hash_challenge(position, seed)
+	answer = file2.meet_challenge(challenge)
 
 	# Check to see if they match
-	assert(file1.check_challenge(hash_answer))
+	assert(file1.check_answer(answer))
 
 	# Create hash_answer from seed and edited file
 	file3 = HeartBeat(file_path3)
-	hash_answer = file3.hash_challenge(position, seed)
+	answer = file3.meet_challenge(challenge)
 
 	# This should not match
-	assert(not file1.check_challenge(hash_answer))
+	assert(not file1.check_answer(answer))
 
 
-# Unit Test 2
-def unit_test2():
-	# Config Vars
-	file_path = "big_buck_bunny_480p_h264.mov"
-	root_seed = "myroot"
-
+# Unit Test on a Custom File
+def custom_unit_test(file_path):
 	# Create challenges from file
 	file1 = HeartBeat(file_path)
 	file1.gen_challenges(10, root_seed)
-	position, seed, hash_response = file1.get_challenge()
+	challenge = file1.get_challenge()
 
 
 # Size Tests
@@ -69,7 +66,8 @@ def size2():
 if __name__ == "__main__":
 	try:
 		unit_test()
-		#unit_test2()
+		if (len(sys.argv) == 2):
+			custom_unit_test(sys.argv[1])
 		size_test()
 	except AssertionError:
 		print("Failed Unit Testing...")

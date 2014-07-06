@@ -16,22 +16,18 @@ def unit_test():
 	# Create challenges from file
 	file1 = HeartBeat(file_path)
 	file1.gen_challenges(10, root_seed)
-	seed, hash_response = file1.get_challenge()
-
-	# Check Seed and Hash Response
-	assert(seed == 0.8872430607393933)
-	assert(hash_response == '852f9c0167c00b1d6dd322c7307f2df7eb19403c7a510199434c62d7d354c961')
+	position, seed, hash_response = file1.get_challenge()
 
 	# Create hash_response from seed and duplicate file
 	file2 = HeartBeat(file_path2)
-	hash_answer = file2.hash_challenge(seed)
+	hash_answer = file2.hash_challenge(position, seed)
 
 	# Check to see if they match
 	assert(file1.check_challenge(hash_answer))
 
 	# Create hash_answer from seed and edited file
 	file3 = HeartBeat(file_path3)
-	hash_answer = file3.hash_challenge(seed)
+	hash_answer = file3.hash_challenge(position, seed)
 
 	# This should not match
 	assert(not file1.check_challenge(hash_answer))

@@ -79,14 +79,14 @@ class HeartBeat:
 		# Generate the corresponding hash for each seed
 		for i in range(num):
 			challenges.append(Challenge(blocks[i], seeds[i]))
-			response = self.hash_challenge(challenges[i])
+			response = self.meet_challenge(challenges[i])
 			challenges[i].set_response(response)
 
 		# Save challenges
 		self.challenges = challenges
 
 
-	def hash_challenge(self, challenge):
+	def meet_challenge(self, challenge):
 		"""
 		Get the SHA256 hash of a specific file block plus the provided
 		seed.
@@ -151,7 +151,7 @@ class HeartBeat:
 		return blocks
 
 
-	def check_challenge(self, hash_answer):
+	def check_answer(self, hash_answer):
 		"""
 		Check if the returned hash is in our challenges list. 
 

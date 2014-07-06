@@ -36,13 +36,13 @@ def unit_test():
 # Unit Test 2
 def unit_test2():
 	# Config Vars
-	file_path = "python-3.4.1.msi"
+	file_path = "big_buck_bunny_480p_h264.mov"
 	root_seed = "myroot"
 
 	# Create challenges from file
 	file1 = HeartBeat(file_path)
 	file1.gen_challenges(10, root_seed)
-	seed, hash_response = file1.get_challenge()
+	position, seed, hash_response = file1.get_challenge()
 
 
 # Size Tests

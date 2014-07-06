@@ -101,7 +101,7 @@ class HeartBeat:
 		Pick a set of positions to start reading blocks from the
 		file that challenges are created for.
 
-		Positions are gaurunteed to be within the bounds of the file.
+		Positions are guaranteed to be within the bounds of the file.
 		"""
 		blocks = []
 		random.seed(root_seed)		

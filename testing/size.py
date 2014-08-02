@@ -1,13 +1,14 @@
-import timeit
 import sys
+import timeit
+sys.path.append("..")
 from heartbeat import HeartBeat
 
 
 # Config Vars
-file_path = "test.txt"
-file_path2 = "test2.txt"
-file_path3 = "test3.txt"
-size_path = "test4.txt"
+file_path = "../files/test.txt"
+file_path2 = "../files/test2.txt"
+file_path3 = "../files/test3.txt"
+size_path = "../files/test4.txt"
 root_seed = "myroot"
 
 

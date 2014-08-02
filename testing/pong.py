@@ -1,5 +1,6 @@
 import sys
 import time
+sys.path.append("..")
 from heartbeat import HeartBeat
 
 class Server:
@@ -25,20 +26,21 @@ if __name__ == "__main__":
 	root_seed = "testing"
 
 	# Start
-	server = Server("C:\\Users\\super3\\Code\\heartbeat\\test4.txt", num_challenges, root_seed)
-	client = Client("C:\\Users\\super3\\Code\\heartbeat\\test4.txt")
+	server = Server("../files/test4.txt", num_challenges, root_seed)
+	client = Client("../files/test4.txt")
 
 	for i in range(num_challenges):
 		challenge = server.challenge()
-		print("Server: c - " + str(challenge.seed))
+		print("Node: c - " + str(challenge.seed))
 		try: 
 			response = client.answer(challenge)
 		except ValueError:
 			response = "IO"
 		print("Client: a - " +  str(response))
 		correct = server.response(response)
-		print("Server: " +  str(correct) + "\n")
+		print("Node: " +  str(correct) + "\n")
 
 		if not correct:
 			break
+		time.sleep(1)
 		

@@ -1,46 +1,30 @@
 import sys
 import time
 sys.path.append("..")
+from model import Chunk
+from model import Client
 from heartbeat import HeartBeat
 
-class Server:
-	def __init__(self, file_path, num_challenges, root_seed):
-		self.file1 = HeartBeat(file_path)
-		self.file1.gen_challenges(num_challenges, root_seed)
-	def challenge(self):
-		return self.file1.get_challenge()
-	def response(self, answer):
-		return self.file1.check_answer(answer)
 
-class Client:
-	def __init__(self, file_path):
-		self.file1 = HeartBeat(file_path)
-	def answer(self, hash):
-		return self.file1.meet_challenge(challenge)
+# Config 
+num_challenges = 10000
+root_seed = "testing"
 
+# Start
+chunk = Chunk("../files/test4.txt", num_challenges, root_seed)
+client = Client("../files/test4.txt")
 
+for i in range(num_challenges):
+	challenge = chunk.challenge()
+	print("Node: c - " + str(challenge.seed))
+	try: 
+		response = client.answer(challenge)
+	except ValueError:
+		response = "IO"
+	print("Client: a - " +  str(response))
+	correct = chunk.response(response)
+	print("Node: " +  str(correct) + "\n")
 
-if __name__ == "__main__":
-	# Config 
-	num_challenges = 100000
-	root_seed = "testing"
-
-	# Start
-	server = Server("../files/test4.txt", num_challenges, root_seed)
-	client = Client("../files/test4.txt")
-
-	for i in range(num_challenges):
-		challenge = server.challenge()
-		print("Node: c - " + str(challenge.seed))
-		try: 
-			response = client.answer(challenge)
-		except ValueError:
-			response = "IO"
-		print("Client: a - " +  str(response))
-		correct = server.response(response)
-		print("Node: " +  str(correct) + "\n")
-
-		if not correct:
-			break
-		time.sleep(1)
-		
+	if not correct:
+		break
+	time.sleep(0.25)

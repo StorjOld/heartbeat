@@ -6,7 +6,7 @@ import os.path
 
 class Challenge:
 	"""
-	Challenge represents a challenge on node can pose to another
+	Challenge represents a challenge one node can pose to another
 	when requesting verification that they have a complete version
 	of a specific file.
 	"""

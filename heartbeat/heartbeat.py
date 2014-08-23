@@ -1,7 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import sys
-import base64
 import random
-import hashlib # For SHA-256 Encoding
+import hashlib
 import os.path
 
 class Challenge:

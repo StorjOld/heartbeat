@@ -154,9 +154,9 @@ class Heartbeat(object):
 
         :param hash_answer: Hash that we compare to our list of challenges
         """
-        for a_challenge in self.challenges:
-            if a_challenge.get_response() == hash_answer:
-                # If we don't disgard a used challenge then a node
+        for challenge in self.challenges:
+            if challenge.response == hash_answer:
+                # If we don't discard a used challenge then a node
                 # could fake having the file because it already
                 # knows the proper response
                 # self.delete_challenge(hash_answer)

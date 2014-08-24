@@ -77,12 +77,12 @@ class Heartbeat(object):
             self.challenges[i].response = response
 
     def meet_challenge(self, challenge):
-        """
-        Get the SHA256 hash of a specific file block plus the provided
-        seed.
-
-        The default block size is one tenth of the file. If the file is
+        """ Get the SHA256 hash of a specific file block plus the provided
+        seed. The default block size is one tenth of the file. If the file is
         larger than 10KB, 1KB is used as the block size.
+
+        :param challenge: challenge as a `Challenge <heartbeat.Challenge>`
+        object
         """
         h = hashlib.sha256()
         CHUNK_SIZE = min(1024, self.file_size // 10)

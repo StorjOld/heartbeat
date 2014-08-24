@@ -9,10 +9,10 @@ import os.path
 
 from .exc import HeartbeatError
 
-class Challenge:
-    """
-    Challenge represents a challenge one node can pose to another
-    when requesting verification that they have a complete version
+
+class Challenge(object):
+    """ The Challenge class represents a challenge one node can pose to
+    another when requesting verification that they have a complete version
     of a specific file.
     """
 

@@ -41,9 +41,14 @@ class Heartbeat(object):
 
     def __init__(self, filepath):
         # Check if the file exists
-        if os.path.isfile(file_path):
-            self.file_size = os.path.getsize(file_path)
-            self.file_object = open(file_path, "rb")
+        """ Initialization method
+
+        :param filepath: Valid path to file
+        :raise HeartbeatError: If file path does not exist
+        """
+        if os.path.isfile(filepath):
+            self.file_size = os.path.getsize(filepath)
+            self.file_object = open(filepath, "rb")
         else:
             raise IOError("File Not Found.")
 

@@ -176,6 +176,7 @@ class Heartbeat(object):
         choice = random.choice(self.challenges)
         return choice.without_answer
 
+    @property
     def challenges_size(self):
-        """Get bytes size of our challenges."""
+        """ Get bytes size of our challenges. """
         return sys.getsizeof(self.challenges)

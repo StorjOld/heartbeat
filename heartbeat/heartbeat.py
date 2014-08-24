@@ -55,9 +55,8 @@ class Heartbeat(object):
         # Challenges is a list of 2-tuples (seed, hash_response)
         self.challenges = []
 
-    def gen_challenges(self, num, root_seed):
-        """
-        Generate the specified number of hash challenges.
+    def generate_challenges(self, num, root_seed):
+        """ Generate the specified number of hash challenges.
 
         Arguments:
         num -- The number of hash challenges we want to generate.

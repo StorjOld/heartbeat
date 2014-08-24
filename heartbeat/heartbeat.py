@@ -138,6 +138,9 @@ class Heartbeat(object):
         :param num: Number of blocks to pick
         :param root_seed: Seed with which begin picking blocks.
         """
+        if num < 0:
+            raise HeartbeatError('%s is not greater than 0' % num)
+
         blocks = []
         random.seed(root_seed)
 

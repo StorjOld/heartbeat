@@ -26,8 +26,12 @@ class Challenge(object):
         self.seed = seed
         self.response = None
 
-    def set_response(self, response):
-        self.response = response
+    @property
+    def without_answer(self):
+        """ Provide a challenge for sending to other nodes. """
+        new = copy.copy(self)
+        del new.response
+        return new
 
 
 class HeartBeat:

@@ -39,7 +39,7 @@ class Heartbeat(object):
     so Node A can verify that Node B has a specified file.
     """
 
-    def __init__(self, file_path):
+    def __init__(self, filepath):
         # Check if the file exists
         if os.path.isfile(file_path):
             self.file_size = os.path.getsize(file_path)

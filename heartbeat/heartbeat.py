@@ -130,11 +130,13 @@ class Heartbeat(object):
         return seeds
 
     def pick_blocks(self, num, root_seed):
-        """
-        Pick a set of positions to start reading blocks from the
-        file that challenges are created for.
+        """ Pick a set of positions to start reading blocks from the file
+        that challenges are created for. This is a deterministic
+        operation. Positions are guaranteed to be within the bounds of the
+        file.
 
-        Positions are guaranteed to be within the bounds of the file.
+        :param num: Number of blocks to pick
+        :param root_seed: Seed with which begin picking blocks.
         """
         blocks = []
         random.seed(root_seed)

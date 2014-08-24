@@ -19,8 +19,8 @@ class Challenge(object):
     def __init__(self, block, seed):
         """ Initialization method
 
-        :param block:
-        :param seed:
+        :param block: Position at which to start a challenge check
+        :param seed: Seed as a hashable object
         """
         self.block = block
         self.seed = seed
@@ -58,9 +58,8 @@ class Heartbeat(object):
     def generate_challenges(self, num, root_seed):
         """ Generate the specified number of hash challenges.
 
-        Arguments:
-        num -- The number of hash challenges we want to generate.
-        root_seed -- Some value that we use to generate our seeds from.
+        :param num: The number of hash challenges we want to generate.
+        :param root_seed: Some value that we use to generate our seeds from.
         """
 
         # Generate a series of seeds
@@ -113,6 +112,7 @@ class Heartbeat(object):
 
         :param num: Numbers of seeds to generate as int
         :param root_seed: Seed to start off with.
+        :return: seed values as a list of length num
         """
         # Generate a starting seed from the root
         if num < 0:
@@ -137,6 +137,7 @@ class Heartbeat(object):
 
         :param num: Number of blocks to pick
         :param root_seed: Seed with which begin picking blocks.
+        :return: block values as a list
         """
         if num < 0:
             raise HeartbeatError('%s is not greater than 0' % num)
@@ -153,6 +154,7 @@ class Heartbeat(object):
         """ Check if the returned hash is in our challenges list.
 
         :param hash_answer: Hash that we compare to our list of challenges
+        :return: boolean indicating if answer is correct, True, or not, False
         """
         for challenge in self.challenges:
             if challenge.response == hash_answer:
@@ -164,7 +166,11 @@ class Heartbeat(object):
         return False
 
     def delete_challenge(self, hash_answer):
-        """ Delete challenge from our list of challenges."""
+        """ Delete challenge from our list of challenges.
+
+        :param hash_answer:  A hash as a string
+        :return: Boolean indicating whether hash existed and was deleted
+        """
         for challenge in self.challenges:
             if challenge.response == hash_answer:
                 self.challenges.remove(challenge)
@@ -172,11 +178,18 @@ class Heartbeat(object):
         return False
 
     def random_challenge(self):
-        """ Get a random challenge."""
+        """ Get a random challenge.
+
+        :return: A challenge object at random
+        """
         choice = random.choice(self.challenges)
         return choice.without_answer
 
     @property
     def challenges_size(self):
-        """ Get bytes size of our challenges. """
+        """ Get bytes size of our challenges.
+
+        :return: Size of the challenges object in memory as an integer.  See
+        sys.getsizeof for more information
+        """
         return sys.getsizeof(self.challenges)

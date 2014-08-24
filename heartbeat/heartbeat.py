@@ -115,6 +115,8 @@ class Heartbeat(object):
         :param root_seed: Seed to start off with.
         """
         # Generate a starting seed from the root
+        if num < 0:
+            raise HeartbeatError('%s is not greater than 0' % num)
         seeds = []
         random.seed(root_seed)
         tmp_seed = random.random()

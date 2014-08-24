@@ -171,9 +171,10 @@ class Heartbeat(object):
                 return True
         return False
 
-    def get_challenge(self):
-        """Get a random challenge."""
-        return random.choice(self.challenges).get_without_answer()
+    def random_challenge(self):
+        """ Get a random challenge."""
+        choice = random.choice(self.challenges)
+        return choice.without_answer
 
     def challenges_size(self):
         """Get bytes size of our challenges."""

@@ -150,11 +150,9 @@ class Heartbeat(object):
         return blocks
 
     def check_answer(self, hash_answer):
-        """
-        Check if the returned hash is in our challenges list.
+        """ Check if the returned hash is in our challenges list.
 
-        Arguments:
-        hash_answer -- a hash that we compare to our list of challenges.
+        :param hash_answer: Hash that we compare to our list of challenges
         """
         for a_challenge in self.challenges:
             if a_challenge.get_response() == hash_answer:

@@ -93,7 +93,7 @@ class Heartbeat(object):
         h = hashlib.sha256()
         self.file_object.seek(challenge.block)
 
-        if (challenge.get_position() > self.file_size - CHUNK_SIZE):
+        if challenge.block > (self.file_size - chunk_size):
             end_slice = (
                 challenge.get_position() - (self.file_size - CHUNK_SIZE)
             )

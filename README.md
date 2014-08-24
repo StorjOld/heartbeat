@@ -1,6 +1,8 @@
 heartbeat
 =========
 
+[![Build Status](https://drone.io/github.com/Storj/heartbeat/status.png)](https://drone.io/github.com/Storj/heartbeat/latest)
+
 Python library for verifying existence of a file. Works with other Storj libraries and wrappers to allow to allow for Node A to trustlessly verify that Node B has a file by comparing hashes. This should be expanded to use Merkle trees, and data striping to optimize I/O. 
 
 #### Functions

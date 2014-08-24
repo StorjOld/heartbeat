@@ -1,8 +1,10 @@
 from setuptools import setup
 
+from heartbeat import __version__
+
 setup(
     name='heartbeat',
-    version='1.0',
+    version=__version__,
     url='https://github.com/Storj/heartbeat',
     license='The MIT License',
     author='Storj Labs',

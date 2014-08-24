@@ -107,13 +107,12 @@ class Heartbeat(object):
 
         return h.hexdigest()
 
-    def gen_seeds(self, num, root_seed):
-        """
-        Deterministically generate list of seeds from a root seed.
+    @staticmethod
+    def generate_seeds(num, root_seed):
+        """ Deterministically generate list of seeds from a root seed.
 
-        Arguments:
-        num -- Numbers of seeds to generate.
-        root_seed -- Seed to start off with.
+        :param num: Numbers of seeds to generate as int
+        :param root_seed: Seed to start off with.
         """
         # Generate a starting seed from the root
         seeds = []

@@ -90,7 +90,8 @@ class Heartbeat(object):
         except TypeError:
             seed = bytes(str(challenge.seed))
 
-        self.file_object.seek(challenge.get_position())
+        h = hashlib.sha256()
+        self.file_object.seek(challenge.block)
 
         if (challenge.get_position() > self.file_size - CHUNK_SIZE):
             end_slice = (

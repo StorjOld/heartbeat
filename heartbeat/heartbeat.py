@@ -50,7 +50,7 @@ class Heartbeat(object):
             self.file_size = os.path.getsize(filepath)
             self.file_object = open(filepath, "rb")
         else:
-            raise IOError("File Not Found.")
+            raise HeartbeatError("%s not found" % filepath)
 
         # Challenges is a list of 2-tuples (seed, hash_response)
         self.challenges = []

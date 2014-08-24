@@ -34,9 +34,8 @@ class Challenge(object):
         return new
 
 
-class HeartBeat:
-    """
-    A small library used to create and verify hash challenges
+class Heartbeat(object):
+    """ A small library used to create and verify hash challenges
     so Node A can verify that Node B has a specified file.
     """
 

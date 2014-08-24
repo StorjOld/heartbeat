@@ -8,7 +8,7 @@ import random
 import unittest
 from decimal import Decimal
 
-from heartbeat import Heartbeat, Challenge
+from heartbeat.heartbeat import Heartbeat, Challenge
 from heartbeat.exc import HeartbeatError
 
 

@@ -159,7 +159,7 @@ class Heartbeat(object):
                 # If we don't discard a used challenge then a node
                 # could fake having the file because it already
                 # knows the proper response
-                # self.delete_challenge(hash_answer)
+                self.delete_challenge(hash_answer)
                 return True
         return False
 

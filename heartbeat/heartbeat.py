@@ -7,6 +7,7 @@ import random
 import hashlib
 import os.path
 
+from .exc import HeartbeatError
 
 class Challenge:
     """

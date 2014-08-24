@@ -22,7 +22,9 @@ class Challenge(object):
         :param block:
         :param seed:
         """
-        return self.response
+        self.block = block
+        self.seed = seed
+        self.response = None
 
     def set_response(self, response):
         self.response = response

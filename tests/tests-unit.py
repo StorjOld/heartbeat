@@ -133,7 +133,11 @@ class TestHeartbeat(unittest.TestCase):
         self.hb.file_object.seek(block)
         h = hashlib.sha256()
         h.update(self.hb.file_object.read(312))
-        h.update(bytes(str(root_seed)))
+        try:
+            encoded_seed = bytes(str(root_seed), 'utf-8')
+        except TypeError:
+            encoded_seed = bytes(str(root_seed))
+        h.update(encoded_seed)
         hexdigest = h.hexdigest()
 
         result = self.hb.meet_challenge(challenge)
@@ -153,7 +157,11 @@ class TestHeartbeat(unittest.TestCase):
         h.update(self.hb.file_object.read(end_slice))
         self.hb.file_object.seek(0)
         h.update(self.hb.file_object.read(312 - end_slice))
-        h.update(bytes(str(root_seed)))
+        try:
+            encoded_seed = bytes(str(root_seed), 'utf-8')
+        except TypeError:
+            encoded_seed = bytes(str(root_seed))
+        h.update(encoded_seed)
         hexdigest = h.hexdigest()
 
         result = self.hb.meet_challenge(challenge)

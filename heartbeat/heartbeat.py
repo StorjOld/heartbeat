@@ -68,16 +68,13 @@ class Heartbeat(object):
         blocks = self.pick_blocks(num, root_seed)
 
         # List of 2-tuples (seed, hash_response)
-        challenges = []
+        self.challenges = []
 
         # Generate the corresponding hash for each seed
         for i in range(num):
-            challenges.append(Challenge(blocks[i], seeds[i]))
-            response = self.meet_challenge(challenges[i])
-            challenges[i].set_response(response)
-
-        # Save challenges
-        self.challenges = challenges
+            self.challenges.append(Challenge(blocks[i], seeds[i]))
+            response = self.meet_challenge(self.challenges[i])
+            self.challenges[i].response = response
 
     def meet_challenge(self, challenge):
         """

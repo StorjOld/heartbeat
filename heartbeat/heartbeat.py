@@ -16,18 +16,8 @@ class Challenge(object):
     of a specific file.
     """
 
-    def __init__(self, position, seed):
-        self.position = position
-        self.seed = seed
-        self.response = None
-
-    def get_without_answer(self):
-        """Provide a challenge for sending to other nodes."""
-        return Challenge(self.position, self.seed)
-
-    def get_position(self):
-        """Provide the position in the file this challenge focuses on."""
-        return self.position
+    def __init__(self, block, seed):
+        """ Initialization method
 
     def get_seed(self):
         """Provide the seed used as input to this challenge block's hash."""

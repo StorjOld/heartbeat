@@ -27,7 +27,7 @@ class TestChallenge(unittest.TestCase):
 
 class TestHeartbeat(unittest.TestCase):
     def setUp(self):
-        self.file_loc = os.path.abspath('files/test.txt')
+        self.file_loc = os.path.abspath('tests/files/test.txt')
         self.hb = Heartbeat(self.file_loc)
 
     def tearDown(self):

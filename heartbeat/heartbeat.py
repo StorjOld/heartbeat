@@ -95,13 +95,13 @@ class Heartbeat(object):
 
         if challenge.block > (self.file_size - chunk_size):
             end_slice = (
-                challenge.get_position() - (self.file_size - CHUNK_SIZE)
+                challenge.block - (self.file_size - chunk_size)
             )
             h.update(self.file_object.read(end_slice))
             self.file_object.seek(0)
-            h.update(self.file_object.read(CHUNK_SIZE - end_slice))
+            h.update(self.file_object.read(chunk_size - end_slice))
         else:
-            h.update(self.file_object.read(CHUNK_SIZE))
+            h.update(self.file_object.read(chunk_size))
 
         h.update(seed)
 

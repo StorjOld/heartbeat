@@ -3,7 +3,7 @@ import time
 sys.path.append("..")
 from model import Chunk
 from model import Client
-from heartbeat import HeartBeat
+from heartbeat import Heartbeat
 
 
 # Config 

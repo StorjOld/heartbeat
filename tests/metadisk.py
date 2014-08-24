@@ -2,7 +2,7 @@ import sys
 import time
 sys.path.append("..")
 from model import Chunk
-from heartbeat import HeartBeat
+from heartbeat import Heartbeat
 
 
 class Contract:

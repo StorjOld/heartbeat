@@ -1,7 +1,7 @@
 import sys
 import timeit
 sys.path.append("..")
-from heartbeat import HeartBeat
+from heartbeat import Heartbeat
 
 
 # Config Vars
@@ -16,19 +16,19 @@ root_seed = "myroot"
 def unit_test():
 
     # Create challenges from file
-    file1 = HeartBeat(file_path)
-    file1.gen_challenges(10, root_seed)
-    challenge = file1.get_challenge()
+    file1 = Heartbeat(file_path)
+    file1.generate_challenges(10, root_seed)
+    challenge = file1.random_challenge
 
     # Create hash_response from seed and duplicate file
-    file2 = HeartBeat(file_path2)
+    file2 = Heartbeat(file_path2)
     answer = file2.meet_challenge(challenge)
 
     # Check to see if they match
     assert(file1.check_answer(answer))
 
     # Create hash_answer from seed and edited file
-    file3 = HeartBeat(file_path3)
+    file3 = Heartbeat(file_path3)
     answer = file3.meet_challenge(challenge)
 
     # This should not match
@@ -38,9 +38,9 @@ def unit_test():
 # Unit Test on a Custom File
 def custom_unit_test(file_path):
     # Create challenges from file
-    file1 = HeartBeat(file_path)
-    file1.gen_challenges(10, root_seed)
-    challenge = file1.get_challenge()
+    file1 = Heartbeat(file_path)
+    file1.generate_challenges(10, root_seed)
+    challenge = file1.random_challenge
 
 
 # Size Tests
@@ -54,9 +54,9 @@ def size_test():
 
 
 def num_challenges(number):
-    file1 = HeartBeat(size_path)
-    file1.gen_challenges(number, root_seed)
-    print("Size: " + str(file1.challenges_size()/1024) + " kb")
+    file1 = Heartbeat(size_path)
+    file1.generate_challenges(number, root_seed)
+    print("Size: " + str(file1.challenges_size /1024) + " kb")
 
 
 def size1():

@@ -64,7 +64,7 @@ class Heartbeat(object):
         """
 
         # Generate a series of seeds
-        seeds = self.gen_seeds(num, root_seed)
+        seeds = self.generate_seeds(num, root_seed)
         blocks = self.pick_blocks(num, root_seed)
 
         # List of 2-tuples (seed, hash_response)

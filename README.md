@@ -8,39 +8,38 @@ Python library for verifying existence of a file. Works with other Storj librari
 Create a heartbeat using a filepath.
 
 ````
-beat = HeartBeat(file_path)
+heartbeat = Heartbeat('/file/path')
 ````
 
-A beat represents a file. To see if another file matches this file (in practice,
+A heartbeat represents a file. To see if another file matches this file (in practice,
 if another node has the file), generate challenges. Only nodes with the same file
 in full will be likely to match the file's beat.
 
 ````
-beat.gen_challenges()
-a_challenge = beat.get_challenge()
+heartbeat.generate_challenges()
+one_challenge = heartbeat.random_challenge()
 ````
 
-Once there is a challenge, it can be posed to other beats who can meet the
+Once there is a challenge, it can be posed to other heartbeats who can meet the
 challenge.
 
 ````
-another_beat = HeartBeat(another_file_path)
-answer = another_beat.meet_challenge(a_challenge)
+another_heartbeat = Heartbeat('/path/to/file')
+answer = another_heartbeat.meet_challenge(one_challenge)
 ````
 
-The original beat can verify the other beat's answer.
+The original heartbeat can verify the other heartbeat's answer.
 
 ````
-if beat.check_answer(answer):
-	print('The beat matches.')
+if heartbeat.check_answer(answer):
+	print('The heartbeat matches.')
 else:
-	print('The beat does not match.')
+	print('The heartbeat does not match.')
 ````
 
 The byte size of all a beat's challenges can be found using
 
 ```` 
-beat.challenges_size()
+heartbeat.challenges_size()
 ````
 
-Refer to ````testing.py```` for simple and up to date code examples.

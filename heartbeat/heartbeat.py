@@ -19,14 +19,8 @@ class Challenge(object):
     def __init__(self, block, seed):
         """ Initialization method
 
-    def get_seed(self):
-        """Provide the seed used as input to this challenge block's hash."""
-        return self.seed
-
-    def get_response(self):
-        """
-        Provide the expected response; a succesfully completed challenge.
-        will match this.
+        :param block:
+        :param seed:
         """
         return self.response
 

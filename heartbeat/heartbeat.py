@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import copy
 import random
 import hashlib
 import os.path

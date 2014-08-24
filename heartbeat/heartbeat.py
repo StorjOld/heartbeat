@@ -84,9 +84,11 @@ class Heartbeat(object):
         :param challenge: challenge as a `Challenge <heartbeat.Challenge>`
         object
         """
-        h = hashlib.sha256()
-        CHUNK_SIZE = min(1024, self.file_size // 10)
-        seed = bytes(str(challenge.get_seed()), 'utf-8')
+        chunk_size = min(1024, self.file_size // 10)
+        try:
+            seed = bytes(str(challenge.seed), 'utf-8')
+        except TypeError:
+            seed = bytes(str(challenge.seed))
 
         self.file_object.seek(challenge.get_position())
 

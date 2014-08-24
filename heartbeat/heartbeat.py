@@ -164,10 +164,10 @@ class Heartbeat(object):
         return False
 
     def delete_challenge(self, hash_answer):
-        """Delete challenge from our list of challenges."""
-        for a_challenge in self.challenges:
-            if a_challenge.get_response() == hash_answer:
-                self.challenges.remove(a_challenge)
+        """ Delete challenge from our list of challenges."""
+        for challenge in self.challenges:
+            if challenge.response == hash_answer:
+                self.challenges.remove(challenge)
                 return True
         return False
 

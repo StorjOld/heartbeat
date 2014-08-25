@@ -143,7 +143,7 @@ class Heartbeat(object):
         if num < 0:
             raise HeartbeatError('%s is not greater than 0' % num)
         seeds = []
-        random.seed(root_seed)
+        random.seed(self.concat_secret(root_seed))
         tmp_seed = random.random()
 
         # Deterministically generate the rest of the seeds
@@ -168,7 +168,7 @@ class Heartbeat(object):
             raise HeartbeatError('%s is not greater than 0' % num)
 
         blocks = []
-        random.seed(root_seed)
+        random.seed(self.concat_secret(root_seed))
 
         for i in range(num):
             blocks.append(random.randint(0, self.file_size - 1))

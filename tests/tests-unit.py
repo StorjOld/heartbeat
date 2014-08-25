@@ -25,16 +25,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import hashlib
 import io
 import os
 import sys
 import random
+import hashlib
 import unittest
 from decimal import Decimal
 
-from heartbeat.heartbeat import Heartbeat, Challenge
 from heartbeat.exc import HeartbeatError
+from heartbeat.heartbeat import Heartbeat, Challenge
 
 
 class TestChallenge(unittest.TestCase):

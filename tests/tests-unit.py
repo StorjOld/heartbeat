@@ -67,6 +67,11 @@ class TestHeartbeat(unittest.TestCase):
 
         self.assertTrue(isinstance(self.hb.challenges, list))
         self.assertEqual(len(self.hb.challenges), 0)
+        self.assertIs(self.hb.secret, None)
+
+        hb = Heartbeat(self.file_loc, os.urandom(32))
+        self.assertTrue(hb.secret)
+        self.assertTrue(len(hb.secret), 32)
 
     def test_initialization_fail(self):
         with self.assertRaises(HeartbeatError) as ex:
@@ -111,6 +116,21 @@ class TestHeartbeat(unittest.TestCase):
         seed_group_2 = self.hb.generate_seeds(5, hexdigest)
         self.assertEqual(seed_group_1, seed_group_2)
 
+    def test_generate_seeds_deterministic_with_secret(self):
+        secret = os.urandom(32)
+        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
+        hb = Heartbeat(self.file_loc, secret=secret)
+
+        seed_group_1 = hb.generate_seeds(5, hexdigest)
+        seed_group_2 = hb.generate_seeds(5, hexdigest)
+        self.assertEqual(seed_group_1, seed_group_2)
+
+        # Make sure group 3, hashed without a secret, does not match
+        # group one or two
+        seed_group_3 = self.hb.generate_seeds(5, hexdigest)
+        self.assertNotEqual(seed_group_1, seed_group_3)
+        self.assertNotEqual(seed_group_2, seed_group_3)
+
     def test_pick_blocks(self):
         integer = random.randint(0, 65535)
         decimal_ = Decimal(random.random()) + 5
@@ -146,6 +166,21 @@ class TestHeartbeat(unittest.TestCase):
         seed_group_1 = self.hb.pick_blocks(5, hexdigest)
         seed_group_2 = self.hb.pick_blocks(5, hexdigest)
         self.assertEqual(seed_group_1, seed_group_2)
+
+    def test_pick_blocks_deterministic_with_secret(self):
+        secret = os.urandom(32)
+        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
+        hb = Heartbeat(self.file_loc, secret=secret)
+
+        seed_group_1 = hb.pick_blocks(5, hexdigest)
+        seed_group_2 = hb.pick_blocks(5, hexdigest)
+        self.assertEqual(seed_group_1, seed_group_2)
+
+        # Make sure group 3, hashed without a secret, does not match
+        # group one or two
+        seed_group_3 = self.hb.pick_blocks(5, hexdigest)
+        self.assertNotEqual(seed_group_1, seed_group_3)
+        self.assertNotEqual(seed_group_2, seed_group_3)
 
     def test_meet_challenge(self):
         block = 0

@@ -218,3 +218,26 @@ class Heartbeat(object):
         sys.getsizeof for more information
         """
         return sys.getsizeof(self.challenges)
+
+    def concat_secret(self, value):
+        """ If a secret on the class, returns a concatenation of the
+        value and the secret, otherwise, returns the value unmodified.
+
+        :param value: Value capable of being added to the self.secret,
+        so be aware of capabilities of both objects __add__ methods.
+        :return: If secret, returns a concatenation of the value and the
+        secret, otherwise, returns the value unmodified
+        """
+        if self.secret:
+            try:
+                secret = bytes(str(self.secret), 'utf-8')
+            except TypeError:
+                secret = bytes(str(self.secret))
+
+            try:
+                value = bytes(str(value), 'utf-8')
+            except TypeError:
+                value = bytes(str(self.secret))
+            return value + secret
+
+        return value

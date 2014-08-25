@@ -63,7 +63,7 @@ class Heartbeat(object):
     so Node A can verify that Node B has a specified file.
     """
 
-    def __init__(self, filepath):
+    def __init__(self, filepath, secret=None):
         # Check if the file exists
         """ Initialization method
 
@@ -75,6 +75,8 @@ class Heartbeat(object):
             self.file_object = open(filepath, "rb")
         else:
             raise HeartbeatError("%s not found" % filepath)
+
+        self.secret = secret
 
         # Challenges is a list of 2-tuples (seed, hash_response)
         self.challenges = []

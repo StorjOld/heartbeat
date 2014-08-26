@@ -89,7 +89,7 @@ class Heartbeat(object):
         """
 
         # Generate a series of seeds
-        seeds = self.generate_seeds(num, root_seed)
+        seeds = self.generate_seeds(num, root_seed, self.secret)
         blocks = self.pick_blocks(num, root_seed)
 
         # List of 2-tuples (seed, hash_response)

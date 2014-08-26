@@ -133,7 +133,8 @@ private_hla.o: private_hla.cxx private_hla.hxx heartbeat.hxx \
  c:\mingw\include\cryptopp\seckey.h c:\mingw\include\cryptopp\modes.h \
  c:\mingw\include\cryptopp\strciphr.h \
  c:\mingw\include\cryptopp\argnames.h c:\mingw\include\cryptopp\sha.h \
- c:\mingw\include\cryptopp\iterhash.h \
+ c:\mingw\include\cryptopp\iterhash.h c:\mingw\include\cryptopp\hex.h \
+ c:\mingw\include\cryptopp\basecode.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\iostream \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ostream \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ios \
@@ -175,8 +176,7 @@ private_hla.o: private_hla.cxx private_hla.hxx heartbeat.hxx \
  c:\mingw\include\rapidjson\internal/meta.h \
  c:\mingw\include\rapidjson\internal/pow10.h \
  c:\mingw\include\rapidjson\error/error.h endian_swap.h \
- c:\mingw\include\cryptopp\hmac.h c:\mingw\include\cryptopp\hex.h \
- c:\mingw\include\cryptopp\basecode.h
+ c:\mingw\include\cryptopp\hmac.h
 
 private_hla.hxx:
 
@@ -504,6 +504,10 @@ c:\mingw\include\cryptopp\sha.h:
 
 c:\mingw\include\cryptopp\iterhash.h:
 
+c:\mingw\include\cryptopp\hex.h:
+
+c:\mingw\include\cryptopp\basecode.h:
+
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\iostream:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ostream:
@@ -601,7 +605,3 @@ c:\mingw\include\rapidjson\error/error.h:
 endian_swap.h:
 
 c:\mingw\include\cryptopp\hmac.h:
-
-c:\mingw\include\cryptopp\hex.h:
-
-c:\mingw\include\cryptopp\basecode.h:

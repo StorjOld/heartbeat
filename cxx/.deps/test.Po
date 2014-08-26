@@ -133,7 +133,8 @@ test.o: test.cxx private_hla.hxx heartbeat.hxx block_file.hxx \
  c:\mingw\include\cryptopp\seckey.h c:\mingw\include\cryptopp\modes.h \
  c:\mingw\include\cryptopp\strciphr.h \
  c:\mingw\include\cryptopp\argnames.h c:\mingw\include\cryptopp\sha.h \
- c:\mingw\include\cryptopp\iterhash.h \
+ c:\mingw\include\cryptopp\iterhash.h c:\mingw\include\cryptopp\hex.h \
+ c:\mingw\include\cryptopp\basecode.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\iostream \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ostream \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ios \
@@ -506,6 +507,10 @@ c:\mingw\include\cryptopp\argnames.h:
 c:\mingw\include\cryptopp\sha.h:
 
 c:\mingw\include\cryptopp\iterhash.h:
+
+c:\mingw\include\cryptopp\hex.h:
+
+c:\mingw\include\cryptopp\basecode.h:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\iostream:
 

@@ -88,8 +88,9 @@ int main(int argc,char *argv[])
 		private_hla s_test;
 		
 		s_test.deserializep(new CryptoPP::StringSource(s_hla,true));
-		s.deserializep(new CryptoPP::StringSource(raw_state,true));
 		p.deserializep(new CryptoPP::StringSource(raw_proof,true));
+		c.deserializep(new CryptoPP::StringSource(raw_challenge,true));
+		s.deserializep(new CryptoPP::StringSource(raw_state,true));
 		
 		if (s_test.verify(p,c,s))
 		{

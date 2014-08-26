@@ -5,6 +5,7 @@
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/sha.h>
+#include <cryptopp/hex.h>
 #include <memory>
 #include <iostream>
 #include "clz.h"
@@ -14,9 +15,7 @@ class prf
 public:
 	prf()
 	{
-		_iv_sz = _aes.DefaultIVLength();
-		_iv = std::unique_ptr<unsigned char>(new unsigned char[_iv_sz]);
-		memset(_iv.get(),0,_iv_sz);
+		init_iv();
 	}
 	
 	prf(const prf &p)
@@ -29,6 +28,13 @@ public:
         copy(other);
         return *this;
     }
+	
+	void init_iv()
+	{
+		_iv_sz = _aes.DefaultIVLength();
+		_iv = std::unique_ptr<unsigned char>(new unsigned char[_iv_sz]);
+		memset(_iv.get(),0,_iv_sz);
+	}
 	
 	void copy(const prf &p)
 	{
@@ -92,10 +98,12 @@ public:
 	// gets a random number into e
 	CryptoPP::Integer evaluate(unsigned int i) const
 	{
-		if (_aes.IsResynchronizable())
-		{
-			_aes.Resynchronize(_iv.get(),_iv_sz);
-		}
+		/*
+		std::string str0;
+		CryptoPP::StringSource s0(_iv.get(), _iv_sz, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str0),true,2,":"));
+		std::cout << "iv = " << str0 << std::endl;
+		*/
+		_aes.Resynchronize(_iv.get(),_iv_sz);
 		CryptoPP::Integer a;
 		unsigned int count = 0;
 		do

@@ -27,7 +27,7 @@ Retrieves the public beat, which contains public parameters and set up parameter
 (tag,state) = beat.encode('path/to/file')
 ```
 
-The file tag encapsulates data about the file which will be used by a server to verify that it has stored the file.  file, tag and state information are sent to server (tag may or may not be quite large).  The state information will be signed or encrypted.
+The file tag encapsulates data about the file which will be used by a server to verify that it has stored the file.  file, tag and state information are sent to server (tag may or may not be quite large).  The state information will be signed and/or encrypted.
 
 ```python
 challenge = beat.gen_challenge()

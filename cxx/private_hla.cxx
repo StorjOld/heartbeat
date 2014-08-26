@@ -391,12 +391,14 @@ void private_hla_data::challenge::serialize(CryptoPP::BufferedTransformation &bt
 	bt.Put(get_key(),get_key_size());
 	
 	// write B size
-	unsigned int B_sz = _v.get_limit().MinEncodedSize();
+	CryptoPP::Integer B = _v.get_limit();
+	
+	unsigned int B_sz = B.MinEncodedSize();
 	n = htonl(B_sz);
 	bt.PutWord32(n);
 	
 	// write B
-	_v.get_limit().Encode(bt,B_sz);
+	B.Encode(bt,B_sz);
 }
 
 void private_hla_data::challenge::deserialize(CryptoPP::BufferedTransformation &bt)
@@ -421,13 +423,13 @@ void private_hla_data::challenge::deserialize(CryptoPP::BufferedTransformation &
 	bt.GetWord32(n);
 	n = ntohl(n);
 	
-	CryptoPP::Integer l;
+	CryptoPP::Integer B;
 	
 	// read B
-	l.Decode(bt,n);
+	B.Decode(bt,n);
 	
 	// set B
-	_v.set_limit(l);
+	_v.set_limit(B);
 }
 
 void private_hla_data::proof::serialize(CryptoPP::BufferedTransformation &bt) const
@@ -493,7 +495,7 @@ void private_hla::init(unsigned int prime_size_bytes, unsigned int sectors)
 	// sector should be no larger than the prime
 	// otherwise sector reduction can be performed by a malicious
 	// server to save space
-	_sector_size = _p.ByteCount()/8;
+	_sector_size = _p.BitCount()/8;
 }
 
 void private_hla::get_public(private_hla &h) const
@@ -527,8 +529,8 @@ void private_hla::encode(tag &t, state &s, file &f)
 	
 	t.sigma().clear();
 	t.sigma().resize(f.get_chunk_count());
-	//std::cout << "Chunks: " << f.get_chunk_count() << std::endl;
-	//std::cout << "Sectors per chunk: " << f.get_sectors_per_chunk() << std::endl;
+	std::cout << "Chunks: " << f.get_chunk_count() << std::endl;
+	std::cout << "Sectors per chunk: " << f.get_sectors_per_chunk() << std::endl;
 	for (int i=0;i<f.get_chunk_count();i++)
 	{
 		t.sigma().at(i) = s.f(i);
@@ -537,7 +539,7 @@ void private_hla::encode(tag &t, state &s, file &f)
 			t.sigma().at(i) += s.alpha(j) * ibf.get_sector(i,j);
 			t.sigma().at(i) %= _p;
 		}
-		//std::cout << "sigma_" << i << " = " << t.sigma().at(i) << std::endl;
+		std::cout << "sigma_" << i << " = " << t.sigma().at(i) << std::endl;
 	}
 	
 	s.encrypt_and_sign(_k_enc,_k_mac);
@@ -591,28 +593,28 @@ void private_hla::prove(proof &p,const challenge &c, file &f,const tag &t)
 	
 	p.mu().clear();
 	p.mu().resize(_sectors);
-	//std::cout << "Sectors: " << _sectors << std::endl;
+	std::cout << "Sectors: " << _sectors << std::endl;
 	for (int j=0;j<_sectors;j++)
 	{
-		// p.mu().at(j) = CrytpoPP::Integer(); // this is called implicitly
+		//p.mu().at(j) = CryptoPP::Integer(); // this is called implicitly
 		for (int i=0;i<c.get_l();i++)
 		{
 			p.mu().at(j) += c.v(i) * ibf.get_sector(indexer.evaluate(i).ConvertToLong(),j);
 			p.mu().at(j) %= _p;
 		}
-		//std::cout << "mu_" << j << " = " << p.mu().at(j) << std::endl;
+		std::cout << "mu_" << j << " = " << p.mu().at(j) << std::endl;
 	}
 	
 	//p.sigma() = CryptoPP::Integer();
-	//std::cout << "Calculating sigma... t.sigma().size() = " << t.sigma().size() << std::endl;
+	std::cout << "Calculating sigma... t.sigma().size() = " << t.sigma().size() << std::endl;
 	for (int i=0;i<c.get_l();i++)
 	{
-		//std::cout << "sigma += v_" << i << " * sigma_" << c.i(i) << std::endl;
+		std::cout << "sigma += v_" << i << " * sigma_" << c.i(i) << std::endl;
 		p.sigma() += c.v(i) * t.sigma().at(indexer.evaluate(i).ConvertToLong());
 		p.sigma() %= _p;
 	}
 	
-	//std::cout << "sigma = " << p.sigma() << std::endl;
+	std::cout << "sigma = " << p.sigma() << std::endl;
 }
 
 bool private_hla::verify(const proof &p, const challenge &c, const state &s_enc)
@@ -632,6 +634,9 @@ bool private_hla::verify(const proof &p, const challenge &c, const state &s_enc)
 	// serializer will not get manual limits, ensure they are set here
 	prf indexer = c.get_i();
 	indexer.set_limit(s.get_n());
+	
+	s.set_f_limit(_p);
+	s.set_alpha_limit(_p);
 	
 	for (int i=0;i<c.get_l();i++)
 	{

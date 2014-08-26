@@ -36,7 +36,8 @@ from heartbeat import Heartbeat
 
 class Chunk(object):
     def __init__(self, file_path, num_challenges, root_seed):
-        self.target_file = Heartbeat(file_path)
+        self.secret = "mysecret"
+        self.target_file = Heartbeat(file_path, self.secret)
         self.target_file.generate_challenges(num_challenges, root_seed)
 
     def challenge(self):
@@ -48,7 +49,7 @@ class Chunk(object):
 
 class Client(object):
     def __init__(self, file_path):
-        self.target_file = Heartbeat(file_path)
+        self.target_file = Heartbeat(file_path, "mysecret")
 
     def answer(self, challenge):
         return self.target_file.meet_challenge(challenge)
@@ -86,7 +87,7 @@ class TestFunctional(unittest.TestCase):
         del self.root_seed
 
     def test_heartbeat_and_challenge(self):
-        file1 = Heartbeat(self.file_path)
+        file1 = Heartbeat(self.file_path, "mysecret")
         file1.generate_challenges(10, self.root_seed)
         challenge = file1.random_challenge()
 
@@ -104,7 +105,7 @@ class TestFunctional(unittest.TestCase):
 
     def test_size(self):
         def num_challenges(number):
-            file1 = Heartbeat(self.size_path)
+            file1 = Heartbeat(self.size_path, "mysecret")
             file1.generate_challenges(number, self.root_seed)
 
         def size1():

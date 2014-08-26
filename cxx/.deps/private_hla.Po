@@ -175,7 +175,8 @@ private_hla.o: private_hla.cxx private_hla.hxx heartbeat.hxx \
  c:\mingw\include\rapidjson\internal/meta.h \
  c:\mingw\include\rapidjson\internal/pow10.h \
  c:\mingw\include\rapidjson\error/error.h endian_swap.h \
- c:\mingw\include\cryptopp\hmac.h
+ c:\mingw\include\cryptopp\hmac.h c:\mingw\include\cryptopp\hex.h \
+ c:\mingw\include\cryptopp\basecode.h
 
 private_hla.hxx:
 
@@ -600,3 +601,7 @@ c:\mingw\include\rapidjson\error/error.h:
 endian_swap.h:
 
 c:\mingw\include\cryptopp\hmac.h:
+
+c:\mingw\include\cryptopp\hex.h:
+
+c:\mingw\include\cryptopp\basecode.h:

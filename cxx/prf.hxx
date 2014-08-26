@@ -14,9 +14,9 @@ class prf
 public:
 	prf()
 	{
-		_iv_sz = _aes.MinIVLength();
+		_iv_sz = _aes.DefaultIVLength();
 		_iv = std::unique_ptr<unsigned char>(new unsigned char[_iv_sz]);
-		memset(_iv.get(),0x00,_iv_sz);
+		memset(_iv.get(),0,_iv_sz);
 	}
 	
 	prf(const prf &p)
@@ -34,15 +34,22 @@ public:
 	{
 		_limit = p._limit;
 		_limit_sz = p._limit_sz;
-		_buffer_sz = p._buffer_sz;
-		_buffer = std::unique_ptr<unsigned char>(new unsigned char[_buffer_sz]);
-		memcpy(_buffer.get(),p._buffer.get(),_buffer_sz);
+		
 		_iv_sz = p._iv_sz;
 		_iv = std::unique_ptr<unsigned char>(new unsigned char[_iv_sz]);
 		memcpy(_iv.get(),p._iv.get(),_iv_sz);
-		_key_sz = p._key_sz;
-		_key = std::unique_ptr<unsigned char>(new unsigned char[_key_sz]);
-		memcpy(_key.get(),p._key.get(),_key_sz);
+		
+		if (p._buffer)
+		{
+			_buffer_sz = p._buffer_sz;
+			_buffer = std::unique_ptr<unsigned char>(new unsigned char[_buffer_sz]);
+			memcpy(_buffer.get(),p._buffer.get(),_buffer_sz);
+		}
+			
+		if (p._key)
+		{
+			set_key(p._key.get(),p._key_sz);
+		}
 		_msb_mask = p._msb_mask;
 	}
 	
@@ -85,7 +92,10 @@ public:
 	// gets a random number into e
 	CryptoPP::Integer evaluate(unsigned int i) const
 	{
-		_aes.Resynchronize(_iv.get(),_iv_sz);
+		if (_aes.IsResynchronizable())
+		{
+			_aes.Resynchronize(_iv.get(),_iv_sz);
+		}
 		CryptoPP::Integer a;
 		unsigned int count = 0;
 		do

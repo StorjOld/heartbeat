@@ -4,6 +4,7 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/hmac.h>
+#include <cryptopp/hex.h>
 
 void private_hla_data::tag::serialize(CryptoPP::BufferedTransformation &bt) const
 {
@@ -52,9 +53,12 @@ void private_hla_data::state::copy(const state &s)
 	_n = s._n;
 	_alpha = s._alpha;
 	_f = s._f;
-	_raw_sz = s._raw_sz;
-	_raw = std::unique_ptr<unsigned char>(new unsigned char[_raw_sz]);
-	memcpy(_raw.get(),s._raw.get(),_raw_sz);
+	if (s._raw)
+	{
+		_raw_sz = s._raw_sz;
+		_raw = std::unique_ptr<unsigned char>(new unsigned char[_raw_sz]);
+		memcpy(_raw.get(),s._raw.get(),_raw_sz);
+	}
 	_encrypted_and_signed = s._encrypted_and_signed;
 }
 
@@ -108,7 +112,7 @@ void private_hla_data::state::deserialize(CryptoPP::BufferedTransformation &bt)
 void private_hla_data::state::encrypt_and_sign(byte k_enc[private_hla_data::key_size],byte k_mac[private_hla_data::key_size])
 {
 	CryptoPP::CFB_Mode< CryptoPP::AES >::Encryption e;
-	CryptoPP::HMAC< CryptoPP::SHA256 > hmac;
+	CryptoPP::HMAC< CryptoPP::SHA256 > hmac(k_mac,private_hla_data::key_size);
 	CryptoPP::AutoSeededRandomPool rng;
 	// generate an IV
 	unsigned int iv_sz = e.DefaultIVLength();
@@ -116,8 +120,6 @@ void private_hla_data::state::encrypt_and_sign(byte k_enc[private_hla_data::key_
 	rng.GenerateBlock(iv.get(),iv_sz);
 	
 	e.SetKeyWithIV(k_enc,private_hla_data::key_size,iv.get(),iv_sz);
-	
-	hmac.SetKey(k_mac,private_hla_data::key_size);
 	
 	// raw format:
 	// [signed_size,signed_data([n,iv_size,iv,encrypted_size,encrypted_data([f_key_size,f_key,alpha_key_size,alpha_key])]),mac_size,mac]
@@ -209,6 +211,20 @@ void private_hla_data::state::encrypt_and_sign(byte k_enc[private_hla_data::key_
 	
 	raw_sink.MessageEnd();
 	
+	/*
+	std::string str0,str1,str2;
+	
+	std::cout << "during encoding: " << std::endl;
+	CryptoPP::StringSource s0(k_mac, private_hla_data::key_size, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str0),true,2,":"));
+	std::cout << "key = " << str0 << std::endl;
+	std::cout << "sig_data.length() = " << sig_data.length() << std::endl;
+	CryptoPP::StringSource s1(sig_data, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str1),true,2,":"));
+	std::cout << "sig_data = " << str1 << std::endl;
+	std::cout << "mac.length() = " << mac.length() << std::endl;
+	CryptoPP::StringSource s2(mac, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str2),true,2,":"));
+	std::cout << "mac = " << str2 << std::endl;
+	*/
+	
 	// now write raw
 	_raw_sz = raw_data.length();
 	_raw = std::unique_ptr<unsigned char>(new unsigned char[_raw_sz]);
@@ -259,19 +275,32 @@ bool private_hla_data::state::check_sig_and_decrypt(byte k_enc[private_hla_data:
 	CryptoPP::StringSink mac_sink(mac_data);
 	raw_source.TransferTo(mac_sink,(CryptoPP::lword)mac_size);
 	
+	/*
+	std::string str0,str1,str2;
+	
+	std::cout << "during decoding: " << std::endl;
+	CryptoPP::StringSource s0(k_mac, private_hla_data::key_size, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str0),true,2,":"));
+	std::cout << "key = " << str0 << std::endl;
+	std::cout << "sig_data.length() = " << sig_data.length() << std::endl;
+	CryptoPP::StringSource s1(sig_data, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str1),true,2,":"));
+	std::cout << "sig_data = " << str1 << std::endl;
+	std::cout << "mac_data.length() = " << mac_data.length() << std::endl;
+	CryptoPP::StringSource s2(mac_data, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str2),true,2,":"));
+	std::cout << "mac_data = " << str2 << std::endl;
+	*/
+	
 	// check signed data
-	CryptoPP::HashVerificationFilter hf(hmac, NULL, CryptoPP::HashVerificationFilter::HASH_AT_END);
+	CryptoPP::HashVerificationFilter hf(hmac, NULL, CryptoPP::HashVerificationFilter::PUT_RESULT|CryptoPP::HashVerificationFilter::HASH_AT_END);
 	
 	CryptoPP::StringSource(sig_data+mac_data, true,
 		new CryptoPP::Redirector(hf));
-		
-	hf.MessageEnd();
 	
 	if (!hf.GetLastResult())
 	{
 		// authentication failed
 		return false;
 	}
+	
 	
 	// parse signed data
 	CryptoPP::StringSource sig_source(sig_data,true);

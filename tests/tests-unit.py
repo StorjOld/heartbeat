@@ -53,7 +53,8 @@ class TestChallenge(unittest.TestCase):
 class TestHeartbeat(unittest.TestCase):
     def setUp(self):
         self.file_loc = os.path.abspath('tests/files/test.txt')
-        self.hb = Heartbeat(self.file_loc)
+        self.secret = "mysecret"
+        self.hb = Heartbeat(self.file_loc, self.secret)
 
     def tearDown(self):
         del self.hb
@@ -67,7 +68,6 @@ class TestHeartbeat(unittest.TestCase):
 
         self.assertTrue(isinstance(self.hb.challenges, list))
         self.assertEqual(len(self.hb.challenges), 0)
-        self.assertIs(self.hb.secret, None)
 
         hb = Heartbeat(self.file_loc, os.urandom(32))
         self.assertTrue(hb.secret)
@@ -86,34 +86,34 @@ class TestHeartbeat(unittest.TestCase):
         hashobj = hashlib.sha256(os.urandom(24))
         hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
 
-        seeds = self.hb.generate_seeds(4, integer)
+        seeds = self.hb.generate_seeds(4, integer, self.secret)
         self.assertEqual(len(seeds), 4)
 
-        seeds = self.hb.generate_seeds(4, decimal_)
+        seeds = self.hb.generate_seeds(4, decimal_, self.secret)
         self.assertEqual(len(seeds), 4)
         for seed in seeds:
-            self.assertIsInstance(seed, float)
+            self.assertTrue(seed, str)
 
-        seeds = self.hb.generate_seeds(4, hashobj)
+        seeds = self.hb.generate_seeds(4, hashobj, self.secret)
         self.assertEqual(len(seeds), 4)
         for seed in seeds:
-            self.assertIsInstance(seed, float)
+            self.assertIsInstance(seed, str)
 
-        seeds = self.hb.generate_seeds(4, hexdigest)
+        seeds = self.hb.generate_seeds(4, hexdigest, self.secret)
         self.assertEqual(len(seeds), 4)
         for seed in seeds:
-            self.assertIsInstance(seed, float)
+            self.assertIsInstance(seed, str)
 
         with self.assertRaises(HeartbeatError) as ex:
-                self.hb.generate_seeds(-1, integer)
+                self.hb.generate_seeds(-1, integer, self.secret)
         ex_msg = ex.exception.message
         self.assertEqual('-1 is not greater than 0', ex_msg)
 
     def test_generate_seeds_deterministic(self):
         hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
 
-        seed_group_1 = self.hb.generate_seeds(5, hexdigest)
-        seed_group_2 = self.hb.generate_seeds(5, hexdigest)
+        seed_group_1 = self.hb.generate_seeds(5, hexdigest, self.secret)
+        seed_group_2 = self.hb.generate_seeds(5, hexdigest, self.secret)
         self.assertEqual(seed_group_1, seed_group_2)
 
     def test_generate_seeds_deterministic_with_secret(self):
@@ -121,15 +121,10 @@ class TestHeartbeat(unittest.TestCase):
         hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
         hb = Heartbeat(self.file_loc, secret=secret)
 
-        seed_group_1 = hb.generate_seeds(5, hexdigest)
-        seed_group_2 = hb.generate_seeds(5, hexdigest)
+        seed_group_1 = hb.generate_seeds(5, hexdigest, self.secret)
+        seed_group_2 = hb.generate_seeds(5, hexdigest, self.secret)
         self.assertEqual(seed_group_1, seed_group_2)
 
-        # Make sure group 3, hashed without a secret, does not match
-        # group one or two
-        seed_group_3 = self.hb.generate_seeds(5, hexdigest)
-        self.assertNotEqual(seed_group_1, seed_group_3)
-        self.assertNotEqual(seed_group_2, seed_group_3)
 
     def test_pick_blocks(self):
         integer = random.randint(0, 65535)
@@ -175,12 +170,6 @@ class TestHeartbeat(unittest.TestCase):
         seed_group_1 = hb.pick_blocks(5, hexdigest)
         seed_group_2 = hb.pick_blocks(5, hexdigest)
         self.assertEqual(seed_group_1, seed_group_2)
-
-        # Make sure group 3, hashed without a secret, does not match
-        # group one or two
-        seed_group_3 = self.hb.pick_blocks(5, hexdigest)
-        self.assertNotEqual(seed_group_1, seed_group_3)
-        self.assertNotEqual(seed_group_2, seed_group_3)
 
     def test_meet_challenge(self):
         block = 0
@@ -235,7 +224,7 @@ class TestHeartbeat(unittest.TestCase):
         for item in self.hb.challenges:
             self.assertIsInstance(item, Challenge)
 
-        seeds = self.hb.generate_seeds(num, hexdigest)
+        seeds = self.hb.generate_seeds(num, hexdigest, self.secret)
         blocks = self.hb.pick_blocks(num, hexdigest)
 
         for index in range(num):

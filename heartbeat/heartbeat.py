@@ -146,13 +146,13 @@ class Heartbeat(object):
 
         seeds = []
         root_seed = str(root_seed)
-        tmp_seed = hashlib.sha256(root_seed).hexdigest()
+        tmp_seed = hashlib.sha256(root_seed.encode('utf-8')).hexdigest()
 
         # Deterministically generate the rest of the seeds
         for x in range(num):
             seeds.append(tmp_seed)
-            h = hashlib.sha256(tmp_seed)
-            h.update(secret)
+            h = hashlib.sha256(tmp_seed.encode('utf-8'))
+            h.update(secret.encode('utf-8'))
             tmp_seed = h.hexdigest()
 
         return seeds

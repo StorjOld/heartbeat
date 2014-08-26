@@ -132,7 +132,8 @@ class Heartbeat(object):
 
         return h.hexdigest()
 
-    def generate_seeds(self, num, root_seed):
+    @staticmethod
+    def generate_seeds(num, root_seed, secret):
         """ Deterministically generate list of seeds from a root seed.
 
         :param num: Numbers of seeds to generate as int
@@ -142,15 +143,17 @@ class Heartbeat(object):
         # Generate a starting seed from the root
         if num < 0:
             raise HeartbeatError('%s is not greater than 0' % num)
+
         seeds = []
-        random.seed(self.concat_secret(root_seed))
-        tmp_seed = random.random()
+        root_seed = str(root_seed)
+        tmp_seed = hashlib.sha256(root_seed).hexdigest()
 
         # Deterministically generate the rest of the seeds
         for x in range(num):
             seeds.append(tmp_seed)
-            random.seed(tmp_seed)
-            tmp_seed = random.random()
+            h = hashlib.sha256(tmp_seed)
+            h.update(secret)
+            tmp_seed = h.hexdigest()
 
         return seeds
 

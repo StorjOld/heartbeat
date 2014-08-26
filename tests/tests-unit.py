@@ -104,10 +104,19 @@ class TestHeartbeat(unittest.TestCase):
         for seed in seeds:
             self.assertIsInstance(seed, str)
 
+    def test_generate_seeds_invalid_num(self):
+        integer = random.randint(0, 65535)
         with self.assertRaises(HeartbeatError) as ex:
                 self.hb.generate_seeds(-1, integer, self.secret)
         ex_msg = ex.exception.message
         self.assertEqual('-1 is not greater than 0', ex_msg)
+
+    def test_denerate_seeds_no_secret(self):
+        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
+        with self.assertRaises(HeartbeatError) as ex:
+            self.hb.generate_seeds(4, hexdigest, None)
+        ex_msg = ex.exception.message
+        self.assertEqual('secret can not be of type NoneType', ex_msg)
 
     def test_generate_seeds_deterministic(self):
         hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
@@ -115,16 +124,6 @@ class TestHeartbeat(unittest.TestCase):
         seed_group_1 = self.hb.generate_seeds(5, hexdigest, self.secret)
         seed_group_2 = self.hb.generate_seeds(5, hexdigest, self.secret)
         self.assertEqual(seed_group_1, seed_group_2)
-
-    def test_generate_seeds_deterministic_with_secret(self):
-        secret = os.urandom(32)
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
-        hb = Heartbeat(self.file_loc, secret=secret)
-
-        seed_group_1 = hb.generate_seeds(5, hexdigest, self.secret)
-        seed_group_2 = hb.generate_seeds(5, hexdigest, self.secret)
-        self.assertEqual(seed_group_1, seed_group_2)
-
 
     def test_pick_blocks(self):
         integer = random.randint(0, 65535)
@@ -160,15 +159,6 @@ class TestHeartbeat(unittest.TestCase):
 
         seed_group_1 = self.hb.pick_blocks(5, hexdigest)
         seed_group_2 = self.hb.pick_blocks(5, hexdigest)
-        self.assertEqual(seed_group_1, seed_group_2)
-
-    def test_pick_blocks_deterministic_with_secret(self):
-        secret = os.urandom(32)
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
-        hb = Heartbeat(self.file_loc, secret=secret)
-
-        seed_group_1 = hb.pick_blocks(5, hexdigest)
-        seed_group_2 = hb.pick_blocks(5, hexdigest)
         self.assertEqual(seed_group_1, seed_group_2)
 
     def test_meet_challenge(self):

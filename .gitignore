@@ -61,3 +61,8 @@ Makefile.in
 *.o
 *.l[ao]
 *~
+Makefile
+autom4te.cache/
+/.deps
+stamp-h1
+*.exe

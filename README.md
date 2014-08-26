@@ -24,7 +24,7 @@ public_beat = beat.public()
 Retrieves the public beat, which contains public parameters and set up parameters for sending to the server or auditors.
 
 ```python
-(tag,state) = beat.encode(file)
+(tag,state) = beat.encode('path/to/file')
 ```
 
 The file tag encapsulates data about the file which will be used by a server to verify that it has stored the file.  file, tag and state information are sent to server (tag may or may not be quite large).  The state information will be signed or encrypted.
@@ -36,7 +36,7 @@ challenge = beat.gen_challenge()
 This should generate a challenge key which is unique.  This step may or may not be necessary, since the challenge information could be drawn by the server from another source (for instance, last hash of bitcoin blockchain header).  In the publically verifiable case it should be possible to call `public_beat.gen_challenge()` and in many cases it is possible to call `heartbeat.gen_challenge()` .
 
 ```python
-proof = public_beat.prove(challenge,file,tag)
+proof = public_beat.prove('path/to/file',challenge,tag)
 ```
 
 This calculates a proof which shows that the file exists.

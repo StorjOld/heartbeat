@@ -144,6 +144,9 @@ class Heartbeat(object):
         if num < 0:
             raise HeartbeatError('%s is not greater than 0' % num)
 
+        if secret is None:
+            raise HeartbeatError('secret can not be of type NoneType')
+
         seeds = []
         root_seed = str(root_seed)
         tmp_seed = hashlib.sha256(root_seed.encode('utf-8')).hexdigest()

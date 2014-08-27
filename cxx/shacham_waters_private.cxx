@@ -12,7 +12,7 @@ void shacham_waters_private_data::tag::serialize(CryptoPP::BufferedTransformatio
 	
 	bt.PutWord32(n);
 	
-	for (int i=0;i<_sigma.size();i++)
+	for (unsigned int i=0;i<_sigma.size();i++)
 	{
 		unsigned int sigma_sz = _sigma[i].MinEncodedSize();
 		n = htonl(sigma_sz);
@@ -34,7 +34,7 @@ void shacham_waters_private_data::tag::deserialize(CryptoPP::BufferedTransformat
 	
 	_sigma.clear();
 	_sigma.resize(n);
-	for (int i=0;i<_sigma.size();i++)
+	for (unsigned int i=0;i<_sigma.size();i++)
 	{
 		bt.GetWord32(n);
 		
@@ -443,7 +443,7 @@ void shacham_waters_private_data::proof::serialize(CryptoPP::BufferedTransformat
 	
 	bt.PutWord32(n);
 	
-	for (int i=0;i<_mu.size();i++)
+	for (unsigned int i=0;i<_mu.size();i++)
 	{
 		unsigned int mu_sz = _mu[i].MinEncodedSize();
 		n = htonl(mu_sz);
@@ -472,7 +472,7 @@ void shacham_waters_private::proof::deserialize(CryptoPP::BufferedTransformation
 	
 	_mu.clear();
 	_mu.resize(n);
-	for (int i=0;i<_mu.size();i++)
+	for (unsigned int i=0;i<_mu.size();i++)
 	{
 		bt.GetWord32(n);
 		
@@ -538,10 +538,10 @@ void shacham_waters_private::encode(tag &t, state &s, file &f)
 	t.sigma().resize(f.get_chunk_count());
 	//std::cout << "Chunks: " << f.get_chunk_count() << std::endl;
 	//std::cout << "Sectors per chunk: " << f.get_sectors_per_chunk() << std::endl;
-	for (int i=0;i<f.get_chunk_count();i++)
+	for (unsigned int i=0;i<f.get_chunk_count();i++)
 	{
 		t.sigma().at(i) = s.f(i);
-		for (int j=0;j<_sectors;j++)
+		for (unsigned int j=0;j<_sectors;j++)
 		{
 			t.sigma().at(i) += s.alpha(j) * ibf.get_sector(i,j);
 			t.sigma().at(i) %= _p;
@@ -601,10 +601,10 @@ void shacham_waters_private::prove(proof &p,const challenge &c, file &f,const ta
 	p.mu().clear();
 	p.mu().resize(_sectors);
 	//std::cout << "Sectors: " << _sectors << std::endl;
-	for (int j=0;j<_sectors;j++)
+	for (unsigned int j=0;j<_sectors;j++)
 	{
 		//p.mu().at(j) = CryptoPP::Integer(); // this is called implicitly
-		for (int i=0;i<c.get_l();i++)
+		for (unsigned int i=0;i<c.get_l();i++)
 		{
 			p.mu().at(j) += c.v(i) * ibf.get_sector(indexer.evaluate(i).ConvertToLong(),j);
 			p.mu().at(j) %= _p;
@@ -614,7 +614,7 @@ void shacham_waters_private::prove(proof &p,const challenge &c, file &f,const ta
 	
 	//p.sigma() = CryptoPP::Integer();
 	//std::cout << "Calculating sigma... t.sigma().size() = " << t.sigma().size() << std::endl;
-	for (int i=0;i<c.get_l();i++)
+	for (unsigned int i=0;i<c.get_l();i++)
 	{
 		//std::cout << "sigma += v_" << i << " * sigma_" << indexer.evaluate(i) << std::endl;
 		p.sigma() += c.v(i) * t.sigma().at(indexer.evaluate(i).ConvertToLong());
@@ -645,13 +645,13 @@ bool shacham_waters_private::verify(const proof &p, const challenge &c, const st
 	s.set_f_limit(_p);
 	s.set_alpha_limit(_p);
 	
-	for (int i=0;i<c.get_l();i++)
+	for (unsigned int i=0;i<c.get_l();i++)
 	{
 		rhs += c.v(i) * s.f(indexer.evaluate(i).ConvertToLong());
 		rhs %= _p;
 	}
 	
-	for (int j=0;j<_sectors;j++)
+	for (unsigned int j=0;j<_sectors;j++)
 	{
 		rhs += s.alpha(j) * p.mu().at(j);
 		rhs %= _p;

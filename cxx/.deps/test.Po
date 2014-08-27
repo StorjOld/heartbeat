@@ -175,8 +175,8 @@ test.o: test.cxx shacham_waters_private.hxx heartbeat.hxx block_file.hxx \
  c:\mingw\include\rapidjson\reader.h \
  c:\mingw\include\rapidjson\internal/meta.h \
  c:\mingw\include\rapidjson\internal/pow10.h \
- c:\mingw\include\rapidjson\error/error.h stream_block_file.hxx \
- ../config.h c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\fstream \
+ c:\mingw\include\rapidjson\error/error.h stream_block_file.hxx config.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\fstream \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\codecvt.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\basic_file.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\c++io.h \
@@ -608,7 +608,7 @@ c:\mingw\include\rapidjson\error/error.h:
 
 stream_block_file.hxx:
 
-../config.h:
+config.h:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\fstream:
 

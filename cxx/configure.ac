@@ -4,11 +4,11 @@
 m4_include([AX_CXX_COMPILE_STDCXX_11.m4])
 
 AC_PREREQ([2.68])
-AC_INIT([heartbeat], [0.1], [jameswt@gmail.com])
+AC_INIT([heartbeat_cxx], [0.1], [jameswt@gmail.com])
 AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile cxx/Makefile])
+AC_CONFIG_FILES([Makefile])
 
 # Checks for programs.
 AC_PROG_CXX

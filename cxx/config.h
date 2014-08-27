@@ -44,19 +44,19 @@
 /* #undef HAVE___LZCNT */
 
 /* Name of package */
-#define PACKAGE "heartbeat"
+#define PACKAGE "heartbeat_cxx"
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "jameswt@gmail.com"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "heartbeat"
+#define PACKAGE_NAME "heartbeat_cxx"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "heartbeat 0.1"
+#define PACKAGE_STRING "heartbeat_cxx 0.1"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "heartbeat"
+#define PACKAGE_TARNAME "heartbeat_cxx"
 
 /* Define to the home page for this package. */
 #define PACKAGE_URL ""

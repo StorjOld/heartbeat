@@ -238,7 +238,7 @@ void private_hla_data::state::encrypt_and_sign(byte k_enc[private_hla_data::key_
 
 bool private_hla_data::state::check_sig_and_decrypt(byte k_enc[private_hla_data::key_size],byte k_mac[private_hla_data::key_size])
 {
-	std::cout << "Checking signature..." << std::endl;
+	//std::cout << "Checking signature..." << std::endl;
 	if (!_encrypted_and_signed)
 	{
 		throw std::runtime_error("in private_hla_data::state::check_sig_and_decrypt, data must be encrypted before decryption and checking signature.");
@@ -609,7 +609,7 @@ void private_hla::prove(proof &p,const challenge &c, file &f,const tag &t)
 			p.mu().at(j) += c.v(i) * ibf.get_sector(indexer.evaluate(i).ConvertToLong(),j);
 			p.mu().at(j) %= _p;
 		}
-		std::cout << "mu_" << j << " = " << p.mu().at(j) << std::endl;
+		//std::cout << "mu_" << j << " = " << p.mu().at(j) << std::endl;
 	}
 	
 	//p.sigma() = CryptoPP::Integer();

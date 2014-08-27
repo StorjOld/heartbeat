@@ -1,4 +1,4 @@
-test.o: test.cxx private_hla.hxx heartbeat.hxx block_file.hxx \
+test.o: test.cxx shacham_waters_private.hxx heartbeat.hxx block_file.hxx \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cstddef \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\c++config.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\os_defines.h \
@@ -182,7 +182,7 @@ test.o: test.cxx private_hla.hxx heartbeat.hxx block_file.hxx \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\c++io.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\fstream.tcc
 
-private_hla.hxx:
+shacham_waters_private.hxx:
 
 heartbeat.hxx:
 

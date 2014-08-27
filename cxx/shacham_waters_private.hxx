@@ -23,7 +23,7 @@ Shacham, Waters, "Compact Proofs of Retrievability"
 #include <rapidjson/writer.h>
 #include <rapidjson/reader.h>
 
-class private_hla_data 
+class shacham_waters_private_data 
 {
 public:
 	static const unsigned int key_size = 32;
@@ -58,8 +58,8 @@ public:
 		void serialize(CryptoPP::BufferedTransformation &bt) const;
 		void deserialize(CryptoPP::BufferedTransformation &bt);
 		
-		void encrypt_and_sign(byte k_enc[private_hla_data::key_size],byte k_mac[private_hla_data::key_size]);
-		bool check_sig_and_decrypt(byte k_enc[private_hla_data::key_size],byte k_mac[private_hla_data::key_size]);
+		void encrypt_and_sign(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size]);
+		bool check_sig_and_decrypt(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size]);
 		void public_interpretation();
 		
 		CryptoPP::Integer f(unsigned int i) const;
@@ -129,7 +129,7 @@ public:
 	typedef block_file file;
 };
 
-class private_hla : public heartbeat<private_hla_data,private_hla>, public serializable
+class shacham_waters_private : public heartbeat<shacham_waters_private_data,shacham_waters_private>, public serializable
 {	
 public:
 	void gen()
@@ -139,7 +139,7 @@ public:
 
 	void init(unsigned int prime_size_bytes = 128, unsigned int sectors = 10);
 	
-	void get_public(private_hla &h) const;
+	void get_public(shacham_waters_private &h) const;
 	
 	// gets the tag and state into t and s for file f
 	void encode(tag &t, state &s, file &f);
@@ -162,8 +162,8 @@ public:
 	void deserialize(CryptoPP::BufferedTransformation &bt);
 	
 private:
-	byte _k_enc[private_hla_data::key_size];
-	byte _k_mac[private_hla_data::key_size];
+	byte _k_enc[shacham_waters_private_data::key_size];
+	byte _k_mac[shacham_waters_private_data::key_size];
 
 	unsigned int _sectors;
 	size_t _sector_size;

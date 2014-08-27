@@ -1,4 +1,4 @@
-#include "private_hla.hxx"
+#include "shacham_waters_private.hxx"
 #include "stream_block_file.hxx"
 
 #include <config.h>
@@ -28,17 +28,17 @@ int main(int argc,char *argv[])
 	
 	{
 		// client context
-		private_hla s_test;
+		shacham_waters_private s_test;
 	
-		private_hla::tag t;
-		private_hla::state s;
+		shacham_waters_private::tag t;
+		shacham_waters_private::state s;
 	
 		s_test.gen();
 	
 		s_test.encode(t,s,sbf);	
 		ifs.seekg(0);
 	
-		private_hla p_test;
+		shacham_waters_private p_test;
 		s_test.get_public(p_test);
 		
 		t.serializep(new CryptoPP::StringSink(raw_tag));
@@ -49,10 +49,10 @@ int main(int argc,char *argv[])
 	
 	{
 		// auditor context 1
-		private_hla::challenge c;
-		private_hla::state s;
+		shacham_waters_private::challenge c;
+		shacham_waters_private::state s;
 		
-		private_hla s_test;
+		shacham_waters_private s_test;
 		
 		s_test.deserializep(new CryptoPP::StringSource(s_hla,true));
 		s.deserializep(new CryptoPP::StringSource(raw_state,true));
@@ -64,11 +64,11 @@ int main(int argc,char *argv[])
 	
 	{
 		// server context
-		private_hla::challenge c;
-		private_hla::proof p;
-		private_hla::tag t;
+		shacham_waters_private::challenge c;
+		shacham_waters_private::proof p;
+		shacham_waters_private::tag t;
 	
-		private_hla p_test;
+		shacham_waters_private p_test;
 		
 		p_test.deserializep(new CryptoPP::StringSource(p_hla,true));
 		c.deserializep(new CryptoPP::StringSource(raw_challenge,true));
@@ -81,11 +81,11 @@ int main(int argc,char *argv[])
 	
 	{
 		// auditor context 2
-		private_hla::challenge c;
-		private_hla::state s;
-		private_hla::proof p;
+		shacham_waters_private::challenge c;
+		shacham_waters_private::state s;
+		shacham_waters_private::proof p;
 		
-		private_hla s_test;
+		shacham_waters_private s_test;
 		
 		s_test.deserializep(new CryptoPP::StringSource(s_hla,true));
 		p.deserializep(new CryptoPP::StringSource(raw_proof,true));

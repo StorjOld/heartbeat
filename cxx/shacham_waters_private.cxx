@@ -1,4 +1,4 @@
-#include "private_hla.hxx"
+#include "shacham_waters_private.hxx"
 #include "endian_swap.h"
 
 #include <cryptopp/filters.h>
@@ -6,7 +6,7 @@
 #include <cryptopp/hmac.h>
 #include <cryptopp/hex.h>
 
-void private_hla_data::tag::serialize(CryptoPP::BufferedTransformation &bt) const
+void shacham_waters_private_data::tag::serialize(CryptoPP::BufferedTransformation &bt) const
 {
 	unsigned int n = htonl(_sigma.size());
 	
@@ -24,7 +24,7 @@ void private_hla_data::tag::serialize(CryptoPP::BufferedTransformation &bt) cons
 	}
 }
 
-void private_hla_data::tag::deserialize(CryptoPP::BufferedTransformation &bt)
+void shacham_waters_private_data::tag::deserialize(CryptoPP::BufferedTransformation &bt)
 {
 	unsigned int n;
 	
@@ -45,12 +45,12 @@ void private_hla_data::tag::deserialize(CryptoPP::BufferedTransformation &bt)
 	}
 }
 
-private_hla_data::state::state(const state &s)
+shacham_waters_private_data::state::state(const state &s)
 {
 	copy(s);
 }
 
-void private_hla_data::state::copy(const state &s) 
+void shacham_waters_private_data::state::copy(const state &s) 
 {
 	_n = s._n;
 	_alpha = s._alpha;
@@ -64,27 +64,27 @@ void private_hla_data::state::copy(const state &s)
 	_encrypted_and_signed = s._encrypted_and_signed;
 }
 
-private_hla_data::state& private_hla_data::state::operator=(const private_hla_data::state &other)
+shacham_waters_private_data::state& shacham_waters_private_data::state::operator=(const shacham_waters_private_data::state &other)
 {
 	copy(other);
 	return *this;
 }
 
-inline CryptoPP::Integer private_hla_data::state::f(unsigned int i) const
+inline CryptoPP::Integer shacham_waters_private_data::state::f(unsigned int i) const
 {
 	return _f.evaluate(i);
 }
 
-inline CryptoPP::Integer private_hla_data::state::alpha(unsigned int i) const
+inline CryptoPP::Integer shacham_waters_private_data::state::alpha(unsigned int i) const
 {
 	return _alpha.evaluate(i);
 }
 
-void private_hla_data::state::serialize(CryptoPP::BufferedTransformation &bt) const
+void shacham_waters_private_data::state::serialize(CryptoPP::BufferedTransformation &bt) const
 {
 	if (!_encrypted_and_signed)
 	{
-		throw std::runtime_error("in private_hla_data::serialize, state must be encrypted prior to serialization.");
+		throw std::runtime_error("in shacham_waters_private_data::serialize, state must be encrypted prior to serialization.");
 	}
 	
 	// write the raw data size
@@ -95,7 +95,7 @@ void private_hla_data::state::serialize(CryptoPP::BufferedTransformation &bt) co
 	bt.Put(_raw.get(),_raw_sz);
 }
 
-void private_hla_data::state::deserialize(CryptoPP::BufferedTransformation &bt)
+void shacham_waters_private_data::state::deserialize(CryptoPP::BufferedTransformation &bt)
 {
 	unsigned int n;
 	
@@ -111,17 +111,17 @@ void private_hla_data::state::deserialize(CryptoPP::BufferedTransformation &bt)
 	_encrypted_and_signed = true;
 }
 
-void private_hla_data::state::encrypt_and_sign(byte k_enc[private_hla_data::key_size],byte k_mac[private_hla_data::key_size])
+void shacham_waters_private_data::state::encrypt_and_sign(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size])
 {
 	CryptoPP::CFB_Mode< CryptoPP::AES >::Encryption e;
-	CryptoPP::HMAC< CryptoPP::SHA256 > hmac(k_mac,private_hla_data::key_size);
+	CryptoPP::HMAC< CryptoPP::SHA256 > hmac(k_mac,shacham_waters_private_data::key_size);
 	CryptoPP::AutoSeededRandomPool rng;
 	// generate an IV
 	unsigned int iv_sz = e.DefaultIVLength();
 	std::unique_ptr<unsigned char> iv(new unsigned char[iv_sz]);
 	rng.GenerateBlock(iv.get(),iv_sz);
 	
-	e.SetKeyWithIV(k_enc,private_hla_data::key_size,iv.get(),iv_sz);
+	e.SetKeyWithIV(k_enc,shacham_waters_private_data::key_size,iv.get(),iv_sz);
 	
 	// raw format:
 	// [signed_size,signed_data([n,iv_size,iv,encrypted_size,encrypted_data([f_key_size,f_key,alpha_key_size,alpha_key])]),mac_size,mac]
@@ -217,7 +217,7 @@ void private_hla_data::state::encrypt_and_sign(byte k_enc[private_hla_data::key_
 	std::string str0,str1,str2;
 	
 	std::cout << "during encoding: " << std::endl;
-	CryptoPP::StringSource s0(k_mac, private_hla_data::key_size, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str0),true,2,":"));
+	CryptoPP::StringSource s0(k_mac, shacham_waters_private_data::key_size, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str0),true,2,":"));
 	std::cout << "key = " << str0 << std::endl;
 	std::cout << "sig_data.length() = " << sig_data.length() << std::endl;
 	CryptoPP::StringSource s1(sig_data, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str1),true,2,":"));
@@ -236,16 +236,16 @@ void private_hla_data::state::encrypt_and_sign(byte k_enc[private_hla_data::key_
 	_encrypted_and_signed = true;
 }
 
-bool private_hla_data::state::check_sig_and_decrypt(byte k_enc[private_hla_data::key_size],byte k_mac[private_hla_data::key_size])
+bool shacham_waters_private_data::state::check_sig_and_decrypt(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size])
 {
 	//std::cout << "Checking signature..." << std::endl;
 	if (!_encrypted_and_signed)
 	{
-		throw std::runtime_error("in private_hla_data::state::check_sig_and_decrypt, data must be encrypted before decryption and checking signature.");
+		throw std::runtime_error("in shacham_waters_private_data::state::check_sig_and_decrypt, data must be encrypted before decryption and checking signature.");
 	}
 	
 	CryptoPP::CFB_Mode< CryptoPP::AES >::Decryption d;
-	CryptoPP::HMAC< CryptoPP::SHA256 > hmac(k_mac,private_hla_data::key_size);
+	CryptoPP::HMAC< CryptoPP::SHA256 > hmac(k_mac,shacham_waters_private_data::key_size);
 
 	CryptoPP::StringSource raw_source(_raw.get(),_raw_sz,true);
 	
@@ -281,7 +281,7 @@ bool private_hla_data::state::check_sig_and_decrypt(byte k_enc[private_hla_data:
 	std::string str0,str1,str2;
 	
 	std::cout << "during decoding: " << std::endl;
-	CryptoPP::StringSource s0(k_mac, private_hla_data::key_size, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str0),true,2,":"));
+	CryptoPP::StringSource s0(k_mac, shacham_waters_private_data::key_size, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str0),true,2,":"));
 	std::cout << "key = " << str0 << std::endl;
 	std::cout << "sig_data.length() = " << sig_data.length() << std::endl;
 	CryptoPP::StringSource s1(sig_data, true,new CryptoPP::HexEncoder(new CryptoPP::StringSink(str1),true,2,":"));
@@ -320,7 +320,7 @@ bool private_hla_data::state::check_sig_and_decrypt(byte k_enc[private_hla_data:
 	sig_source.Get(iv.get(),iv_sz);
 	
 	// set up decryption
-	d.SetKeyWithIV(k_enc,private_hla_data::key_size,iv.get(),iv_sz);
+	d.SetKeyWithIV(k_enc,shacham_waters_private_data::key_size,iv.get(),iv_sz);
 	
 	// get encrypted data size
 	sig_source.GetWord32(n);
@@ -350,11 +350,11 @@ bool private_hla_data::state::check_sig_and_decrypt(byte k_enc[private_hla_data:
 	return true;
 }
 
-void private_hla_data::state::public_interpretation()
+void shacham_waters_private_data::state::public_interpretation()
 {
 	if (!_encrypted_and_signed)
 	{
-		throw std::runtime_error("in private_hla_data::state::check_sig_and_decrypt, data must be encrypted before decryption and checking signature.");
+		throw std::runtime_error("in shacham_waters_private_data::state::check_sig_and_decrypt, data must be encrypted before decryption and checking signature.");
 	}
 	
 	// simply gets n out of the stream
@@ -369,17 +369,17 @@ void private_hla_data::state::public_interpretation()
 	_n = ntohl(n);
 }
 
-inline CryptoPP::Integer private_hla_data::challenge::v(unsigned int i) const
+inline CryptoPP::Integer shacham_waters_private_data::challenge::v(unsigned int i) const
 {
 	return _v.evaluate(i);
 }
 
-inline CryptoPP::Integer private_hla_data::challenge::i(unsigned int i) const
+inline CryptoPP::Integer shacham_waters_private_data::challenge::i(unsigned int i) const
 {
 	return _i.evaluate(i);
 }
 
-void private_hla_data::challenge::serialize(CryptoPP::BufferedTransformation &bt) const
+void shacham_waters_private_data::challenge::serialize(CryptoPP::BufferedTransformation &bt) const
 {
 	// write l
 	unsigned int n = htonl(_l);
@@ -405,7 +405,7 @@ void private_hla_data::challenge::serialize(CryptoPP::BufferedTransformation &bt
 	B.Encode(bt,B_sz);
 }
 
-void private_hla_data::challenge::deserialize(CryptoPP::BufferedTransformation &bt)
+void shacham_waters_private_data::challenge::deserialize(CryptoPP::BufferedTransformation &bt)
 {
 	unsigned int n;
 	
@@ -437,7 +437,7 @@ void private_hla_data::challenge::deserialize(CryptoPP::BufferedTransformation &
 	_v.set_limit(B);
 }
 
-void private_hla_data::proof::serialize(CryptoPP::BufferedTransformation &bt) const
+void shacham_waters_private_data::proof::serialize(CryptoPP::BufferedTransformation &bt) const
 {
 	unsigned int n = htonl(_mu.size());
 	
@@ -462,7 +462,7 @@ void private_hla_data::proof::serialize(CryptoPP::BufferedTransformation &bt) co
 	_sigma.Encode(bt,sigma_sz);
 }
 
-void private_hla::proof::deserialize(CryptoPP::BufferedTransformation &bt)
+void shacham_waters_private::proof::deserialize(CryptoPP::BufferedTransformation &bt)
 {
 	unsigned int n;
 	
@@ -488,12 +488,12 @@ void private_hla::proof::deserialize(CryptoPP::BufferedTransformation &bt)
 	_sigma.Decode(bt,n);
 }
 
-void private_hla::init(unsigned int prime_size_bytes, unsigned int sectors)
+void shacham_waters_private::init(unsigned int prime_size_bytes, unsigned int sectors)
 {
 	CryptoPP::AutoSeededRandomPool rng;
 	
-	rng.GenerateBlock(_k_enc,private_hla_data::key_size);
-	rng.GenerateBlock(_k_mac,private_hla_data::key_size);
+	rng.GenerateBlock(_k_enc,shacham_waters_private_data::key_size);
+	rng.GenerateBlock(_k_mac,shacham_waters_private_data::key_size);
 	
 	_sectors = sectors;
 	
@@ -505,14 +505,14 @@ void private_hla::init(unsigned int prime_size_bytes, unsigned int sectors)
 	_sector_size = _p.BitCount()/8;
 }
 
-void private_hla::get_public(private_hla &h) const
+void shacham_waters_private::get_public(shacham_waters_private &h) const
 {
 	h._p = _p;
 	h._sectors = _sectors;
 	h._sector_size = _sector_size;
 }
 
-void private_hla::encode(tag &t, state &s, file &f)
+void shacham_waters_private::encode(tag &t, state &s, file &f)
 {
 	//std::cout << "Encoding... " << std::endl;
 	CryptoPP::AutoSeededRandomPool rng;
@@ -524,14 +524,14 @@ void private_hla::encode(tag &t, state &s, file &f)
 	
 	s.set_n(f.get_chunk_count());
 	
-	byte k_prf[private_hla_data::key_size];
-	rng.GenerateBlock(k_prf,private_hla_data::key_size);
-	s.set_f_key(k_prf,private_hla_data::key_size);
+	byte k_prf[shacham_waters_private_data::key_size];
+	rng.GenerateBlock(k_prf,shacham_waters_private_data::key_size);
+	s.set_f_key(k_prf,shacham_waters_private_data::key_size);
 	s.set_f_limit(_p);
 	
-	byte k_alpha[private_hla_data::key_size];
-	rng.GenerateBlock(k_alpha,private_hla_data::key_size);
-	s.set_alpha_key(k_alpha,private_hla_data::key_size);
+	byte k_alpha[shacham_waters_private_data::key_size];
+	rng.GenerateBlock(k_alpha,shacham_waters_private_data::key_size);
+	s.set_alpha_key(k_alpha,shacham_waters_private_data::key_size);
 	s.set_alpha_limit(_p);
 	
 	t.sigma().clear();
@@ -552,7 +552,7 @@ void private_hla::encode(tag &t, state &s, file &f)
 	s.encrypt_and_sign(_k_enc,_k_mac);
 }
 
-void private_hla::gen_challenge(challenge &c, const state &s)
+void shacham_waters_private::gen_challenge(challenge &c, const state &s)
 {
 	if (!gen_challenge(c,s,s.get_n(),_p))
 	{
@@ -560,7 +560,7 @@ void private_hla::gen_challenge(challenge &c, const state &s)
 	}
 }
 
-bool private_hla::gen_challenge(challenge &c, const state &s_enc, unsigned int l, const CryptoPP::Integer &B)
+bool shacham_waters_private::gen_challenge(challenge &c, const state &s_enc, unsigned int l, const CryptoPP::Integer &B)
 {
 	//std::cout << "Generating challenge..." << std::endl;
 	
@@ -577,17 +577,17 @@ bool private_hla::gen_challenge(challenge &c, const state &s_enc, unsigned int l
 	
 	c.set_l(l);
 
-	byte k[private_hla_data::key_size];
-	rng.GenerateBlock(k,private_hla_data::key_size);
+	byte k[shacham_waters_private_data::key_size];
+	rng.GenerateBlock(k,shacham_waters_private_data::key_size);
 	
-	c.set_key(k,private_hla_data::key_size);
+	c.set_key(k,shacham_waters_private_data::key_size);
 	c.set_v_limit(B);
 	c.set_i_limit(s.get_n());
 	
 	return true;
 }
 
-void private_hla::prove(proof &p,const challenge &c, file &f,const tag &t)
+void shacham_waters_private::prove(proof &p,const challenge &c, file &f,const tag &t)
 {
 	//std::cout << "Proving existence..." << std::endl;
 	integer_block_file_interface ibf(f);
@@ -624,7 +624,7 @@ void private_hla::prove(proof &p,const challenge &c, file &f,const tag &t)
 	//std::cout << "sigma = " << p.sigma() << std::endl;
 }
 
-bool private_hla::verify(const proof &p, const challenge &c, const state &s_enc)
+bool shacham_waters_private::verify(const proof &p, const challenge &c, const state &s_enc)
 {
 	//std::cout << "Verifying proof..." << std::endl;
 	CryptoPP::Integer rhs;
@@ -663,22 +663,22 @@ bool private_hla::verify(const proof &p, const challenge &c, const state &s_enc)
 	return p.sigma() == rhs;
 }
 
-void private_hla::serialize(CryptoPP::BufferedTransformation &bt) const
+void shacham_waters_private::serialize(CryptoPP::BufferedTransformation &bt) const
 {
 	unsigned int n;
 	
 	// write key size
-	n = htonl(private_hla_data::key_size);
+	n = htonl(shacham_waters_private_data::key_size);
 	bt.PutWord32(n);
 	
 	// write encryption key
-	bt.Put(_k_enc,private_hla_data::key_size);
+	bt.Put(_k_enc,shacham_waters_private_data::key_size);
 	
 	// write key size
 	bt.PutWord32(n);
 	
 	// write key
-	bt.Put(_k_mac,private_hla_data::key_size);
+	bt.Put(_k_mac,shacham_waters_private_data::key_size);
 	
 	// write sectors
 	n = htonl(_sectors);
@@ -698,7 +698,7 @@ void private_hla::serialize(CryptoPP::BufferedTransformation &bt) const
 	_p.Encode(bt,p_sz);
 }
 
-void private_hla::deserialize(CryptoPP::BufferedTransformation &bt)
+void shacham_waters_private::deserialize(CryptoPP::BufferedTransformation &bt)
 {
 	unsigned int n;
 	// read key size
@@ -706,7 +706,7 @@ void private_hla::deserialize(CryptoPP::BufferedTransformation &bt)
 	n = ntohl(n);
 	
 	// check key size
-	if (n != private_hla_data::key_size)
+	if (n != shacham_waters_private_data::key_size)
 	{
 		throw std::runtime_error("Incompatible key sizes.");
 	}
@@ -719,7 +719,7 @@ void private_hla::deserialize(CryptoPP::BufferedTransformation &bt)
 	n = ntohl(n);
 	
 	// check key size
-	if (n != private_hla_data::key_size)
+	if (n != shacham_waters_private_data::key_size)
 	{
 		throw std::runtime_error("Incompatible key sizes.");
 	}

@@ -20,11 +20,13 @@ public:
 	
 	prf(const prf &p)
 	{
+		init_iv();
 		copy(p);
 	}
 	
 	 prf& operator= (const prf &other)
     {
+		init_iv();
         copy(other);
         return *this;
     }
@@ -40,10 +42,6 @@ public:
 	{
 		_limit = p._limit;
 		_limit_sz = p._limit_sz;
-		
-		_iv_sz = p._iv_sz;
-		_iv = std::unique_ptr<unsigned char>(new unsigned char[_iv_sz]);
-		memcpy(_iv.get(),p._iv.get(),_iv_sz);
 		
 		if (p._buffer)
 		{

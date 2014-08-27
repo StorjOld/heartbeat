@@ -19,6 +19,7 @@ void private_hla_data::tag::serialize(CryptoPP::BufferedTransformation &bt) cons
 	
 		bt.PutWord32(n);
 		
+		//std::cout << "Encoding sigma_" << i << " in " << sigma_sz << " bytes." << std::endl;
 		_sigma[i].Encode(bt,sigma_sz);
 	}
 }
@@ -39,6 +40,7 @@ void private_hla_data::tag::deserialize(CryptoPP::BufferedTransformation &bt)
 		
 		n = ntohl(n);
 		
+		//std::cout << "Decoding sigma_" << i << " in " << n << " bytes." << std::endl;
 		_sigma[i].Decode(bt,n);
 	}
 }
@@ -395,9 +397,11 @@ void private_hla_data::challenge::serialize(CryptoPP::BufferedTransformation &bt
 	
 	unsigned int B_sz = B.MinEncodedSize();
 	n = htonl(B_sz);
+	
 	bt.PutWord32(n);
 	
 	// write B
+	//std::cout << "Encoding B in " << B_sz << " bytes." << std::endl;
 	B.Encode(bt,B_sz);
 }
 
@@ -426,6 +430,7 @@ void private_hla_data::challenge::deserialize(CryptoPP::BufferedTransformation &
 	CryptoPP::Integer B;
 	
 	// read B
+	//std::cout << "Dencoding B in " << n << " bytes." << std::endl;
 	B.Decode(bt,n);
 	
 	// set B
@@ -445,6 +450,7 @@ void private_hla_data::proof::serialize(CryptoPP::BufferedTransformation &bt) co
 	
 		bt.PutWord32(n);
 		
+		//std::cout << "Encoding mu_" << i << " in " << mu_sz << " bytes." << std::endl;
 		_mu[i].Encode(bt,mu_sz);
 	}
 	
@@ -452,7 +458,7 @@ void private_hla_data::proof::serialize(CryptoPP::BufferedTransformation &bt) co
 	n = htonl(sigma_sz);
 	
 	bt.PutWord32(n);
-	
+	//std::cout << "Encoding sigma  in " << sigma_sz << " bytes." << std::endl;
 	_sigma.Encode(bt,sigma_sz);
 }
 
@@ -472,12 +478,13 @@ void private_hla::proof::deserialize(CryptoPP::BufferedTransformation &bt)
 		
 		n = ntohl(n);
 		
+		//std::cout << "Dencoding mu_" << i << " in " << n << " bytes." << std::endl;
 		_mu[i].Decode(bt,n);
 	}
 	
 	bt.GetWord32(n);
 	n = ntohl(n);
-	
+	//std::cout << "Dencoding sigma in " << n << " bytes." << std::endl;
 	_sigma.Decode(bt,n);
 }
 
@@ -507,7 +514,7 @@ void private_hla::get_public(private_hla &h) const
 
 void private_hla::encode(tag &t, state &s, file &f)
 {
-	std::cout << "Encoding... " << std::endl;
+	//std::cout << "Encoding... " << std::endl;
 	CryptoPP::AutoSeededRandomPool rng;
 	
 	integer_block_file_interface ibf(f);
@@ -529,8 +536,8 @@ void private_hla::encode(tag &t, state &s, file &f)
 	
 	t.sigma().clear();
 	t.sigma().resize(f.get_chunk_count());
-	std::cout << "Chunks: " << f.get_chunk_count() << std::endl;
-	std::cout << "Sectors per chunk: " << f.get_sectors_per_chunk() << std::endl;
+	//std::cout << "Chunks: " << f.get_chunk_count() << std::endl;
+	//std::cout << "Sectors per chunk: " << f.get_sectors_per_chunk() << std::endl;
 	for (int i=0;i<f.get_chunk_count();i++)
 	{
 		t.sigma().at(i) = s.f(i);
@@ -539,7 +546,7 @@ void private_hla::encode(tag &t, state &s, file &f)
 			t.sigma().at(i) += s.alpha(j) * ibf.get_sector(i,j);
 			t.sigma().at(i) %= _p;
 		}
-		std::cout << "sigma_" << i << " = " << t.sigma().at(i) << std::endl;
+		//std::cout << "sigma_" << i << " = " << t.sigma().at(i) << std::endl;
 	}
 	
 	s.encrypt_and_sign(_k_enc,_k_mac);
@@ -555,7 +562,7 @@ void private_hla::gen_challenge(challenge &c, const state &s)
 
 bool private_hla::gen_challenge(challenge &c, const state &s_enc, unsigned int l, const CryptoPP::Integer &B)
 {
-	std::cout << "Generating challenge..." << std::endl;
+	//std::cout << "Generating challenge..." << std::endl;
 	
 	state s = s_enc;
 	
@@ -582,7 +589,7 @@ bool private_hla::gen_challenge(challenge &c, const state &s_enc, unsigned int l
 
 void private_hla::prove(proof &p,const challenge &c, file &f,const tag &t)
 {
-	std::cout << "Proving existence..." << std::endl;
+	//std::cout << "Proving existence..." << std::endl;
 	integer_block_file_interface ibf(f);
 	
 	f.redefine_chunks(_sector_size,_sectors);
@@ -593,7 +600,7 @@ void private_hla::prove(proof &p,const challenge &c, file &f,const tag &t)
 	
 	p.mu().clear();
 	p.mu().resize(_sectors);
-	std::cout << "Sectors: " << _sectors << std::endl;
+	//std::cout << "Sectors: " << _sectors << std::endl;
 	for (int j=0;j<_sectors;j++)
 	{
 		//p.mu().at(j) = CryptoPP::Integer(); // this is called implicitly
@@ -606,20 +613,20 @@ void private_hla::prove(proof &p,const challenge &c, file &f,const tag &t)
 	}
 	
 	//p.sigma() = CryptoPP::Integer();
-	std::cout << "Calculating sigma... t.sigma().size() = " << t.sigma().size() << std::endl;
+	//std::cout << "Calculating sigma... t.sigma().size() = " << t.sigma().size() << std::endl;
 	for (int i=0;i<c.get_l();i++)
 	{
-		std::cout << "sigma += v_" << i << " * sigma_" << c.i(i) << std::endl;
+		//std::cout << "sigma += v_" << i << " * sigma_" << indexer.evaluate(i) << std::endl;
 		p.sigma() += c.v(i) * t.sigma().at(indexer.evaluate(i).ConvertToLong());
 		p.sigma() %= _p;
 	}
 	
-	std::cout << "sigma = " << p.sigma() << std::endl;
+	//std::cout << "sigma = " << p.sigma() << std::endl;
 }
 
 bool private_hla::verify(const proof &p, const challenge &c, const state &s_enc)
 {
-	std::cout << "Verifying proof..." << std::endl;
+	//std::cout << "Verifying proof..." << std::endl;
 	CryptoPP::Integer rhs;
 	
 	state s = s_enc;
@@ -650,8 +657,8 @@ bool private_hla::verify(const proof &p, const challenge &c, const state &s_enc)
 		rhs %= _p;
 	}
 	
-	std::cout << "sigma: " << p.sigma() << std::endl;
-	std::cout << "rhs: " << rhs << std::endl;
+	//std::cout << "sigma: " << p.sigma() << std::endl;
+	//std::cout << "rhs: " << rhs << std::endl;
 	
 	return p.sigma() == rhs;
 }
@@ -667,49 +674,72 @@ void private_hla::serialize(CryptoPP::BufferedTransformation &bt) const
 	// write encryption key
 	bt.Put(_k_enc,private_hla_data::key_size);
 	
+	// write key size
 	bt.PutWord32(n);
 	
+	// write key
 	bt.Put(_k_mac,private_hla_data::key_size);
 	
+	// write sectors
 	n = htonl(_sectors);
 	bt.PutWord32(n);
 	
+	// write sector size
 	n = htonl(_sector_size);
 	bt.PutWord32(n);
 	
+	// write p size
 	unsigned int p_sz = _p.MinEncodedSize();
 	n = htonl(p_sz);
 	bt.PutWord32(n);
 	
+	// write p
+	//std::cout << "Encoding p in " << p_sz << " bytes." << std::endl;
 	_p.Encode(bt,p_sz);
 }
 
 void private_hla::deserialize(CryptoPP::BufferedTransformation &bt)
 {
 	unsigned int n;
-	
+	// read key size
 	bt.GetWord32(n);
 	n = ntohl(n);
 	
+	// check key size
 	if (n != private_hla_data::key_size)
 	{
 		throw std::runtime_error("Incompatible key sizes.");
 	}
 	
+	// get key
 	bt.Get(_k_enc,n);
 	
+	// read key size
 	bt.GetWord32(n);
 	n = ntohl(n);
 	
+	// check key size
 	if (n != private_hla_data::key_size)
 	{
 		throw std::runtime_error("Incompatible key sizes.");
 	}
 	
+	// get key
 	bt.Get(_k_mac,n);
 	
+	// read sectors
+	bt.GetWord32(n);
+	_sectors = ntohl(n);
+
+	// read sector size
+	bt.GetWord32(n);
+	_sector_size = ntohl(n);
+
+	// read p size
 	bt.GetWord32(n);
 	n = ntohl(n);
 	
+	// read p
+	//std::cout << "Dencoding p in " << n << " bytes." << std::endl;
 	_p.Decode(bt,n);
 }

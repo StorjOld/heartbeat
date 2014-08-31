@@ -132,6 +132,30 @@ public:
 class shacham_waters_private : public heartbeat<shacham_waters_private_data,shacham_waters_private>, public serializable
 {	
 public:
+	shacham_waters_private()
+	{
+		std::cout << "Shacham waters private constructor called..." << std::endl;
+		std::cout << "this = 0x" << std::hex << (int)this << std::endl;
+		
+		std::cout << "_k_enc = 0x" << std::hex << (int)_k_enc << ", size = 0x" << sizeof(_k_enc) << std::endl;
+		std::cout << "_k_mac = 0x" << std::hex << (int)_k_mac << ", size = 0x" << sizeof(_k_mac) << std::endl;
+		
+		std::cout << "test write to buffer...";
+		/*
+		CryptoPP::AutoSeededRandomPool rng;
+		rng.GenerateBlock(_k_enc,shacham_waters_private_data::key_size);
+		rng.GenerateBlock(_k_mac,shacham_waters_private_data::key_size);
+		*/
+		memset(_k_enc,0xff,shacham_waters_private_data::key_size);
+		memset(_k_mac,0xff,shacham_waters_private_data::key_size);
+		std::cout << "successful." << std::endl;
+	}
+	
+	~shacham_waters_private()
+	{
+		std::cout << "Shacham waters private destructor called..." << std::endl;
+	}
+
 	void gen()
 	{
 		init();

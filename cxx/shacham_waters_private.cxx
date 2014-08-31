@@ -466,7 +466,7 @@ void shacham_waters_private::proof::deserialize(CryptoPP::BufferedTransformation
 {
 	unsigned int n;
 	
-	bt.GetWord32(n);
+	bt.GetWord32(n); 
 	
 	n = ntohl(n);
 	
@@ -490,19 +490,30 @@ void shacham_waters_private::proof::deserialize(CryptoPP::BufferedTransformation
 
 void shacham_waters_private::init(unsigned int prime_size_bytes, unsigned int sectors)
 {
+	std::cout << "this = 0x" << std::hex << (int)this << std::endl;
+	std::cout << "Initializing shacham waters private, prime bytes: " << prime_size_bytes << ", sectors: " << sectors << "..." << std::endl;
 	CryptoPP::AutoSeededRandomPool rng;
 	
+	std::cout << "_k_enc = 0x" << std::hex << (int)_k_enc << std::endl;
+	std::cout << "_k_mac = 0x" << std::hex << (int)_k_mac << std::endl;
+	std::cout << "shacham_waters_private_data::key_size = " << std::dec << shacham_waters_private_data::key_size << std::endl;
 	rng.GenerateBlock(_k_enc,shacham_waters_private_data::key_size);
 	rng.GenerateBlock(_k_mac,shacham_waters_private_data::key_size);
+	
+	std::cout << "generated keys..." << std::endl;
 	
 	_sectors = sectors;
 	
 	_p = CryptoPP::Integer(rng,0,CryptoPP::Integer::Power2(prime_size_bytes*8),CryptoPP::Integer::RandomNumberType::PRIME);
 	
+	std::cout << "generated prime..." << std::endl;
+	
 	// sector should be no larger than the prime
 	// otherwise sector reduction can be performed by a malicious
 	// server to save space
 	_sector_size = _p.BitCount()/8;
+	
+	std::cout << "finished initializing..." << std::endl;
 }
 
 void shacham_waters_private::get_public(shacham_waters_private &h) const

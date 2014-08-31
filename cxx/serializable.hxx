@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cryptopp/filters.h>
 
 class serializable

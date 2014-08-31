@@ -1,3 +1,9 @@
 import heartbeat.SwPriv
 
-heartbeat.SwPriv.Test()
+print(dir(heartbeat.SwPriv.SwPriv))
+
+hla = heartbeat.SwPriv.SwPriv()
+
+print(dir(hla))
+
+hla.gen()

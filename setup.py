@@ -1,7 +1,7 @@
 from distutils.core import setup, Extension
 from distutils.command.build_ext import build_ext
 
-copt = {'mingw32' : ['-std=c++11']}
+copt = {'mingw32' : ['-std=c++11','-g','-O0']}
 lopt = {}
 
 class build_ext_subclass( build_ext ):
@@ -15,6 +15,11 @@ class build_ext_subclass( build_ext ):
 				e.extra_link_args = lopt[ c ]
 		build_ext.build_extensions(self)
 
+swpriv_sources = ['cxx/shacham_waters_private.cxx','cxx/SwPriv.cxx']
+pycxx_sources = ['cxx/pycxx/src/cxxsupport.cxx','cxx/pycxx/src/cxx_extensions.cxx','cxx/pycxx/src/cxxextensions.c','cxx/pycxx/src/IndirectPythonInterface.cxx']
+
+all_sources = swpriv_sources + pycxx_sources
+	
 
 swpriv = Extension('heartbeat.SwPriv',
                     define_macros = [('MAJOR_VERSION', '1'),
@@ -22,8 +27,7 @@ swpriv = Extension('heartbeat.SwPriv',
                     include_dirs = ['cxx/pycxx'],
                     libraries = ['cryptopp'],
                     #library_dirs = ['/usr/local/lib'],
-					
-                    sources = ['cxx/shacham_waters_private.cxx','cxx/SwPriv.cxx']);
+                    sources = all_sources);
 					
 setup (name = 'SwPriv',
        version = '1.0',

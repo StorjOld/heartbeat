@@ -1,7 +1,8 @@
 from distutils.core import setup, Extension
 from distutils.command.build_ext import build_ext
 
-copt = {'mingw32' : ['-std=c++11']}
+copt = {'mingw32' : ['-std=c++11'],
+		'}
 lopt = {}
 
 class build_ext_subclass( build_ext ):
@@ -16,7 +17,7 @@ class build_ext_subclass( build_ext ):
 		build_ext.build_extensions(self)
 
 swpriv_sources = ['cxx/shacham_waters_private.cxx','cxx/SwPriv.cxx']
-pycxx_sources = ['cxx/pycxx/src/cxxsupport.cxx','cxx/pycxx/src/cxx_extensions.cxx','cxx/pycxx/src/cxxextensions.c','cxx/pycxx/src/IndirectPythonInterface.cxx']
+pycxx_sources = ['cxx/pycxx/Src/cxxsupport.cxx','cxx/pycxx/Src/cxx_extensions.cxx','cxx/pycxx/Src/cxxextensions.c','cxx/pycxx/Src/IndirectPythonInterface.cxx']
 
 all_sources = swpriv_sources + pycxx_sources
 	

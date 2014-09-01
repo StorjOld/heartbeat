@@ -27,6 +27,7 @@ THE SOFTWARE.
 #pragma once
 
 #include <Python.h>
+#include <CXX/Objects.hxx>
 #include "simple_file.hxx"
 
 class PythonStreamFile : public simple_file

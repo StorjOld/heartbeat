@@ -27,10 +27,9 @@ THE SOFTWARE.
 #pragma once
 
 #include <cryptopp/cryptlib.h>
-#pragma once
-
 #include <cryptopp/filters.h>
 #include <Python.h>
+#include <CXX/Objects.hxx>
 
 class PyBytesSink : public CryptoPP::Bufferless<CryptoPP::Sink>
 {

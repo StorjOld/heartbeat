@@ -65,14 +65,14 @@ The old hash challenge scheme fits within the above as a privately verifiable sc
 
 #### Installation
 
-To build the SwPriv python extension module which is a privately verifiable Homomorphic Linear Authentication scheme, use setup.py.
+To build the SwPriv python extension module which is a privately verifiable Homomorphic Linear Authentication scheme, use setup.py.  You must have Crypto++ installed.
 
 ```
 python setup.py build
 python setup.py install
 ```
 
-Your C++ compiler must support C++11.
+Your C++ compiler must support C++11. 
 
 
 

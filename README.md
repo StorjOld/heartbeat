@@ -67,12 +67,16 @@ The old hash challenge scheme fits within the above as a privately verifiable sc
 
 To build the SwPriv python extension module which is a privately verifiable Homomorphic Linear Authentication scheme, use setup.py.  You must have Crypto++ installed.
 
+To build on a linux system:
+
 ```
 python3 setup.py build
 sudo python3 setup.py install
 ```
 
-Your C++ compiler must support C++11. 
+Your C++ compiler must support C++11, although really only for support of std::unique_ptr, which isn't included in the standard library before C++11.
+
+Also note that setup.py is configured to compile against the static Crypto++ library, not the DLL, and so on windows it defaults to searching for cryptlib, not cryptopp.
 
 
 

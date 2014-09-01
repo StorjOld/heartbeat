@@ -228,7 +228,7 @@ public:
 			throw Py::RuntimeError(e.what());
 			return Py::None();
 		}
-		catch (const Py::Exception &e)
+		catch (const Py::Exception &)
 		{
 			return Py::None();
 		}
@@ -254,7 +254,7 @@ public:
 			throw Py::RuntimeError(e.what());
 			return Py::None();
 		}
-		catch (const Py::Exception &e)
+		catch (const Py::Exception &)
 		{
 			return Py::None();
 		}
@@ -291,7 +291,7 @@ public:
 			throw Py::RuntimeError(e.what());
 			return Py::None();
 		}
-		catch (const Py::Exception &e)
+		catch (const Py::Exception &)
 		{
 			return Py::None();
 		}
@@ -323,7 +323,7 @@ public:
 			throw Py::RuntimeError(e.what());
 			return Py::None();
 		}
-		catch (const Py::Exception &e)
+		catch (const Py::Exception &)
 		{
 			return Py::None();
 		}
@@ -359,7 +359,7 @@ public:
 			throw Py::RuntimeError(e.what());
 			return Py::None();
 		}
-		catch (const Py::Exception &e)
+		catch (const Py::Exception &)
 		{
 			return Py::None();
 		}
@@ -396,7 +396,7 @@ public:
 			throw Py::RuntimeError(e.what());
 			return Py::None();
 		}
-		catch (const Py::Exception &e)
+		catch (const Py::Exception &)
 		{
 			return Py::None();
 		}

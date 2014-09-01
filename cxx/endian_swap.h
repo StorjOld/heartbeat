@@ -26,6 +26,8 @@ THE SOFTWARE.
 
 #pragma once
 
+#include <stdint.h>
+
 inline void swap(uint32_t *i)
 {
 	char buf;

@@ -63,6 +63,16 @@ Verifies in a public verification scheme that the file exists.
 
 The old hash challenge scheme fits within the above as a privately verifiable scheme.
 
+#### Installation
+
+To build the SwPriv python extension module which is a privately verifiable Homomorphic Linear Authentication scheme, use setup.py.
+
+```
+python setup.py build
+python setup.py install
+```
+
+Your C++ compiler must support C++11.
 
 
 

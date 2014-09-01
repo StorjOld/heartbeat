@@ -58,7 +58,6 @@ config.status
 config.log
 configure
 Makefile.in
-config/
 *.o
 *.l[ao]
 *~

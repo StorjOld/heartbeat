@@ -52,17 +52,19 @@ docs/_build/
 # PyBuilder
 target/
 
-# C++ autotools stuff
-/config.h.in
-/configure
+# C++ autotools and binary object stuff
+config.h.in
+config.status
+config.log
+configure
 Makefile.in
-/config/*
-**/*.o
-**/*.l[ao]
-**/*~
+config/
+*.o
+*.l[ao]
+*~
 Makefile
 autom4te.cache/
-**/*.Po
+*.Po
 stamp-h1
-**/*.exe
-**/*.m4
+*.exe
+aclocal.m4

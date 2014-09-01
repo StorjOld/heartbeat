@@ -58,11 +58,11 @@ target/
 /configure
 Makefile.in
 /config/*
-*.o
-*.l[ao]
-*~
+**.o
+**.l[ao]
+**~
 Makefile
 autom4te.cache/
-*.Po
+**.Po
 stamp-h1
-*.exe
+**.exe

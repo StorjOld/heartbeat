@@ -627,7 +627,7 @@ bool shacham_waters_private::gen_challenge(challenge &c, const state &s_enc, uns
 	return true;
 }
 
-void shacham_waters_private::prove(proof &p,const challenge &c, file &f,const tag &t,const state &s)
+void shacham_waters_private::prove(proof &p, file &f, const challenge &c, const tag &t,const state &s)
 {
 	//std::cout << "Proving existence..." << std::endl;
 	//integer_block_file_interface ibf(f);

@@ -324,7 +324,7 @@ public:
 			Py::PythonClassObject<Proof> pyproof( proof_type.apply( Py::Tuple() ) );
 			Proof *proof = pyproof.getCxxObject();
 			
-			prove(*proof,*challenge,psf,*tag,*state);
+			prove(*proof,psf,*challenge,*tag,*state);
 			
 			return pyproof;
 		}

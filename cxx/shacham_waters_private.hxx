@@ -152,7 +152,7 @@ public:
 	bool gen_challenge(challenge &c, const state &s, unsigned int l, const CryptoPP::Integer &B);
 	
 	// gets a proof of storage for the file
-	void prove(proof &p,const challenge &c, file &f,const tag &t,const state &s);
+	void prove(proof &p, file &f, const challenge &c,const tag &t,const state &s);
 	
 	// verifies that a proof is correct
 	bool verify(const proof &p,const challenge &c, const state &s);

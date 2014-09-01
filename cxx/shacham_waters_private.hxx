@@ -45,9 +45,6 @@ Shacham, Waters, "Compact Proofs of Retrievability"
 #include <cryptopp/integer.h>
 #include <cryptopp/nbtheory.h>
 
-#include <rapidjson/writer.h>
-#include <rapidjson/reader.h>
-
 class shacham_waters_private_data 
 {
 public:

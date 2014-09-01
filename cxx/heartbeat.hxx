@@ -29,7 +29,7 @@ public:
 	virtual void gen_challenge(challenge &c, const state &s) = 0;
 	
 	// gets a proof of storage for the file
-	virtual void prove(proof &p,const challenge &c, file &f,const tag &t) = 0;
+	virtual void prove(proof &p,const challenge &c, file &f,const tag &t,const state &s) = 0;
 	
 	// verifies that a proof is correct
 	virtual bool verify(const proof &p,const challenge &c,const state &s) = 0;

@@ -1,34 +1,14 @@
-test.o: test.cxx shacham_waters_private.hxx heartbeat.hxx block_file.hxx \
+test.o: test.cxx shacham_waters_private.hxx heartbeat.hxx simple_file.hxx \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cstddef \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\c++config.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\os_defines.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\cpu_defines.h \
- c:\mingw\lib\gcc\mingw32\4.8.1\include\stddef.h \
- integer_block_file_interface.hxx c:\mingw\include\pbc\pbc.h \
- c:\mingw\lib\gcc\mingw32\4.8.1\include\stdarg.h c:\mingw\include\stdio.h \
- c:\mingw\include\_mingw.h c:\mingw\include\sdkddkver.h \
- c:\mingw\include\sys\types.h \
- c:\mingw\lib\gcc\mingw32\4.8.1\include\stdint.h \
- c:\mingw\include\stdint.h c:\mingw\include\stdlib.h \
- c:\mingw\include\gmp.h c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\iosfwd \
- c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stringfwd.h \
- c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\memoryfwd.h \
- c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\postypes.h \
- c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cwchar \
- c:\mingw\include\wchar.h c:\mingw\include\wctype.h \
- c:\mingw\include\string.h \
- c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cstdio \
- c:\mingw\include\pbc\pbc_utils.h c:\mingw\include\pbc\pbc_field.h \
- c:\mingw\include\pbc\pbc_param.h c:\mingw\include\pbc\pbc_pairing.h \
- c:\mingw\include\pbc\pbc_curve.h c:\mingw\include\pbc\pbc_mnt.h \
- c:\mingw\include\pbc\pbc_a1_param.h c:\mingw\include\pbc\pbc_a_param.h \
- c:\mingw\include\pbc\pbc_d_param.h c:\mingw\include\pbc\pbc_e_param.h \
- c:\mingw\include\pbc\pbc_f_param.h c:\mingw\include\pbc\pbc_g_param.h \
- c:\mingw\include\pbc\pbc_i_param.h c:\mingw\include\pbc\pbc_random.h \
- c:\mingw\include\pbc\pbc_memory.h c:\mingw\include\cryptopp\integer.h \
- c:\mingw\include\cryptopp\cryptlib.h c:\mingw\include\cryptopp\config.h \
- c:\mingw\include\cryptopp\stdcpp.h c:\mingw\include\assert.h \
- c:\mingw\include\limits.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\stddef.h prf.hxx \
+ c:\mingw\include\cryptopp\integer.h c:\mingw\include\cryptopp\cryptlib.h \
+ c:\mingw\include\cryptopp\config.h c:\mingw\include\cryptopp\stdcpp.h \
+ c:\mingw\include\assert.h c:\mingw\include\_mingw.h \
+ c:\mingw\include\sdkddkver.h c:\mingw\include\limits.h \
+ c:\mingw\include\stdlib.h c:\mingw\include\string.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\memory \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_algobase.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\functexcept.h \
@@ -52,6 +32,7 @@ test.o: test.cxx shacham_waters_private.hxx heartbeat.hxx block_file.hxx \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\atomic_lockfree_defines.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\exception_ptr.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\nested_exception.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\memoryfwd.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_construct.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\alloc_traits.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\alloc_traits.h \
@@ -61,6 +42,14 @@ test.o: test.cxx shacham_waters_private.hxx heartbeat.hxx block_file.hxx \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_raw_storage_iter.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\typeinfo \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\hash_bytes.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\iosfwd \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stringfwd.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\postypes.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cwchar \
+ c:\mingw\include\wchar.h c:\mingw\lib\gcc\mingw32\4.8.1\include\stdarg.h \
+ c:\mingw\include\wctype.h c:\mingw\include\sys\types.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\stdint.h \
+ c:\mingw\include\stdint.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\atomicity.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\gthr.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\gthr-default.h \
@@ -103,6 +92,8 @@ test.o: test.cxx shacham_waters_private.hxx heartbeat.hxx block_file.hxx \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_heap.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\random \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cmath c:\mingw\include\math.h \
+ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cstdio \
+ c:\mingw\include\stdio.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\limits \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\random.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\vector \
@@ -123,9 +114,9 @@ test.o: test.cxx shacham_waters_private.hxx heartbeat.hxx block_file.hxx \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_multimap.h \
  c:\mingw\include\malloc.h c:\mingw\include\cryptopp\secblock.h \
  c:\mingw\include\cryptopp\misc.h c:\mingw\include\cryptopp\smartptr.h \
- prf.hxx c:\mingw\include\cryptopp\randpool.h \
- c:\mingw\include\cryptopp\filters.h c:\mingw\include\cryptopp\simple.h \
- c:\mingw\include\cryptopp\queue.h c:\mingw\include\cryptopp\algparam.h \
+ c:\mingw\include\cryptopp\randpool.h c:\mingw\include\cryptopp\filters.h \
+ c:\mingw\include\cryptopp\simple.h c:\mingw\include\cryptopp\queue.h \
+ c:\mingw\include\cryptopp\algparam.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\deque \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_deque.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\deque.tcc \
@@ -175,7 +166,7 @@ test.o: test.cxx shacham_waters_private.hxx heartbeat.hxx block_file.hxx \
  c:\mingw\include\rapidjson\reader.h \
  c:\mingw\include\rapidjson\internal/meta.h \
  c:\mingw\include\rapidjson\internal/pow10.h \
- c:\mingw\include\rapidjson\error/error.h stream_block_file.hxx config.h \
+ c:\mingw\include\rapidjson\error/error.h stream_file.hxx config.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\fstream \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\codecvt.h \
  c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\basic_file.h \
@@ -186,7 +177,7 @@ shacham_waters_private.hxx:
 
 heartbeat.hxx:
 
-block_file.hxx:
+simple_file.hxx:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cstddef:
 
@@ -198,75 +189,7 @@ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32\bits\cpu_defines.h:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\stddef.h:
 
-integer_block_file_interface.hxx:
-
-c:\mingw\include\pbc\pbc.h:
-
-c:\mingw\lib\gcc\mingw32\4.8.1\include\stdarg.h:
-
-c:\mingw\include\stdio.h:
-
-c:\mingw\include\_mingw.h:
-
-c:\mingw\include\sdkddkver.h:
-
-c:\mingw\include\sys\types.h:
-
-c:\mingw\lib\gcc\mingw32\4.8.1\include\stdint.h:
-
-c:\mingw\include\stdint.h:
-
-c:\mingw\include\stdlib.h:
-
-c:\mingw\include\gmp.h:
-
-c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\iosfwd:
-
-c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stringfwd.h:
-
-c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\memoryfwd.h:
-
-c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\postypes.h:
-
-c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cwchar:
-
-c:\mingw\include\wchar.h:
-
-c:\mingw\include\wctype.h:
-
-c:\mingw\include\string.h:
-
-c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cstdio:
-
-c:\mingw\include\pbc\pbc_utils.h:
-
-c:\mingw\include\pbc\pbc_field.h:
-
-c:\mingw\include\pbc\pbc_param.h:
-
-c:\mingw\include\pbc\pbc_pairing.h:
-
-c:\mingw\include\pbc\pbc_curve.h:
-
-c:\mingw\include\pbc\pbc_mnt.h:
-
-c:\mingw\include\pbc\pbc_a1_param.h:
-
-c:\mingw\include\pbc\pbc_a_param.h:
-
-c:\mingw\include\pbc\pbc_d_param.h:
-
-c:\mingw\include\pbc\pbc_e_param.h:
-
-c:\mingw\include\pbc\pbc_f_param.h:
-
-c:\mingw\include\pbc\pbc_g_param.h:
-
-c:\mingw\include\pbc\pbc_i_param.h:
-
-c:\mingw\include\pbc\pbc_random.h:
-
-c:\mingw\include\pbc\pbc_memory.h:
+prf.hxx:
 
 c:\mingw\include\cryptopp\integer.h:
 
@@ -278,7 +201,15 @@ c:\mingw\include\cryptopp\stdcpp.h:
 
 c:\mingw\include\assert.h:
 
+c:\mingw\include\_mingw.h:
+
+c:\mingw\include\sdkddkver.h:
+
 c:\mingw\include\limits.h:
+
+c:\mingw\include\stdlib.h:
+
+c:\mingw\include\string.h:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\memory:
 
@@ -326,6 +257,8 @@ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\exception_ptr.h:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\nested_exception.h:
 
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\memoryfwd.h:
+
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_construct.h:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\alloc_traits.h:
@@ -343,6 +276,26 @@ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stl_raw_storage_iter.h:
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\typeinfo:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\hash_bytes.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\iosfwd:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\stringfwd.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\postypes.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cwchar:
+
+c:\mingw\include\wchar.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\stdarg.h:
+
+c:\mingw\include\wctype.h:
+
+c:\mingw\include\sys\types.h:
+
+c:\mingw\lib\gcc\mingw32\4.8.1\include\stdint.h:
+
+c:\mingw\include\stdint.h:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\ext\atomicity.h:
 
@@ -430,6 +383,10 @@ c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cmath:
 
 c:\mingw\include\math.h:
 
+c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\cstdio:
+
+c:\mingw\include\stdio.h:
+
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\limits:
 
 c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bits\random.h:
@@ -473,8 +430,6 @@ c:\mingw\include\cryptopp\secblock.h:
 c:\mingw\include\cryptopp\misc.h:
 
 c:\mingw\include\cryptopp\smartptr.h:
-
-prf.hxx:
 
 c:\mingw\include\cryptopp\randpool.h:
 
@@ -606,7 +561,7 @@ c:\mingw\include\rapidjson\internal/pow10.h:
 
 c:\mingw\include\rapidjson\error/error.h:
 
-stream_block_file.hxx:
+stream_file.hxx:
 
 config.h:
 

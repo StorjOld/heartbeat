@@ -36,7 +36,7 @@ challenge = beat.gen_challenge(state)
 This should generate a challenge key which is unique.  This step may or may not be necessary, since the challenge information could be drawn by the server from another source (for instance, last hash of bitcoin blockchain header).  In the publically verifiable case it should be possible to call `public_beat.gen_challenge()` and in many cases it is possible to call `heartbeat.gen_challenge()` .
 
 ```python
-proof = public_beat.prove(file,challenge,tag)
+proof = public_beat.prove(file,challenge,tag,state)
 ```
 
 This calculates a proof which shows that the file exists.

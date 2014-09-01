@@ -9,6 +9,7 @@
 #include "serializable.hxx"
 #include "shacham_waters_private.hxx"
 #include "PyBytesSink.hxx"
+#include "PythonStreamFile.hxx"
 
 namespace SwPriv
 {
@@ -43,7 +44,7 @@ public:
 	PyBytesStateAccessiblePyClass( Py::PythonClassInstance *self, Py::Tuple &args, Py::Dict &kwds )
 		: Py::PythonClass< Tthis >::PythonClass( self, args, kwds ) 
 	{
-		std::cout << "PyBytesStateAccessiblePyClass<Tthis,Tbase> constructor called." << std::endl;
+		//std::cout << "PyBytesStateAccessiblePyClass<Tthis,Tbase> constructor called." << std::endl;
 	}
 
 	static void init_type_dont_ready(std::string T_type_name)
@@ -100,6 +101,7 @@ public:
 	Tag( Py::PythonClassInstance *self, Py::Tuple &args, Py::Dict &kwds )
 		: PyBytesStateAccessiblePyClass<Tag,shacham_waters_private_data::tag>(self,args,kwds) 
 	{
+		//std::cout << "Tag construtor called." << std::endl;
 	}
 	
 	static void init_type()
@@ -116,6 +118,7 @@ public:
 	State( Py::PythonClassInstance *self, Py::Tuple &args, Py::Dict &kwds )
 		: PyBytesStateAccessiblePyClass<State,shacham_waters_private_data::state>(self,args,kwds) 
 	{
+		//std::cout << "State construtor called." << std::endl;
 	}
 	
 	static void init_type()
@@ -132,6 +135,7 @@ public:
 	Challenge( Py::PythonClassInstance *self, Py::Tuple &args, Py::Dict &kwds )
 		: PyBytesStateAccessiblePyClass<Challenge,shacham_waters_private_data::challenge>(self,args,kwds) 
 	{
+		//std::cout << "Challenge construtor called." << std::endl;
 	}
 	
 	static void init_type()
@@ -148,6 +152,7 @@ public:
 	Proof( Py::PythonClassInstance *self, Py::Tuple &args, Py::Dict &kwds )
 		: PyBytesStateAccessiblePyClass<Proof,shacham_waters_private_data::proof>(self,args,kwds) 
 	{
+		//std::cout << "Proof construtor called." << std::endl;
 	}
 	
 	static void init_type()
@@ -165,7 +170,7 @@ public:
 	SwPriv( Py::PythonClassInstance *self, Py::Tuple &args, Py::Dict &kwds )
 		: PyBytesStateAccessiblePyClass<SwPriv,shacham_waters_private>(self,args,kwds) 
 	{
-		std::cout << "SwPriv constructor called..." << std::endl;
+		//std::cout << "SwPriv constructor called..." << std::endl;
 	}
 
 	static void init_type()
@@ -184,48 +189,191 @@ public:
 	
 	Py::Object _gen()
 	{
-		gen();
-		
-		std::cout << "heartbeat generated." << std::endl;
-		
-		return Py::None();
+		try 
+		{
+			gen();
+			
+			//std::cout << "heartbeat generated." << std::endl;
+			
+			return Py::None();
+		}
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+			return Py::None();
+		}
+		catch (const Py::Exception &e)
+		{
+			return Py::None();
+		}
 	}
 	PYCXX_NOARGS_METHOD_DECL( SwPriv, _gen )
 	
 	Py::Object _get_public()
 	{
-		Py::Callable class_type( SwPriv::type() );
-        Py::PythonClassObject<SwPriv> pyobj( class_type.apply( Py::Tuple() ) );
-		SwPriv *obj = pyobj.getCxxObject();
+		try 
+		{
+			Py::Callable class_type( SwPriv::type() );
+			Py::PythonClassObject<SwPriv> pyobj( class_type.apply( Py::Tuple() ) );
+			SwPriv *obj = pyobj.getCxxObject();
 		
-		get_public(*obj);
+			get_public(*obj);
+			
+			//std::cout << "public heartbeat retrieved." << std::endl;
 		
-		return pyobj;
+			return pyobj;
+		}
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+			return Py::None();
+		}
+		catch (const Py::Exception &e)
+		{
+			return Py::None();
+		}
 	}
 	PYCXX_NOARGS_METHOD_DECL( SwPriv, _get_public )
 	
+	// (tag,state) = encode(file)
 	Py::Object _encode(const Py::Tuple &args )
 	{
-		Py::Callable tag_type( Tag::type() );
-		Py::PythonClassObject<Tag> tag_pyobj( class_type.apply( Py::Tuple() ) );
+		try 
+		{
+			//std::cout << "encoding file...";
+			
+			Py::Callable tag_type( Tag::type() );
+			Py::PythonClassObject<Tag> pytag( tag_type.apply( Py::Tuple() ) );
+			Tag *tag = pytag.getCxxObject();
+			
+			Py::Callable state_type( State::type() );
+			Py::PythonClassObject<State> pystate( state_type.apply( Py::Tuple() ) );
+			State *state = pystate.getCxxObject();
+			
+			PythonStreamFile psf(args[0]);
+			
+			//std::cout << "stream file generated..." << std::endl;
+			
+			encode(*tag,*state,psf);
+			
+			//std::cout << "done" << std::endl;
+			
+			return Py::TupleN(pytag,pystate);
+		} 
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+			return Py::None();
+		}
+		catch (const Py::Exception &e)
+		{
+			return Py::None();
+		}
 	}
 	PYCXX_VARARGS_METHOD_DECL( SwPriv, _encode )
 	
+	// challenge = gen_challenge(state)
 	Py::Object _gen_challenge(const Py::Tuple &args )
 	{
-		throw Py::RuntimeError("Not implemented");
+		try
+		{
+			//std::cout << "generating challenge...";
+			
+			Py::Callable challenge_type( Challenge::type() );
+			Py::PythonClassObject<Challenge> pychallenge( challenge_type.apply( Py::Tuple() ) );
+			Challenge *challenge = pychallenge.getCxxObject();
+		
+			Py::PythonClassObject<State> pystate( args[0] );
+			State *state = pystate.getCxxObject();
+		 
+			gen_challenge(*challenge,*state);
+		
+			//std::cout << "done." << std::endl;
+			
+			return pychallenge;
+		}
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+			return Py::None();
+		}
+		catch (const Py::Exception &e)
+		{
+			return Py::None();
+		}
 	}
 	PYCXX_VARARGS_METHOD_DECL( SwPriv, _gen_challenge )
 	
+	// proof = public_beat.prove(file,challenge,tag,state)
 	Py::Object _prove(const Py::Tuple &args )
 	{
-		throw Py::RuntimeError("Not implemented");
+		try
+		{
+			PythonStreamFile psf(args[0]);
+			
+			Py::PythonClassObject<Challenge> pychallenge( args[1] );
+			Challenge *challenge = pychallenge.getCxxObject();
+			
+			Py::PythonClassObject<Tag> pytag( args[2] );
+			Tag *tag = pytag.getCxxObject();
+			
+			Py::PythonClassObject<State> pystate( args[3] );
+			State *state = pystate.getCxxObject();
+			
+			Py::Callable proof_type( Proof::type() );
+			Py::PythonClassObject<Proof> pyproof( proof_type.apply( Py::Tuple() ) );
+			Proof *proof = pyproof.getCxxObject();
+			
+			prove(*proof,*challenge,psf,*tag,*state);
+			
+			return pyproof;
+		}
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+			return Py::None();
+		}
+		catch (const Py::Exception &e)
+		{
+			return Py::None();
+		}
 	}
 	PYCXX_VARARGS_METHOD_DECL( SwPriv, _prove )
 	
+	// is_valid = beat.verify(proof,challenge,state)
 	Py::Object _verify(const Py::Tuple &args )
 	{
-		throw Py::RuntimeError("Not implemented");
+		try
+		{
+			Py::PythonClassObject<Proof> pyproof( args[0] );
+			Proof *proof = pyproof.getCxxObject();
+		
+			Py::PythonClassObject<Challenge> pychallenge( args[1] );
+			Challenge *challenge = pychallenge.getCxxObject();
+			
+			Py::PythonClassObject<State> pystate( args[2] );
+			State *state = pystate.getCxxObject();
+			
+			bool is_valid = verify(*proof,*challenge,*state);
+			
+			if (is_valid)
+			{
+				return Py::True();
+			}
+			else
+			{
+				return Py::False();
+			}
+		}
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+			return Py::None();
+		}
+		catch (const Py::Exception &e)
+		{
+			return Py::None();
+		}
 	}
 	PYCXX_VARARGS_METHOD_DECL( SwPriv, _verify )
 };
@@ -239,11 +387,18 @@ public:
 		: Py::ExtensionModule<Module>("SwPriv")
 	{
 		SwPriv::SwPriv::init_type();
+		SwPriv::State::init_type();
+		SwPriv::Tag::init_type();
+		SwPriv::Challenge::init_type();
+		SwPriv::Proof::init_type();
 		
 		initialize("Documentation for Private HLA Module");
 		
 		Py::Dict d( moduleDictionary() );
-		Py::Object x( SwPriv::SwPriv::type() );
-		d["SwPriv"] = x;
+		d["SwPriv"] = Py::Object(SwPriv::SwPriv::type());
+		d["State"] = Py::Object(SwPriv::State::type());
+		d["Tag"] = Py::Object(SwPriv::Tag::type());
+		d["Challenge"] = Py::Object(SwPriv::Challenge::type());
+		d["Proof"] = Py::Object(SwPriv::Proof::type());
 	}
 };

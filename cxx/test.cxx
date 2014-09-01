@@ -1,5 +1,5 @@
 #include "shacham_waters_private.hxx"
-#include "stream_block_file.hxx"
+#include "stream_file.hxx"
 
 #include <config.h>
 
@@ -15,9 +15,6 @@ int main(int argc,char *argv[])
 	{
 		filename = argv[1];
 	}
-	std::ifstream ifs(filename,std::ifstream::in|std::ifstream::binary);
-	
-	stream_block_file sbf(ifs);
 
 	std::string raw_tag;
 	std::string raw_state;
@@ -34,9 +31,11 @@ int main(int argc,char *argv[])
 		shacham_waters_private::state s;
 	
 		s_test.gen();
-	
-		s_test.encode(t,s,sbf);	
-		ifs.seekg(0);
+
+		std::ifstream is(filename,std::ifstream::in|std::ifstream::binary);
+		stream_file sf(is);
+		
+		s_test.encode(t,s,sf);
 	
 		shacham_waters_private p_test;
 		s_test.get_public(p_test);
@@ -67,14 +66,19 @@ int main(int argc,char *argv[])
 		shacham_waters_private::challenge c;
 		shacham_waters_private::proof p;
 		shacham_waters_private::tag t;
+		shacham_waters_private::state s;
 	
 		shacham_waters_private p_test;
 		
 		p_test.deserializep(new CryptoPP::StringSource(p_hla,true));
 		c.deserializep(new CryptoPP::StringSource(raw_challenge,true));
 		t.deserializep(new CryptoPP::StringSource(raw_tag,true));
+		s.deserializep(new CryptoPP::StringSource(raw_state,true));
 	
-		p_test.prove(p,c,sbf,t);
+		std::ifstream is(filename,std::ifstream::in|std::ifstream::binary);
+		stream_file sf(is);
+	
+		p_test.prove(p,c,sf,t,s);
 		
 		p.serializep(new CryptoPP::StringSink(raw_proof));
 	}

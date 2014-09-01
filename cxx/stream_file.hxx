@@ -1,9 +1,29 @@
-#implements a basic file that can be read from
+//implements a basic file that can be read from
 
-#include <cstddef>
+#pragma once
 
-class stream_file
+#include "simple_file.hxx"
+
+#include <iostream>
+
+class stream_file : public simple_file
 {
 public:
-	virtual size_t read(unsigned char *buffer,size_t sz);
+	stream_file(std::istream &in) : _in(in) 
+	{}
+	
+	virtual size_t read(unsigned char *buffer,size_t sz)
+	{
+		_in.read((char*)buffer,sz);
+		_in.clear();
+		return _in.gcount();
+	}
+	
+	virtual size_t seek(size_t i)
+	{
+		_in.seekg(i);
+		return _in.tellg();
+	}
+private:
+	std::istream &_in;
 };

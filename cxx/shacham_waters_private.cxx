@@ -109,6 +109,9 @@ void shacham_waters_private_data::state::deserialize(CryptoPP::BufferedTransform
 	bt.Get(_raw.get(),_raw_sz);
 	
 	_encrypted_and_signed = true;
+	
+	// extract what we can without having keys
+	public_interpretation();
 }
 
 void shacham_waters_private_data::state::encrypt_and_sign(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size])
@@ -490,30 +493,30 @@ void shacham_waters_private::proof::deserialize(CryptoPP::BufferedTransformation
 
 void shacham_waters_private::init(unsigned int prime_size_bytes, unsigned int sectors)
 {
-	std::cout << "this = 0x" << std::hex << (int)this << std::endl;
-	std::cout << "Initializing shacham waters private, prime bytes: " << prime_size_bytes << ", sectors: " << sectors << "..." << std::endl;
+	//std::cout << "this = 0x" << std::hex << (int)this << std::endl;
+	//std::cout << "Initializing shacham waters private, prime bytes: " << prime_size_bytes << ", sectors: " << sectors << "..." << std::endl;
 	CryptoPP::AutoSeededRandomPool rng;
 	
-	std::cout << "_k_enc = 0x" << std::hex << (int)_k_enc << std::endl;
-	std::cout << "_k_mac = 0x" << std::hex << (int)_k_mac << std::endl;
-	std::cout << "shacham_waters_private_data::key_size = " << std::dec << shacham_waters_private_data::key_size << std::endl;
+	//std::cout << "_k_enc = 0x" << std::hex << (int)_k_enc << std::endl;
+	//std::cout << "_k_mac = 0x" << std::hex << (int)_k_mac << std::endl;
+	//std::cout << "shacham_waters_private_data::key_size = " << std::dec << shacham_waters_private_data::key_size << std::endl;
 	rng.GenerateBlock(_k_enc,shacham_waters_private_data::key_size);
 	rng.GenerateBlock(_k_mac,shacham_waters_private_data::key_size);
 	
-	std::cout << "generated keys..." << std::endl;
+	//std::cout << "generated keys..." << std::endl;
 	
 	_sectors = sectors;
 	
 	_p = CryptoPP::Integer(rng,0,CryptoPP::Integer::Power2(prime_size_bytes*8),CryptoPP::Integer::RandomNumberType::PRIME);
 	
-	std::cout << "generated prime..." << std::endl;
+	//std::cout << "generated prime..." << std::endl;
 	
 	// sector should be no larger than the prime
 	// otherwise sector reduction can be performed by a malicious
 	// server to save space
 	_sector_size = _p.BitCount()/8;
 	
-	std::cout << "finished initializing..." << std::endl;
+	//std::cout << "finished initializing..." << std::endl;
 }
 
 void shacham_waters_private::get_public(shacham_waters_private &h) const
@@ -528,12 +531,12 @@ void shacham_waters_private::encode(tag &t, state &s, file &f)
 	//std::cout << "Encoding... " << std::endl;
 	CryptoPP::AutoSeededRandomPool rng;
 	
-	integer_block_file_interface ibf(f);
+	//integer_block_file_interface ibf(f);
 	
 	// split file into sector sized chunks
-	f.redefine_chunks(_sector_size,_sectors);
+	//f.redefine_chunks(_sector_size,_sectors);
 	
-	s.set_n(f.get_chunk_count());
+	//s.set_n(f.get_chunk_count());
 	
 	byte k_prf[shacham_waters_private_data::key_size];
 	rng.GenerateBlock(k_prf,shacham_waters_private_data::key_size);
@@ -546,19 +549,45 @@ void shacham_waters_private::encode(tag &t, state &s, file &f)
 	s.set_alpha_limit(_p);
 	
 	t.sigma().clear();
-	t.sigma().resize(f.get_chunk_count());
+	//t.sigma().resize(f.get_chunk_count());
+	
 	//std::cout << "Chunks: " << f.get_chunk_count() << std::endl;
 	//std::cout << "Sectors per chunk: " << f.get_sectors_per_chunk() << std::endl;
-	for (unsigned int i=0;i<f.get_chunk_count();i++)
+	std::unique_ptr<unsigned char> buffer(new unsigned char[_sector_size]);
+	
+	size_t bytes_read = 0;
+	bool done = false;
+	unsigned int chunk_id = 0;
+	
+	//for (unsigned int i=0;i<f.get_chunk_count();i++)
+	while (!done)
 	{
-		t.sigma().at(i) = s.f(i);
+		//t.sigma().at(i) = s.f(i);
+		CryptoPP::Integer sigma = s.f(chunk_id);
 		for (unsigned int j=0;j<_sectors;j++)
 		{
-			t.sigma().at(i) += s.alpha(j) * ibf.get_sector(i,j);
-			t.sigma().at(i) %= _p;
+			bytes_read = f.read(buffer.get(),_sector_size);
+			
+			if (bytes_read > 0)
+			{
+				//t.sigma().at(i) += s.alpha(j) * ibf.get_sector(i,j);
+				sigma += s.alpha(j) * CryptoPP::Integer(buffer.get(),bytes_read);
+				//t.sigma().at(i) %= _p;
+				sigma %= _p;
+			}
+			
+			if (bytes_read != _sector_size)
+			{
+				done = true;
+				break;
+			}
 		}
+		t.sigma().push_back(sigma);
+		chunk_id++;
 		//std::cout << "sigma_" << i << " = " << t.sigma().at(i) << std::endl;
 	}
+	
+	s.set_n(chunk_id);
 	
 	s.encrypt_and_sign(_k_enc,_k_mac);
 }
@@ -598,16 +627,19 @@ bool shacham_waters_private::gen_challenge(challenge &c, const state &s_enc, uns
 	return true;
 }
 
-void shacham_waters_private::prove(proof &p,const challenge &c, file &f,const tag &t)
+void shacham_waters_private::prove(proof &p,const challenge &c, file &f,const tag &t,const state &s)
 {
 	//std::cout << "Proving existence..." << std::endl;
-	integer_block_file_interface ibf(f);
+	//integer_block_file_interface ibf(f);
 	
-	f.redefine_chunks(_sector_size,_sectors);
+	//f.redefine_chunks(_sector_size,_sectors);
 	
 	// serializer cannot get indexer limits, so we manually set here
 	prf indexer = c.get_i();
-	indexer.set_limit(f.get_chunk_count());
+	indexer.set_limit(s.get_n());
+	
+	unsigned int chunk_size = _sectors*_sector_size;
+	std::unique_ptr<unsigned char> buffer(new unsigned char[_sector_size]);
 	
 	p.mu().clear();
 	p.mu().resize(_sectors);
@@ -617,8 +649,17 @@ void shacham_waters_private::prove(proof &p,const challenge &c, file &f,const ta
 		//p.mu().at(j) = CryptoPP::Integer(); // this is called implicitly
 		for (unsigned int i=0;i<c.get_l();i++)
 		{
-			p.mu().at(j) += c.v(i) * ibf.get_sector(indexer.evaluate(i).ConvertToLong(),j);
-			p.mu().at(j) %= _p;
+			size_t pos = indexer.evaluate(i).ConvertToLong()*chunk_size + j*_sector_size;
+			if (f.seek(pos) == pos)
+			{
+				size_t bytes_read = f.read(buffer.get(),_sector_size);
+				p.mu().at(j) += c.v(i) * CryptoPP::Integer(buffer.get(),bytes_read);
+				p.mu().at(j) %= _p;
+			}
+			else
+			{
+				break;
+			}
 		}
 		//std::cout << "mu_" << j << " = " << p.mu().at(j) << std::endl;
 	}

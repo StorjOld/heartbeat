@@ -9,8 +9,7 @@ Shacham, Waters, "Compact Proofs of Retrievability"
 #pragma once
 
 #include "heartbeat.hxx"
-#include "block_file.hxx"
-#include "integer_block_file_interface.hxx"
+#include "simple_file.hxx"
 #include "prf.hxx"
 #include "serializable.hxx"
 
@@ -126,36 +125,12 @@ public:
 		std::vector<CryptoPP::Integer> _mu;
 		CryptoPP::Integer _sigma;
 	};
-	typedef block_file file;
+	typedef simple_file file;
 };
 
 class shacham_waters_private : public heartbeat<shacham_waters_private_data,shacham_waters_private>, public serializable
 {	
 public:
-	shacham_waters_private()
-	{
-		std::cout << "Shacham waters private constructor called..." << std::endl;
-		std::cout << "this = 0x" << std::hex << (int)this << std::endl;
-		
-		std::cout << "_k_enc = 0x" << std::hex << (int)_k_enc << ", size = 0x" << sizeof(_k_enc) << std::endl;
-		std::cout << "_k_mac = 0x" << std::hex << (int)_k_mac << ", size = 0x" << sizeof(_k_mac) << std::endl;
-		
-		std::cout << "test write to buffer...";
-		/*
-		CryptoPP::AutoSeededRandomPool rng;
-		rng.GenerateBlock(_k_enc,shacham_waters_private_data::key_size);
-		rng.GenerateBlock(_k_mac,shacham_waters_private_data::key_size);
-		*/
-		memset(_k_enc,0xff,shacham_waters_private_data::key_size);
-		memset(_k_mac,0xff,shacham_waters_private_data::key_size);
-		std::cout << "successful." << std::endl;
-	}
-	
-	~shacham_waters_private()
-	{
-		std::cout << "Shacham waters private destructor called..." << std::endl;
-	}
-
 	void gen()
 	{
 		init();
@@ -177,7 +152,7 @@ public:
 	bool gen_challenge(challenge &c, const state &s, unsigned int l, const CryptoPP::Integer &B);
 	
 	// gets a proof of storage for the file
-	void prove(proof &p,const challenge &c, file &f,const tag &t);
+	void prove(proof &p,const challenge &c, file &f,const tag &t,const state &s);
 	
 	// verifies that a proof is correct
 	bool verify(const proof &p,const challenge &c, const state &s);

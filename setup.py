@@ -2,7 +2,7 @@ from distutils.core import setup, Extension
 from distutils.command.build_ext import build_ext
 
 copt = {'mingw32' : ['-std=c++11'],
-		'}
+		'unix' : ['-std=c++11']}
 lopt = {}
 
 class build_ext_subclass( build_ext ):

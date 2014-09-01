@@ -78,7 +78,7 @@ int main(int argc,char *argv[])
 		std::ifstream is(filename,std::ifstream::in|std::ifstream::binary);
 		stream_file sf(is);
 	
-		p_test.prove(p,c,sf,t,s);
+		p_test.prove(p,sf,c,t,s);
 		
 		p.serializep(new CryptoPP::StringSink(raw_proof));
 	}

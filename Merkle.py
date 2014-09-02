@@ -3,7 +3,7 @@ from heartbeat.MerkleTree import MerkleTree
 import hashlib
 import hmac
 import os
-
+import random
 
 # challenge is a the seed and index
 class Challenge(object):
@@ -52,17 +52,33 @@ class Merkle(object):
         h = hmac.new(seed,None,hashlib.sha256)
         while (True):
             buffer = file.read(bufsz)
-            tmp = hashlib.sha256(buffer).digest()
             h.update(buffer)
             if (len(buffer)!=bufsz):
                 break
-        fh = h.digest()
-        return fh
+        return h.digest()
 
+    @staticmethod
+    def get_chunk_hash(file,seed,chunksz=8192,bufsz=65536):
+        filesz = file.seek(0,2)
+        random.seed(seed)
+        i = random.randint(0,filesz-chunksz)
+        file.seek(i)
+        read = 0
+        if (chunksz < bufsz):
+            bufsz = chunksz
+        h = hmac.new(seed,None,hashlib.sha256)
+        while (True):
+            buffer = file.read(bufsz)
+            h.update(buffer)
+            read+=len(buffer)
+            if (read >= chunksz):
+                break
+        return h.digest()
 
-    def __init__(self,i=0,n=256,key=None,seed=None,root=None):
+    def __init__(self,i=0,n=256,chunksz=8192,key=None,seed=None,root=None):
         self.n = n
         self.i = i
+        self.chunksz = chunksz
         self.key = key
         self.seed = seed
         self.root = root
@@ -73,7 +89,7 @@ class Merkle(object):
         return None
 
     def get_public(self):
-        return Merkle(self.i,self.n)
+        return Merkle(self.i,self.n,self.chunksz)
 
     def encode(self,file):
         # generates a merkle tree with the leaves as seed file hashes, the seed for each leaf being
@@ -83,7 +99,8 @@ class Merkle(object):
         seed = Merkle.get_next_seed(self.key,self.seed)
         for i in range(0,self.n):
             file.seek(0)
-            leaf = Merkle.get_file_hash(file,seed)
+            #leaf = Merkle.get_file_hash(file,seed)
+            leaf = Merkle.get_chunk_hash(file,seed,self.chunksz)
             mt.add_leaf(leaf)
             seed = Merkle.get_next_seed(self.key,seed)
         mt.build()
@@ -102,7 +119,8 @@ class Merkle(object):
         return chal
 
     def prove(self,file,challenge,tag):
-        leaf = Merkle.get_file_hash(file,challenge.get_seed())
+        #leaf = Merkle.get_file_hash(file,challenge.get_seed())
+        leaf = Merkle.get_chunk_hash(file,challenge.get_seed(),self.chunksz)
         return Proof(leaf,tag.get_tree().get_branch(challenge.get_index()))
 
     def verify(self,proof,challenge,state=None):

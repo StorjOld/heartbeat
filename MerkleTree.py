@@ -1,7 +1,6 @@
 import math
 import hashlib
 import hmac
-import base64
 import heartbeat
 
 # numbering scheme:
@@ -74,21 +73,18 @@ class MerkleTree(object):
                     h.update(l)
                 r = self.branches[MerkleTree.get_right_child(k)]
                 if (r):
-                    h.update(self.branches[MerkleTree.get_right_child(k)])
+                    h.update(r)
                 self.branches[k] = h.digest()
 
     # gets the branch of leaf i
     def get_branch(self,i):
         branch = [None]*(self.order)
-        #print("Compiling branch "+str(i))
         j = i + 2**self.order - 1
 
         for k in range(0,self.order):
             if (self.is_left(j)):
-                #print("("+str(j)+","+str(j+1)+")")
                 branch[k] = (self.branches[j],self.branches[j+1])
             else:
-                #print("("+str(j-1)+","+str(j)+")")
                 branch[k] = (self.branches[j-1],self.branches[j])
             j = MerkleTree.get_parent(j)
 
@@ -96,17 +92,10 @@ class MerkleTree(object):
 
     @staticmethod
     def verify_branch(leaf,branch,root):
-        #print("MerkleTree.verify_branch()")
         # just check the hashes are correct
         lh = hashlib.sha256(leaf).digest()
         for i in range(0,len(branch)):
-            #print("Child hash = "+str(base64.b64encode(lh)))
-            #if (branch[i][0]):
-            #    print("Left hash = "+str(base64.b64encode(branch[i][0])))
-            #if (branch[i][1]):
-            #    print("Right hash = "+str(base64.b64encode(branch[i][1])))
             if (branch[i][0] != lh and branch[i][1] != lh):
-                #print("Branch hash failed")
                 return False;
             h = hashlib.sha256()
             if (branch[i][0]):
@@ -115,9 +104,7 @@ class MerkleTree(object):
                 h.update(branch[i][1])
             lh = h.digest()
         if (root != lh):
-            #print("Root hash failed")
             return False
-        #print("Branch verified")
         return True
 
     # gets the merkle root

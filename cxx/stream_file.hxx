@@ -50,6 +50,15 @@ public:
 		_in.seekg(i);
 		return _in.tellg();
 	}
+	
+	virtual size_t bytes_remaining()
+	{
+		size_t start = _in.tellg();
+		_in.seekg(0,_in::end);
+		size_t end = _in.tellg();
+		_in.seekg(start);
+		return end-start;
+	}
 private:
 	std::istream &_in;
 };

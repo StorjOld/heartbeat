@@ -24,39 +24,40 @@ THE SOFTWARE.
 
 */
 
-/*
-
-C++ interface to the heartbeat, for fast implementation
-
-*/
-
 #pragma once
-#include "seekable_file.hxx"
 
-template <typename Tdata,typename T>
-class heartbeat
+#include <Python.h>
+#include <CXX/Objects.hxx>
+#include "simple_file.hxx"
+
+class PythonSeekableFile : public seekable_file
 {
 public:
-	typedef typename Tdata::tag tag;
-	typedef typename Tdata::state state;
-	typedef typename Tdata::challenge challenge;
-	typedef typename Tdata::proof proof;
+	PythonSeekableFile(Py::Object file) : _file(file) {}
 	
-	// generates the public and private keys for the scheme
-	virtual void gen() = 0;
+	virtual size_t read(unsigned char *buffer,size_t sz)
+	{
+		//std::cout << "Reading " << sz << " bytes...";
+		std::string bytes = Py::Bytes(_file.callMemberFunction("read",Py::TupleN(Py::Long((long)sz))));
+		//std::cout << "done. Read " << bytes.c_str() << " bytes" << std::endl;
+		memcpy(buffer,bytes.c_str(),bytes.length());
+		return bytes.length();
+	}
 	
-	// gets the public version of this object into heartbeat h
-	virtual void get_public(T &h) const = 0;
+	virtual size_t seek(size_t i)
+	{
+		return (long)Py::Long(_file.callMemberFunction("seek",Py::TupleN(Py::Long((long)i))));
+	}
 	
-	// gets the tag and state into t and s for file f
-	virtual void encode(tag &t,state &s, simple_file &f) = 0;
-	
-	// gets a challenge for the beat
-	virtual void gen_challenge(challenge &c, const state &s) = 0;
-	
-	// gets a proof of storage for the file
-	virtual void prove(proof &p, seekable_file &f, const challenge &c, const tag &t) = 0;
-	
-	// verifies that a proof is correct
-	virtual bool verify(const proof &p,const challenge &c,const state &s) = 0;
+	virtual size_t bytes_remaining()
+	{
+		size_t start = (long)Py::Long(_file.callMemberFunction("tell"));
+		size_t end = (long)Py::Long(_file.callMemberFunction("seek",Py::TupleN(Py::Long(0),Py::Long(2))));
+		seek(start);
+		return end-start;
+	}
+private:
+	Py::Object _file;
+	Py::Callable _read;
+	Py::Callable _seek;
 };

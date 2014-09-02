@@ -35,7 +35,7 @@ THE SOFTWARE.
 #include "serializable.hxx"
 #include "shacham_waters_private.hxx"
 #include "PyBytesSink.hxx"
-#include "PythonStreamFile.hxx"
+#include "PythonSeekableFile.hxx"
 
 namespace SwPriv
 {
@@ -276,7 +276,7 @@ public:
 			Py::PythonClassObject<State> pystate( state_type.apply( Py::Tuple() ) );
 			State *state = pystate.getCxxObject();
 			
-			PythonStreamFile psf(args[0]);
+			PythonSeekableFile psf(args[0]);
 			
 			//std::cout << "stream file generated..." << std::endl;
 			
@@ -330,12 +330,12 @@ public:
 	}
 	PYCXX_VARARGS_METHOD_DECL( SwPriv, _gen_challenge )
 	
-	// proof = public_beat.prove(file,challenge,tag,state)
+	// proof = public_beat.prove(file,challenge,tag)
 	Py::Object _prove(const Py::Tuple &args )
 	{
 		try
 		{
-			PythonStreamFile psf(args[0]);
+			PythonSeekableFile psf(args[0]);
 			
 			Py::PythonClassObject<Challenge> pychallenge( args[1] );
 			Challenge *challenge = pychallenge.getCxxObject();
@@ -343,14 +343,11 @@ public:
 			Py::PythonClassObject<Tag> pytag( args[2] );
 			Tag *tag = pytag.getCxxObject();
 			
-			Py::PythonClassObject<State> pystate( args[3] );
-			State *state = pystate.getCxxObject();
-			
 			Py::Callable proof_type( Proof::type() );
 			Py::PythonClassObject<Proof> pyproof( proof_type.apply( Py::Tuple() ) );
 			Proof *proof = pyproof.getCxxObject();
 			
-			prove(*proof,psf,*challenge,*tag,*state);
+			prove(*proof,psf,*challenge,*tag);
 			
 			return pyproof;
 		}

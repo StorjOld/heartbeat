@@ -49,4 +49,16 @@ Implements a privately verifiable homomorphic authentication scheme from Shacham
 ''',
        ext_modules = [swpriv],
 	   cmdclass = {'build_ext' : build_ext_subclass})
-	   
+
+setup (name = 'Merkle',
+       version = '1.0',
+       description = 'Private hash tree authenticator based proof of storage.',
+       author = 'William T. James',
+       author_email = 'jameswt@gmail.com',
+       url = '',
+       long_description = '''
+Implements a merkle hash tree authentication scheme.
+''',
+        package_dir = {'heartbeat':''},
+        py_modules = ['heartbeat.Merkle','heartbeat.MerkleTree'])
+	  

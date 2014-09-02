@@ -35,7 +35,7 @@ Shacham, Waters, "Compact Proofs of Retrievability"
 #pragma once
 
 #include "heartbeat.hxx"
-#include "simple_file.hxx"
+#include "seekable_file.hxx"
 #include "prf.hxx"
 #include "serializable.hxx"
 
@@ -148,7 +148,6 @@ public:
 		std::vector<CryptoPP::Integer> _mu;
 		CryptoPP::Integer _sigma;
 	};
-	typedef simple_file file;
 };
 
 class shacham_waters_private : public heartbeat<shacham_waters_private_data,shacham_waters_private>, public serializable
@@ -164,7 +163,7 @@ public:
 	void get_public(shacham_waters_private &h) const;
 	
 	// gets the tag and state into t and s for file f
-	void encode(tag &t, state &s, file &f);
+	void encode(tag &t, state &s, simple_file &f);
 	
 	// gets a challenge for the beat
 	void gen_challenge(challenge &c, const state &s);
@@ -175,7 +174,7 @@ public:
 	bool gen_challenge(challenge &c, const state &s, unsigned int l, const CryptoPP::Integer &B);
 	
 	// gets a proof of storage for the file
-	void prove(proof &p, file &f, const challenge &c,const tag &t,const state &s);
+	void prove(proof &p, seekable_file &f, const challenge &c,const tag &t);
 	
 	// verifies that a proof is correct
 	bool verify(const proof &p,const challenge &c, const state &s);

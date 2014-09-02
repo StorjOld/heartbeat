@@ -16,7 +16,7 @@ challenge = hla.gen_challenge(state)
 
 f = open("files/test7.txt","rb")
 
-proof = public_hla.prove(f,challenge,tag,state)
+proof = public_hla.prove(f,challenge,tag)
 
 if (hla.verify(proof,challenge,state)):
 	print('proof valid')

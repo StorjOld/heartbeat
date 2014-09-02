@@ -552,7 +552,7 @@ void shacham_waters_private::get_public(shacham_waters_private &h) const
 	h._sector_size = _sector_size;
 }
 
-void shacham_waters_private::encode(tag &t, state &s, file &f)
+void shacham_waters_private::encode(tag &t, state &s, simple_file &f)
 {
 	//std::cout << "Encoding... " << std::endl;
 	CryptoPP::AutoSeededRandomPool rng;
@@ -653,19 +653,24 @@ bool shacham_waters_private::gen_challenge(challenge &c, const state &s_enc, uns
 	return true;
 }
 
-void shacham_waters_private::prove(proof &p, file &f, const challenge &c, const tag &t,const state &s)
+void shacham_waters_private::prove(proof &p, seekable_file &f, const challenge &c, const tag &t)
 {
 	//std::cout << "Proving existence..." << std::endl;
 	//integer_block_file_interface ibf(f);
 	
 	//f.redefine_chunks(_sector_size,_sectors);
 	
-	// serializer cannot get indexer limits, so we manually set here
-	prf indexer = c.get_i();
-	indexer.set_limit(s.get_n());
+	
 	
 	unsigned int chunk_size = _sectors*_sector_size;
 	std::unique_ptr<unsigned char> buffer(new unsigned char[_sector_size]);
+	
+	// serializer cannot get indexer limits, so we manually set here
+	prf indexer = c.get_i();
+	// no longer want to require state in prove, removing that requirement
+	//indexer.set_limit(s.get_n());
+	indexer.set_limit(f.blocks_remaining(chunk_size));
+	
 	
 	p.mu().clear();
 	p.mu().resize(_sectors);

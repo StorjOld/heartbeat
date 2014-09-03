@@ -74,6 +74,7 @@ int main(int argc,char *argv[])
 	
 	{
 		// auditor context 1
+		
 		shacham_waters_private::challenge c;
 		shacham_waters_private::state s;
 		

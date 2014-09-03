@@ -9,7 +9,7 @@ This is the API for heartbeat, of which there can be many different types.  Ther
 beat = heartbeat()
 ```
 
-Beat represents a proof of storage scheme.
+Beat represents a proof of storage scheme.  Data internal to the beat is essential for all functions.
 
 ```python
 beat.gen()
@@ -21,25 +21,27 @@ Generates public and private keys for the scheme.
 public_beat = beat.get_public()
 ```
 
-Retrieves the public beat, which contains public parameters and set up parameters for sending to the server or auditors.
+Retrieves the public beat, which contains public parameters and set up parameters for sending to the server or auditors.  This strips any private keys but maintains public information.
 
 ```python
 (tag,state) = beat.encode(file)
 ```
 
-The tag encapsulates data about the file which will be used by a server to verify that it has stored the file.  The file, tag and state information are sent to server (tag may or may not be quite large).  The state information will be signed and/or encrypted.
+The tag encapsulates data about the file which will be used by a server to verify that it has stored the file.  The file, tag and state information are sent to server (tag may or may not be quite large).  The state information will be signed and/or encrypted.  The state information is information that can be outsourced but is necessary for verification.  State and tag are sent to the server for storage.  These are separate because in some cases the state information needs to be transmitted apart from the tag.  The client should maintain the heartbeat because it contains the private keys for generation and verification of challenges.
+
+After a time has passed, when an auditor wants to verify the challenge, if necessary he should request the state back from the server.  Then, he can generate a challenge:
 
 ```python
 challenge = beat.gen_challenge(state)
 ```
 
-This should generate a challenge key which is unique.  This step may or may not be necessary, since the challenge information could be drawn by the server from another source (for instance, last hash of bitcoin blockchain header).  In the publically verifiable case it should be possible to call `public_beat.gen_challenge()` and in many cases it is possible to call the static message `heartbeat.gen_challenge()` .
+This should generate a challenge key which is unique.  This step may or may not be necessary, since in some schemes the challenge information could be drawn by the server from another source (for instance, last hash of bitcoin blockchain header).  In the publically verifiable case it should be possible to call `public_beat.gen_challenge()` and in many cases it is possible to call the static message `heartbeat.gen_challenge()`.  Then, the challenge, and possibly the public_beat if not already sent, are sent to the server who proves the file existance by running:
 
 ```python
 proof = public_beat.prove(file,challenge,tag)
 ```
 
-This calculates a proof which shows that the file exists.
+This calculates a proof which shows that the file exists.  Then the proof is sent back to the auditor who verifies the challenge.
 
 ```python
 if (beat.verify(proof,challenge,state)):

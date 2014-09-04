@@ -9,7 +9,6 @@ This is the API for heartbeat, of which there can be many different types.  Ther
 beat = heartbeat()
 ```
 
-<<<<<<< HEAD
 Beat represents a proof of storage scheme.  Data internal to the beat is essential for all functions.
 
 ```python

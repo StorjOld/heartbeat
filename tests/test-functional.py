@@ -31,13 +31,13 @@ import time
 import timeit
 import unittest
 
-from heartbeat import Heartbeat
+from heartbeat.OneHash import OneHash
 
 
 class Chunk(object):
     def __init__(self, file_path, num_challenges, root_seed):
         self.secret = "mysecret"
-        self.target_file = Heartbeat(file_path, self.secret)
+        self.target_file = OneHash(file_path, self.secret)
         self.target_file.generate_challenges(num_challenges, root_seed)
 
     def challenge(self):
@@ -49,7 +49,7 @@ class Chunk(object):
 
 class Client(object):
     def __init__(self, file_path):
-        self.target_file = Heartbeat(file_path, "mysecret")
+        self.target_file = OneHash(file_path, "mysecret")
 
     def answer(self, challenge):
         return self.target_file.meet_challenge(challenge)
@@ -87,17 +87,17 @@ class TestFunctional(unittest.TestCase):
         del self.root_seed
 
     def test_heartbeat_and_challenge(self):
-        file1 = Heartbeat(self.file_path, "mysecret")
+        file1 = OneHash(self.file_path, "mysecret")
         file1.generate_challenges(10, self.root_seed)
         challenge = file1.random_challenge()
 
         # Create hash_response from seed and duplicate file
-        file2 = Heartbeat(self.file_path2)
+        file2 = OneHash(self.file_path2)
         answer = file2.meet_challenge(challenge)
         self.assertTrue(file1.check_answer(answer))
 
         # Create hash_answer from seed and edited file
-        file3 = Heartbeat(self.file_path3)
+        file3 = OneHash(self.file_path3)
         answer = file3.meet_challenge(challenge)
 
         # This should not match
@@ -105,7 +105,7 @@ class TestFunctional(unittest.TestCase):
 
     def test_size(self):
         def num_challenges(number):
-            file1 = Heartbeat(self.size_path, "mysecret")
+            file1 = OneHash(self.size_path, "mysecret")
             file1.generate_challenges(number, self.root_seed)
 
         def size1():
@@ -149,3 +149,6 @@ class TestFunctional(unittest.TestCase):
     def test_challenges(self):
         contract = Contract("tests/files/test4.txt", 3, 100, "testing")
         contract.run()
+
+if __name__ == '__main__':
+	unittest.main()

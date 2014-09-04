@@ -34,7 +34,7 @@ import unittest
 from decimal import Decimal
 
 from heartbeat.exc import HeartbeatError
-from heartbeat.heartbeat import Heartbeat, Challenge
+from heartbeat.OneHash import OneHash, Challenge
 
 
 class TestChallenge(unittest.TestCase):
@@ -50,11 +50,11 @@ class TestChallenge(unittest.TestCase):
         self.assertIs(self.challenge.response, None)
 
 
-class TestHeartbeat(unittest.TestCase):
+class TestOneHash(unittest.TestCase):
     def setUp(self):
         self.file_loc = os.path.abspath('tests/files/test.txt')
         self.secret = "mysecret"
-        self.hb = Heartbeat(self.file_loc, self.secret)
+        self.hb = OneHash(self.file_loc, self.secret)
 
     def tearDown(self):
         del self.hb
@@ -69,13 +69,13 @@ class TestHeartbeat(unittest.TestCase):
         self.assertTrue(isinstance(self.hb.challenges, list))
         self.assertEqual(len(self.hb.challenges), 0)
 
-        hb = Heartbeat(self.file_loc, os.urandom(32))
+        hb = OneHash(self.file_loc, os.urandom(32))
         self.assertTrue(hb.secret)
         self.assertTrue(len(hb.secret), 32)
 
     def test_initialization_fail(self):
         with self.assertRaises(HeartbeatError) as ex:
-            Heartbeat('does/not/exist')
+            OneHash('does/not/exist')
 
         ex_msg = ex.exception.message
         self.assertEqual('does/not/exist not found', ex_msg)
@@ -167,11 +167,11 @@ class TestHeartbeat(unittest.TestCase):
         challenge = Challenge(block, root_seed)
 
         chunk_size = min(1024, self.hb.file_size // 10)
-        self.assertEqual(chunk_size, 312)
+        self.assertEqual(chunk_size, 313)
 
         self.hb.file_object.seek(block)
         h = hashlib.sha256()
-        h.update(self.hb.file_object.read(312))
+        h.update(self.hb.file_object.read(313))
         try:
             encoded_seed = bytes(str(root_seed), 'utf-8')
         except TypeError:
@@ -195,7 +195,7 @@ class TestHeartbeat(unittest.TestCase):
         h = hashlib.sha256()
         h.update(self.hb.file_object.read(end_slice))
         self.hb.file_object.seek(0)
-        h.update(self.hb.file_object.read(312 - end_slice))
+        h.update(self.hb.file_object.read(313 - end_slice))
         try:
             encoded_seed = bytes(str(root_seed), 'utf-8')
         except TypeError:
@@ -280,3 +280,6 @@ class TestHeartbeat(unittest.TestCase):
         self.hb.generate_challenges(num, hexdigest)
 
         self.assertEqual(self.hb.challenges_size, sys.getsizeof(self.hb.challenges))
+
+if __name__ == '__main__':
+	unittest.main()

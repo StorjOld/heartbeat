@@ -25,6 +25,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .heartbeat import Challenge, Heartbeat  # NOQA
-
 __version__ = "0.1.2"

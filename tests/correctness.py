@@ -34,13 +34,13 @@ def test_heartbeat(heartbeat,n=10):
 
     public_beat = beat.get_public()
 
-    with open("files/test7.txt","rb") as f:
+    with open("tests/files/test7.txt","rb") as f:
         (tag,state) = beat.encode(f)
 
     for i in range(n):
         challenge = beat.gen_challenge(state)
 
-        with open("files/test7.txt","rb") as f:
+        with open("tests/files/test7.txt","rb") as f:
             proof = public_beat.prove(f,challenge,tag)
 
         if (beat.verify(proof,challenge,state)):

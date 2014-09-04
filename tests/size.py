@@ -1,7 +1,7 @@
 import sys
 import timeit
 sys.path.append("..")
-from heartbeat import HeartBeat
+from heartbeat import OneHash
 
 
 # Config Vars
@@ -16,19 +16,19 @@ root_seed = "myroot"
 def unit_test():
 
 	# Create challenges from file
-	file1 = HeartBeat(file_path)
+	file1 = OneHash(file_path)
 	file1.gen_challenges(10, root_seed)
 	challenge = file1.get_challenge()
 
 	# Create hash_response from seed and duplicate file
-	file2 = HeartBeat(file_path2)
+	file2 = OneHash(file_path2)
 	answer = file2.meet_challenge(challenge)
 
 	# Check to see if they match
 	assert(file1.check_answer(answer))
 
 	# Create hash_answer from seed and edited file
-	file3 = HeartBeat(file_path3)
+	file3 = OneHash(file_path3)
 	answer = file3.meet_challenge(challenge)
 
 	# This should not match
@@ -38,7 +38,7 @@ def unit_test():
 # Unit Test on a Custom File
 def custom_unit_test(file_path):
 	# Create challenges from file
-	file1 = HeartBeat(file_path)
+	file1 = OneHash(file_path)
 	file1.gen_challenges(10, root_seed)
 	challenge = file1.get_challenge()
 
@@ -53,7 +53,7 @@ def size_test():
 	print("")
 
 def num_challenges(number):
-	file1 = HeartBeat(size_path)
+	file1 = OneHash(size_path)
 	file1.gen_challenges(number, root_seed)
 	print("Size: " + str(file1.challenges_size()/1024) + " kb")
 

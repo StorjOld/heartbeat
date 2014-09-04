@@ -2,7 +2,7 @@ import sys
 import time
 sys.path.append("..")
 from model import Chunk
-from heartbeat import HeartBeat
+from heartbeat import OneHash
 
 class Contract:
 	def __init__(self, file_path, redudancy, num_challenges, root_seed):

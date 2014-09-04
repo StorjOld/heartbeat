@@ -69,3 +69,6 @@ autom4te.cache/
 stamp-h1
 *.exe
 aclocal.m4
+
+# PyCharm/Intellij
+.idea

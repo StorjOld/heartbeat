@@ -1,7 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# This file is part of Heartbeat: https://github.com/Storj/heartbeat
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014 William T. James
+# Copyright (c) 2014 Paul Durivage <pauldurivage+git@gmail.com> for Storj Labs
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +25,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from heartbeat import SwPriv
 
-hla = SwPriv.SwPriv()
+class HeartbeatError(Exception):
+    def __init__(self, message):
+        self.message = message
 
-hla.gen()
-
-public_hla = hla.get_public()
-
-f = open("files/test7.txt","rb")
-
-(tag,state) = hla.encode(f)
-
-f.close()
-
-challenge = hla.gen_challenge(state)
-
-f = open("files/test7.txt","rb")
-
-proof = public_hla.prove(f,challenge,tag)
-
-if (hla.verify(proof,challenge,state)):
-	print('proof valid')
-else:
-	print('proof invalid')
+    def __str__(self):
+        return self.message

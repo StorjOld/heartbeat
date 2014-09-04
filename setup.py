@@ -1,7 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# This file is part of Heartbeat: https://github.com/Storj/heartbeat
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014 William T. James
+# Copyright (c) 2014 Paul Durivage, William T. James
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +25,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from distutils.core import setup, Extension
-from distutils.command.build_ext import build_ext
+#from distutils.core import setup, Extension
+from setuptools import setup, Extension
+#from distutils.command.build_ext import build_ext
+from setuptools.command.build_ext import build_ext
+
+import heartbeat
+import heartbeat.SwPriv
 
 copt = {'mingw32' : ['-std=c++11'],
 		'unix' : ['-std=c++11'],
@@ -62,7 +71,7 @@ swpriv = Extension('heartbeat.SwPriv',
                     sources = all_sources);
 					
 setup (name = 'SwPriv',
-       version = '1.0',
+       version = heartbeat.SwPriv.__version__,
        description = 'Private homomorphic authenticator based proof of storage.',
        author = 'William T. James',
        author_email = 'jameswt@gmail.com',
@@ -73,15 +82,14 @@ Implements a privately verifiable homomorphic authentication scheme from Shacham
        ext_modules = [swpriv],
 	   cmdclass = {'build_ext' : build_ext_subclass})
 
-setup (name = 'Merkle',
-       version = '1.0',
-       description = 'Private hash tree authenticator based proof of storage.',
-       author = 'William T. James',
-       author_email = 'jameswt@gmail.com',
-       url = '',
-       long_description = '''
-Implements a merkle hash tree authentication scheme.
-''',
-        package_dir = {'heartbeat':''},
-        py_modules = ['heartbeat.Merkle','heartbeat.MerkleTree'])
-	  
+
+setup(
+    name='heartbeat',
+    version=heartbeat.__version__,
+    url='https://github.com/Storj/heartbeat',
+    license='The MIT License',
+    author='Storj Labs',
+    author_email='info@storj.io',
+    description='Python library for verifying existence of a file',
+    packages=['heartbeat','heartbeat.Merkle','heartbeat.OneHash'],
+)

@@ -9,6 +9,7 @@ This is the API for heartbeat, of which there can be many different types.  Ther
 beat = heartbeat()
 ```
 
+<<<<<<< HEAD
 Beat represents a proof of storage scheme.  Data internal to the beat is essential for all functions.
 
 ```python
@@ -75,8 +76,4 @@ sudo python3 setup.py install
 Your C++ compiler must support C++11, although really only for support of std::unique_ptr, which isn't included in the standard library before C++11.
 
 Also note that setup.py is configured to compile against the static Crypto++ library, not the DLL, and so on windows it defaults to searching for cryptlib, not cryptopp.
-
-
-
-
 

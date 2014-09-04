@@ -22,11 +22,13 @@
 # SOFTWARE.
 
 # This implements a merkle tree based proof of storage
-from heartbeat.MerkleTree import MerkleTree
 import hashlib
 import hmac
 import os
 import random
+
+from .MerkleTree import MerkleTree
+from ..exc import HeartbeatError
 
 # challenge is a the seed and index
 class Challenge(object):
@@ -135,7 +137,7 @@ class Merkle(object):
     def gen_challenge(self,state=None):
         # returns the next challenge and increments the seed and index
         if (self.i>=self.n):
-            raise Exception("Out of challenges.")
+            raise HeartbeatError("Out of challenges.")
         self.seed = Merkle.get_next_seed(self.key,self.seed)
         chal = Challenge(self.seed,self.i)
         self.i+=1

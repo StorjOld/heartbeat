@@ -84,7 +84,7 @@ Implements a privately verifiable homomorphic authentication scheme from Shacham
 
 
 setup(
-    name='heartbeat',
+    name='storj-heartbeat',
     version=heartbeat.__version__,
     url='https://github.com/Storj/heartbeat',
     license='The MIT License',

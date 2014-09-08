@@ -25,6 +25,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .onehash import OneHash,Challenge
+from .onehash import OneHash, Challenge      # NOQA
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"

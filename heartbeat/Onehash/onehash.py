@@ -65,9 +65,9 @@ class OneHash(object):
 
     def __init__(self, filepath, secret=None):
         # Check if the file exists
-        
+
         """ Initialization method
-        
+
         :param filepath: Valid path to file
         :raise HeartbeatError: If file path does not exist
         """
@@ -81,7 +81,7 @@ class OneHash(object):
 
         # Challenges is a list of 2-tuples (seed, hash_response)
         self.challenges = []
-	
+
     def __del__(self):
         try:
             self.file_object.close()
@@ -94,7 +94,7 @@ class OneHash(object):
         :param num: The number of hash challenges we want to generate.
         :param root_seed: Some value that we use to generate our seeds from.
         """
- 
+
         # Generate a series of seeds
         seeds = self.generate_seeds(num, root_seed, self.secret)
         blocks = self.pick_blocks(num, root_seed)

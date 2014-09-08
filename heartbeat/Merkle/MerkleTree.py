@@ -23,20 +23,19 @@
 
 import math
 import hashlib
-import hmac
-import heartbeat
 
 # numbering scheme:
 # branches                               0
 #                         1                               2
-#                 3               4               5         
+#                 3               4               5
 #             7      8        9      10      11
 #          15  16  17  18  19  20  21  22  23
 
 # leaves:   0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 0 - 0 - 0 - 0 - 0 - 0 - 0
 
+
 class MerkleTree(object):
-    def __init__(self,order=0):
+    def __init__(self, order=0):
         self.branches = list()
         self.order = 0
         self.leaves = list()
@@ -54,7 +53,7 @@ class MerkleTree(object):
 
     @staticmethod
     def is_left(i):
-        return i%2 != 0
+        return i % 2 != 0
 
     @staticmethod
     def get_left_child(i):
@@ -63,12 +62,12 @@ class MerkleTree(object):
     @staticmethod
     def get_right_child(i):
         return (i+1)*2
-    
+
     @staticmethod
     def get_order(n):
         return math.ceil(math.log2(n))
 
-    def add_leaf(self,leaf):
+    def add_leaf(self, leaf):
         self.leaves.append(leaf)
 
     def build(self):
@@ -77,7 +76,7 @@ class MerkleTree(object):
         self.branches = [None]*2*n
 
         # populate lowest branches with leaf hashes
-        for j in range(0,n):
+        for j in range(0, n):
             if (j < len(self.leaves)):
                 h = hashlib.sha256()
                 h.update(self.leaves[j])
@@ -86,9 +85,9 @@ class MerkleTree(object):
                 break
 
         # now populate the entire tree
-        for i in range(1,self.order+1):
+        for i in range(1, self.order+1):
             p = 2**(self.order-i)
-            for j in range(0,p):
+            for j in range(0, p):
                 k = p+j-1
                 h = hashlib.sha256()
                 l = self.branches[MerkleTree.get_left_child(k)]
@@ -100,26 +99,26 @@ class MerkleTree(object):
                 self.branches[k] = h.digest()
 
     # gets the branch of leaf i
-    def get_branch(self,i):
+    def get_branch(self, i):
         branch = [None]*(self.order)
         j = i + 2**self.order - 1
 
-        for k in range(0,self.order):
+        for k in range(0, self.order):
             if (self.is_left(j)):
-                branch[k] = (self.branches[j],self.branches[j+1])
+                branch[k] = (self.branches[j], self.branches[j+1])
             else:
-                branch[k] = (self.branches[j-1],self.branches[j])
+                branch[k] = (self.branches[j-1], self.branches[j])
             j = MerkleTree.get_parent(j)
 
         return branch
 
     @staticmethod
-    def verify_branch(leaf,branch,root):
+    def verify_branch(leaf, branch, root):
         # just check the hashes are correct
         lh = hashlib.sha256(leaf).digest()
-        for i in range(0,len(branch)):
+        for i in range(0, len(branch)):
             if (branch[i][0] != lh and branch[i][1] != lh):
-                return False;
+                return False
             h = hashlib.sha256()
             if (branch[i][0]):
                 h.update(branch[i][0])

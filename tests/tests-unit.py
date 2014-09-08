@@ -279,7 +279,8 @@ class TestOneHash(unittest.TestCase):
         hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
         self.hb.generate_challenges(num, hexdigest)
 
-        self.assertEqual(self.hb.challenges_size, sys.getsizeof(self.hb.challenges))
+        self.assertEqual(self.hb.challenges_size,
+                         sys.getsizeof(self.hb.challenges))
 
 if __name__ == '__main__':
-	unittest.main()
+    unittest.main()

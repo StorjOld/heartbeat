@@ -29,19 +29,19 @@ hla.gen()
 
 public_hla = hla.get_public()
 
-f = open("tests/files/test7.txt","rb")
+f = open("tests/files/test7.txt", "rb")
 
-(tag,state) = hla.encode(f)
+(tag, state) = hla.encode(f)
 
 f.close()
 
 challenge = hla.gen_challenge(state)
 
-f = open("tests/files/test7.txt","rb")
+f = open("tests/files/test7.txt", "rb")
 
-proof = public_hla.prove(f,challenge,tag)
+proof = public_hla.prove(f, challenge, tag)
 
-if (hla.verify(proof,challenge,state)):
-	print('proof valid')
+if (hla.verify(proof, challenge, state)):
+    print('proof valid')
 else:
-	print('proof invalid')
+    print('proof invalid')

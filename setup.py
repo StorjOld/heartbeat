@@ -31,7 +31,7 @@ from setuptools.command.build_ext import build_ext
 from heartbeat import __version__
 
 copt = {'mingw32': ['-std=c++11'],
-        'unix': ['-std=c++11'],
+        'unix': ['-std=c++0x'],
         'msvc': ['/EHsc']}
 lopt = {}
 libs = {} # {'mingw32': ['cryptopp'],

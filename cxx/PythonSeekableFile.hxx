@@ -28,6 +28,7 @@ THE SOFTWARE.
 
 #include <Python.h>
 #include <CXX/Objects.hxx>
+#include "PyArray.hxx"
 #include "simple_file.hxx"
 
 class PythonSeekableFile : public seekable_file
@@ -38,7 +39,7 @@ public:
 	virtual size_t read(unsigned char *buffer,size_t sz)
 	{
 		//std::cout << "Reading " << sz << " bytes...";
-		std::string bytes = Py::Bytes(_file.callMemberFunction("read",Py::TupleN(Py::Long((long)sz))));
+		std::string bytes = py_array(_file.callMemberFunction("read",Py::TupleN(Py::Long((long)sz))));
 		//std::cout << "done. Read " << bytes.c_str() << " bytes" << std::endl;
 		memcpy(buffer,bytes.c_str(),bytes.length());
 		return bytes.length();

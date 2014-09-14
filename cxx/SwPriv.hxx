@@ -36,6 +36,7 @@ THE SOFTWARE.
 #include "shacham_waters_private.hxx"
 #include "PyBytesSink.hxx"
 #include "PythonSeekableFile.hxx"
+#include "PyArray.hxx"
 
 namespace SwPriv
 {
@@ -45,7 +46,7 @@ template<typename T>
 class PyBytesStateAccessible : public T
 {
 public:
-	Py::Bytes get_state()
+	py_array get_state()
 	{
 		// serialize the underlying and output
 		PyBytesSink sink;
@@ -55,7 +56,7 @@ public:
 		return sink.finish();
 	}
 	
-	void set_state(Py::Bytes state)
+	void set_state(py_array state)
 	{
 		this->deserializep(new CryptoPP::StringSource(state,true));
 	}

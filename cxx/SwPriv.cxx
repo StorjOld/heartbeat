@@ -24,10 +24,17 @@ THE SOFTWARE.
 
 */
 
+//#define CRYPTOPP_IMPORTS
+#include <cryptopp/dll.h>
+
 #include "SwPriv.hxx"
 #include <Python.h>
 #include <CXX/Objects.hxx>
 #include <iostream>
+
+#if PY_MAJOR_VERSION == 2
+#define PyInit_SwPriv initSwPriv
+#endif
 
 extern "C" PyObject *PyInit_SwPriv()
 {

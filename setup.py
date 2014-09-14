@@ -34,9 +34,9 @@ copt = {'mingw32': ['-std=c++11'],
         'unix': ['-std=c++11'],
         'msvc': ['/EHsc']}
 lopt = {}
-libs = {'mingw32': ['cryptopp'],
-        'unix': ['cryptopp'],
-        'msvc': ['cryptlib']}
+libs = {} # {'mingw32': ['cryptopp'],
+          # 'unix': ['cryptopp'],
+          # 'msvc': ['cryptopp']}
 
 #cryptopp_url = "http://www.cryptopp.com/cryptopp562.zip"
 #cryptopp_install_dir = "build/cryptopp"

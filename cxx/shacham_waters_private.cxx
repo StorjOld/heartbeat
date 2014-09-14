@@ -24,6 +24,9 @@ THE SOFTWARE.
 
 */
 
+//#define CRYPTOPP_IMPORTS
+#include <cryptopp/dll.h>
+
 #include "shacham_waters_private.hxx"
 #include "endian_swap.h"
 

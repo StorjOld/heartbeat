@@ -25,6 +25,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .OneHash import OneHash, Challenge      # NOQA
+from .PySwPriv import PySwPriv  # NOQA
 
-__version__ = "0.1.3"
+__version__ = "0.1.0"

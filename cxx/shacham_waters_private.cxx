@@ -669,7 +669,7 @@ void shacham_waters_private::prove(proof &p, seekable_file &f, const challenge &
 	prf indexer = c.get_i();
 	// no longer want to require state in prove, removing that requirement
 	//indexer.set_limit(s.get_n());
-	indexer.set_limit(f.blocks_remaining(chunk_size));
+	indexer.set_limit(t.sigma().size());
 	
 	
 	p.mu().clear();

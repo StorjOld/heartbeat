@@ -21,9 +21,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from heartbeat import SwPriv
+from heartbeat import PySwPriv
 
-hla = SwPriv.SwPriv()
+hla = PySwPriv.PySwPriv()
 
 hla.gen()
 

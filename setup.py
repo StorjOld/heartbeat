@@ -25,13 +25,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# from distutils.core import setup, Extension
 from setuptools import setup, Extension
-# from distutils.command.build_ext import build_ext
 from setuptools.command.build_ext import build_ext
 
-import heartbeat
-import heartbeat.SwPriv
+from heartbeat import __version__
 
 copt = {'mingw32': ['-std=c++11'],
         'unix': ['-std=c++11'],
@@ -41,7 +38,12 @@ libs = {'mingw32': ['cryptopp'],
         'unix': ['cryptopp'],
         'msvc': ['cryptlib']}
 
+#cryptopp_url = "http://www.cryptopp.com/cryptopp562.zip"
+#cryptopp_install_dir = "build/cryptopp"
+#crytpopp_sha256 = "5cbfd2fcb4a6b3aab35902e2e0f3b59d9171fee12b3fc2b363e1801dfec53574"
 
+#install_cpp_lib(cryptopp_url,cryptopp_install_dir,cryptopp_sha256)
+        
 class build_ext_subclass(build_ext):
     def build_extensions(self):
         c = self.compiler.compiler_type
@@ -68,32 +70,37 @@ all_sources = swpriv_sources + pycxx_sources
 swpriv = Extension('heartbeat.SwPriv',
                    define_macros=[('MAJOR_VERSION', '1'),
                                   ('MINOR_VERSION', '0')],
-                   include_dirs=['cxx/pycxx'],
+                   include_dirs=['cxx/pycxx','cxx'],
                    # libraries=['cryptopp'],
                    # library_dirs=['/usr/local/lib'],
                    sources=all_sources)
 
-setup(name='SwPriv',
-      version=heartbeat.SwPriv.__version__,
-      description='Private homomorphic authenticator based proof of storage.',
-      author='William T. James',
-      author_email='jameswt@gmail.com',
-      url='',
-      long_description='''
-Implements a privately verifiable homomorphic authentication
-scheme from Shacham and Waters.
-''',
-      ext_modules=[swpriv],
-      cmdclass={'build_ext': build_ext_subclass})
+# setup(name='SwPriv',
+      # version=__version__,
+      # description='Private homomorphic authenticator based proof of storage.',
+      # author='William T. James',
+      # author_email='jameswt@gmail.com',
+      # url='',
+      # long_description='''
+# Implements a privately verifiable homomorphic authentication
+# scheme from Shacham and Waters.
+# ''',
+      # ext_modules=[swpriv],
+      # cmdclass={'build_ext': build_ext_subclass})
 
 
 setup(
     name='heartbeat',
-    version=heartbeat.__version__,
+    version=__version__,
     url='https://github.com/Storj/heartbeat',
     license='The MIT License',
     author='Storj Labs',
     author_email='info@storj.io',
     description='Python library for verifying existence of a file',
-    packages=['heartbeat', 'heartbeat.Merkle', 'heartbeat.OneHash'],
+    install_requires=[
+        'pycrypto >= 2.6.1',
+    ],
+    packages=['heartbeat', 'heartbeat.Merkle', 'heartbeat.OneHash', 'heartbeat.PySwPriv'],
+    ext_modules=[swpriv],
+    cmdclass={'build_ext': build_ext_subclass}
 )

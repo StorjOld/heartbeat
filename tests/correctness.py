@@ -24,7 +24,7 @@
 from heartbeat import SwPriv, Merkle
 
 tests = {"Merkle": Merkle.Merkle,
-         "SwPriv": SwPriv.SwPriv}
+         "SwPriv": SwPriv.SwPriv }
 
 
 def test_heartbeat(heartbeat, n=10):

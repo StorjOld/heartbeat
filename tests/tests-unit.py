@@ -167,11 +167,11 @@ class TestOneHash(unittest.TestCase):
         challenge = Challenge(block, root_seed)
 
         chunk_size = min(1024, self.hb.file_size // 10)
-        self.assertEqual(chunk_size, 313)
+        self.assertEqual(chunk_size, 312)
 
         self.hb.file_object.seek(block)
         h = hashlib.sha256()
-        h.update(self.hb.file_object.read(313))
+        h.update(self.hb.file_object.read(312))
         try:
             encoded_seed = bytes(str(root_seed), 'utf-8')
         except TypeError:

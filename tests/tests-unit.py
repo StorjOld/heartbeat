@@ -195,7 +195,7 @@ class TestOneHash(unittest.TestCase):
         h = hashlib.sha256()
         h.update(self.hb.file_object.read(end_slice))
         self.hb.file_object.seek(0)
-        h.update(self.hb.file_object.read(313 - end_slice))
+        h.update(self.hb.file_object.read(312 - end_slice))
         try:
             encoded_seed = bytes(str(root_seed), 'utf-8')
         except TypeError:

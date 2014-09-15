@@ -32,6 +32,8 @@ THE SOFTWARE.
 #include <CXX/Objects.hxx>
 #include "PyArray.hxx"
 
+#include <stdexcept>
+
 
 class PyBytesSink : public CryptoPP::Bufferless<CryptoPP::Sink>
 {

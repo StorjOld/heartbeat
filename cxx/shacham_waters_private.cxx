@@ -86,10 +86,10 @@ void shacham_waters_private_data::state::copy(const state &s)
 	_n = s._n;
 	_alpha = s._alpha;
 	_f = s._f;
-	if (s._raw)
+	if (s._raw.get())
 	{
 		_raw_sz = s._raw_sz;
-		_raw = std::unique_ptr<unsigned char>(new unsigned char[_raw_sz]);
+		_raw = smart_buffer(new unsigned char[_raw_sz]);
 		memcpy(_raw.get(),s._raw.get(),_raw_sz);
 	}
 	_encrypted_and_signed = s._encrypted_and_signed;
@@ -134,7 +134,7 @@ void shacham_waters_private_data::state::deserialize(CryptoPP::BufferedTransform
 	bt.GetWord32(n);
 	_raw_sz = ntohl(n);
 	
-	_raw = std::unique_ptr<unsigned char>(new unsigned char[_raw_sz]);
+	_raw = smart_buffer(new unsigned char[_raw_sz]);
 	
 	// get the raw data
 	bt.Get(_raw.get(),_raw_sz);
@@ -152,7 +152,7 @@ void shacham_waters_private_data::state::encrypt_and_sign(byte k_enc[shacham_wat
 	CryptoPP::AutoSeededRandomPool rng;
 	// generate an IV
 	unsigned int iv_sz = e.DefaultIVLength();
-	std::unique_ptr<unsigned char> iv(new unsigned char[iv_sz]);
+	smart_buffer iv(new unsigned char[iv_sz]);
 	rng.GenerateBlock(iv.get(),iv_sz);
 	
 	e.SetKeyWithIV(k_enc,shacham_waters_private_data::key_size,iv.get(),iv_sz);
@@ -263,7 +263,7 @@ void shacham_waters_private_data::state::encrypt_and_sign(byte k_enc[shacham_wat
 	
 	// now write raw
 	_raw_sz = raw_data.length();
-	_raw = std::unique_ptr<unsigned char>(new unsigned char[_raw_sz]);
+	_raw = smart_buffer(new unsigned char[_raw_sz]);
 	
 	memcpy(_raw.get(),raw_data.c_str(),_raw_sz);
 	
@@ -348,7 +348,7 @@ bool shacham_waters_private_data::state::check_sig_and_decrypt(byte k_enc[shacha
 	// get iv size
 	sig_source.GetWord32(n);
 	unsigned int iv_sz = ntohl(n);
-	std::unique_ptr<unsigned char> iv(new unsigned char[iv_sz]);
+	smart_buffer iv(new unsigned char[iv_sz]);
 	
 	// get iv
 	sig_source.Get(iv.get(),iv_sz);
@@ -367,7 +367,7 @@ bool shacham_waters_private_data::state::check_sig_and_decrypt(byte k_enc[shacha
 	// get f_key size
 	df.GetWord32(n);
 	n = ntohl(n);
-	std::unique_ptr<unsigned char> key(new unsigned char[n]);
+	smart_buffer key(new unsigned char[n]);
 	
 	df.Get(key.get(),n);
 	
@@ -375,7 +375,7 @@ bool shacham_waters_private_data::state::check_sig_and_decrypt(byte k_enc[shacha
 	
 	df.GetWord32(n);
 	n = ntohl(n);
-	key = std::unique_ptr<unsigned char>(new unsigned char[n]);
+	key = smart_buffer(new unsigned char[n]);
 	
 	df.Get(key.get(),n);
 	
@@ -447,11 +447,11 @@ void shacham_waters_private_data::challenge::deserialize(CryptoPP::BufferedTrans
 	bt.GetWord32(n);
 	_l = ntohl(n);
 	
-	std::unique_ptr<unsigned char> key;
+	smart_buffer key;
 	// get key size
 	bt.GetWord32(n);
 	n = ntohl(n);
-	key = std::unique_ptr<unsigned char>(new unsigned char[n]);
+	key = smart_buffer(new unsigned char[n]);
 	
 	bt.Get(key.get(),n);
 	
@@ -584,7 +584,7 @@ void shacham_waters_private::encode(tag &t, state &s, simple_file &f)
 	
 	//std::cout << "Chunks: " << f.get_chunk_count() << std::endl;
 	//std::cout << "Sectors per chunk: " << f.get_sectors_per_chunk() << std::endl;
-	std::unique_ptr<unsigned char> buffer(new unsigned char[_sector_size]);
+	smart_buffer buffer(new unsigned char[_sector_size]);
 	
 	size_t bytes_read = 0;
 	bool done = false;
@@ -668,7 +668,7 @@ void shacham_waters_private::prove(proof &p, seekable_file &f, const challenge &
 	
 	
 	unsigned int chunk_size = _sectors*_sector_size;
-	std::unique_ptr<unsigned char> buffer(new unsigned char[_sector_size]);
+	smart_buffer buffer(new unsigned char[_sector_size]);
 	
 	// serializer cannot get indexer limits, so we manually set here
 	prf indexer = c.get_i();

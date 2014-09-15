@@ -100,7 +100,7 @@ public:
 		prf _alpha;
 		prf _f;
 		
-		std::unique_ptr<unsigned char> _raw;
+		smart_buffer _raw;
 		unsigned int _raw_sz;
 		bool _encrypted_and_signed;
 	};

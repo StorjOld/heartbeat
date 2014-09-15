@@ -167,11 +167,10 @@ class TestOneHash(unittest.TestCase):
         challenge = Challenge(block, root_seed)
 
         chunk_size = min(1024, self.hb.file_size // 10)
-        self.assertEqual(chunk_size, 312)
 
         self.hb.file_object.seek(block)
         h = hashlib.sha256()
-        h.update(self.hb.file_object.read(312))
+        h.update(self.hb.file_object.read(chunk_size))
         try:
             encoded_seed = bytes(str(root_seed), 'utf-8')
         except TypeError:
@@ -195,7 +194,7 @@ class TestOneHash(unittest.TestCase):
         h = hashlib.sha256()
         h.update(self.hb.file_object.read(end_slice))
         self.hb.file_object.seek(0)
-        h.update(self.hb.file_object.read(312 - end_slice))
+        h.update(self.hb.file_object.read(chunk_size - end_slice))
         try:
             encoded_seed = bytes(str(root_seed), 'utf-8')
         except TypeError:

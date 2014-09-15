@@ -60,7 +60,7 @@ public:
 	void init_iv()
 	{
 		_iv_sz = _aes.DefaultIVLength();
-		_iv = std::unique_ptr<unsigned char>(new unsigned char[_iv_sz]);
+		_iv = smart_buffer(new unsigned char[_iv_sz]);
 		memset(_iv.get(),0,_iv_sz);
 	}
 	
@@ -69,14 +69,14 @@ public:
 		_limit = p._limit;
 		_limit_sz = p._limit_sz;
 		
-		if (p._buffer)
+		if (p._buffer.get()!=0)
 		{
 			_buffer_sz = p._buffer_sz;
-			_buffer = std::unique_ptr<unsigned char>(new unsigned char[_buffer_sz]);
+			_buffer = smart_buffer(new unsigned char[_buffer_sz]);
 			memcpy(_buffer.get(),p._buffer.get(),_buffer_sz);
 		}
 			
-		if (p._key)
+		if (p._key.get()!=0)
 		{
 			set_key(p._key.get(),p._key_sz);
 		}
@@ -86,7 +86,7 @@ public:
 	void set_key(unsigned char *key,unsigned int key_length)
 	{
 		_key_sz = key_length;
-		_key = std::unique_ptr<unsigned char>(new unsigned char[_key_sz]);
+		_key = smart_buffer(new unsigned char[_key_sz]);
 		memcpy(_key.get(),key,_key_sz);
 		
 		_aes.SetKeyWithIV(_key.get(),_key_sz,_iv.get(),_iv_sz);
@@ -111,7 +111,7 @@ public:
 		unsigned int digest_sz = _sha.DigestSize();
 		
 		_buffer_sz = _limit_sz > digest_sz ? _limit_sz : digest_sz;
-		_buffer = std::unique_ptr<unsigned char>(new unsigned char[_buffer_sz]);
+		_buffer = smart_buffer(new unsigned char[_buffer_sz]);
 	}
 	
 	const CryptoPP::Integer& get_limit() const
@@ -152,13 +152,13 @@ private:
 	CryptoPP::Integer _limit;
 	unsigned int _limit_sz;
 	
-	std::unique_ptr<unsigned char> _buffer;
+	smart_buffer _buffer;
 	unsigned int _buffer_sz;
 	
-	std::unique_ptr<unsigned char> _iv;
+	smart_buffer _iv;
 	unsigned int _iv_sz;
 
-	std::unique_ptr<unsigned char> _key;
+	smart_buffer _key;
 	unsigned int _key_sz;
 	
 	byte _msb_mask;

@@ -538,7 +538,7 @@ void shacham_waters_private::init(unsigned int prime_size_bytes, unsigned int se
 	
 	_sectors = sectors;
 	
-	_p = CryptoPP::Integer(rng,0,CryptoPP::Integer::Power2(prime_size_bytes*8),CryptoPP::Integer::RandomNumberType::PRIME);
+	_p = CryptoPP::Integer(rng,0,CryptoPP::Integer::Power2(prime_size_bytes*8),CryptoPP::Integer::PRIME);
 	
 	//std::cout << "generated prime..." << std::endl;
 	

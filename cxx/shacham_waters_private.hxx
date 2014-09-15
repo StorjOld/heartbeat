@@ -38,6 +38,7 @@ Shacham, Waters, "Compact Proofs of Retrievability"
 #include "seekable_file.hxx"
 #include "prf.hxx"
 #include "serializable.hxx"
+#include "pointer.hxx"
 
 // for encryption / decryption of state information
 #include <cryptopp/aes.h>

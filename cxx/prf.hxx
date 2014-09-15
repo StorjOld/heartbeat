@@ -32,9 +32,9 @@ THE SOFTWARE.
 #include <cryptopp/modes.h>
 #include <cryptopp/sha.h>
 #include <cryptopp/hex.h>
-#include <memory>
 #include <iostream>
 #include "clz.h"
+#include "pointer.hxx"
 
 class prf
 {

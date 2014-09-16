@@ -25,7 +25,7 @@ THE SOFTWARE.
 */
 
 //#define CRYPTOPP_IMPORTS
-#include <cryptopp/dll.h>
+//#include <cryptopp/dll.h>
 
 #include "SwPriv.hxx"
 #include <Python.h>

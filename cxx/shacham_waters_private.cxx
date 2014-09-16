@@ -24,8 +24,8 @@ THE SOFTWARE.
 
 */
 
-//#define CRYPTOPP_IMPORTS
-#include <cryptopp/dll.h>
+//#define CRYPTOPP_IMPORTS 
+//#include <cryptopp/dll.h>
 
 #include "shacham_waters_private.hxx"
 #include "endian_swap.h"
@@ -118,10 +118,12 @@ void shacham_waters_private_data::state::serialize(CryptoPP::BufferedTransformat
 		throw std::runtime_error("in shacham_waters_private_data::serialize, state must be encrypted prior to serialization.");
 	}
 	
+	//std::cout << "Writing raw size: " << _raw_sz << std::endl;
 	// write the raw data size
 	unsigned int n = htonl(_raw_sz);
 	bt.PutWord32(n);
 	
+	//std::cout << "Writing raw data." << std::endl;
 	// write the raw data
 	bt.Put(_raw.get(),_raw_sz);
 }
@@ -133,19 +135,20 @@ void shacham_waters_private_data::state::deserialize(CryptoPP::BufferedTransform
 	// get the size of the raw data
 	bt.GetWord32(n);
 	_raw_sz = ntohl(n);
+	//std::cout << "Read raw size: " << _raw_sz << std::endl;
 	
 	_raw = smart_buffer(new unsigned char[_raw_sz]);
 	
 	// get the raw data
 	bt.Get(_raw.get(),_raw_sz);
-	
+	//std::cout << "Got raw data." << std::endl;
 	_encrypted_and_signed = true;
 	
 	// extract what we can without having keys
 	public_interpretation();
 }
 
-void shacham_waters_private_data::state::encrypt_and_sign(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size])
+void shacham_waters_private_data::state::encrypt_and_sign(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size],bool convergent_encryption)
 {
 	CryptoPP::CFB_Mode< CryptoPP::AES >::Encryption e;
 	CryptoPP::HMAC< CryptoPP::SHA256 > hmac(k_mac,shacham_waters_private_data::key_size);
@@ -153,7 +156,15 @@ void shacham_waters_private_data::state::encrypt_and_sign(byte k_enc[shacham_wat
 	// generate an IV
 	unsigned int iv_sz = e.DefaultIVLength();
 	smart_buffer iv(new unsigned char[iv_sz]);
-	rng.GenerateBlock(iv.get(),iv_sz);
+	
+	if (convergent_encryption)
+	{
+		memset(iv.get(),0,iv_sz);
+	}
+	else
+	{
+		rng.GenerateBlock(iv.get(),iv_sz);
+	}
 	
 	e.SetKeyWithIV(k_enc,shacham_waters_private_data::key_size,iv.get(),iv_sz);
 	
@@ -186,11 +197,17 @@ void shacham_waters_private_data::state::encrypt_and_sign(byte k_enc[shacham_wat
 	unsigned int n = htonl(_f.get_key_size());
 	ef.PutWord32(n);
 	// put key
-	ef.Put(_f.get_key(),_f.get_key_size());
+	if (_f.get_key_size() > 0)
+	{
+		ef.Put(_f.get_key(),_f.get_key_size());
+	}
 	
 	n = htonl(_alpha.get_key_size());
 	ef.PutWord32(n);
-	ef.Put(_alpha.get_key(),_alpha.get_key_size());
+	if (_alpha.get_key_size() > 0)
+	{
+		ef.Put(_alpha.get_key(),_alpha.get_key_size());
+	}
 	
 	ef.MessageEnd();
 	// finished encrypting
@@ -371,7 +388,10 @@ bool shacham_waters_private_data::state::check_sig_and_decrypt(byte k_enc[shacha
 	
 	df.Get(key.get(),n);
 	
-	set_f_key(key.get(),n);
+	if (n > 0)
+	{
+		set_f_key(key.get(),n);
+	}
 	
 	df.GetWord32(n);
 	n = ntohl(n);
@@ -379,7 +399,10 @@ bool shacham_waters_private_data::state::check_sig_and_decrypt(byte k_enc[shacha
 	
 	df.Get(key.get(),n);
 	
-	set_alpha_key(key.get(),n);
+	if (n > 0)
+	{
+		set_alpha_key(key.get(),n);
+	}
 	
 	return true;
 }
@@ -455,7 +478,10 @@ void shacham_waters_private_data::challenge::deserialize(CryptoPP::BufferedTrans
 	
 	bt.Get(key.get(),n);
 	
-	set_key(key.get(),n);
+	if (n > 0) 
+	{
+		set_key(key.get(),n);
+	}
 	
 	// read B size
 	bt.GetWord32(n);

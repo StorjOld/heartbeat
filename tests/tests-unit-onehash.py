@@ -34,7 +34,7 @@ import unittest
 from decimal import Decimal
 
 from heartbeat.exc import HeartbeatError
-from heartbeat.OneHash import OneHash, Challenge
+from heartbeat.OneHash import OneHash,Challenge
 
 
 class TestChallenge(unittest.TestCase):
@@ -52,7 +52,7 @@ class TestChallenge(unittest.TestCase):
 
 class TestOneHash(unittest.TestCase):
     def setUp(self):
-        self.file_loc = os.path.abspath('tests/files/test.txt')
+        self.file_loc = os.path.abspath('files/test.txt')
         self.secret = "mysecret"
         self.hb = OneHash(self.file_loc, self.secret)
 

@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from heartbeat import SwPriv, Merkle
+from heartbeat import SwPriv,Merkle
 
 tests = {"Merkle": Merkle.Merkle,
          "SwPriv": SwPriv.SwPriv }

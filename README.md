@@ -9,13 +9,7 @@ This is the API for heartbeat, of which there can be many different types.  Ther
 beat = heartbeat()
 ```
 
-Beat represents a proof of storage scheme.  Data internal to the beat is essential for all functions.
-
-```python
-beat.gen()
-```
-
-Generates public and private keys for the scheme.
+Beat represents a proof of storage scheme.  Data internal to the beat is essential for all functions.  This generates public and private keys for the scheme.
 
 ```python
 public_beat = beat.get_public()

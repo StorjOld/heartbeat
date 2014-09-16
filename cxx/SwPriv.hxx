@@ -37,6 +37,7 @@ THE SOFTWARE.
 #include "PyBytesSink.hxx"
 #include "PythonSeekableFile.hxx"
 #include "PyArray.hxx"
+#include <sstream>
 
 namespace SwPriv
 {
@@ -50,15 +51,14 @@ public:
 	{
 		// serialize the underlying and output
 		PyBytesSink sink;
-		
 		this->serialize(sink);
-		
 		return sink.finish();
 	}
 	
 	void set_state(py_array state)
 	{
-		this->deserializep(new CryptoPP::StringSource(state,true));
+		CryptoPP::StringSource *ss = new CryptoPP::StringSource(state,true);
+		this->deserializep(ss);
 	}
 };
 
@@ -81,7 +81,7 @@ public:
         Tthis::behaviors().supportGetattro();
         Tthis::behaviors().supportSetattro();
 		
-		Tthis::PYCXX_ADD_NOARGS_METHOD( __getstate, _get_state, "doc: get_state()" );
+		Tthis::PYCXX_ADD_NOARGS_METHOD( __getstate__, _get_state, "doc: get_state()" );
 		Tthis::PYCXX_ADD_VARARGS_METHOD(  __setstate__, _set_state, "doc: set_state( state )");
 	}
 	
@@ -104,7 +104,15 @@ public:
 	
 	Py::Object _get_state()
 	{
-		return this->get_state();
+		try 
+		{
+			return this->get_state();
+		}
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+		}
+		return Py::None();
 	}
 	PYCXX_NOARGS_METHOD_DECL( Tthis, _get_state )
 	
@@ -114,9 +122,14 @@ public:
 		{
 			throw Py::RuntimeError("set_state only takes one argument: state");
 		}
-		
-		this->set_state(args[0]);
-		
+		try 
+		{
+			this->set_state(args[0]);
+		}
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+		}
 		return Py::None();
 	}
 	PYCXX_VARARGS_METHOD_DECL( Tthis, _set_state )
@@ -152,7 +165,83 @@ public:
 	{
 		PyBytesStateAccessiblePyClass<State,shacham_waters_private_data::state>::init_type_dont_ready("State");
 		
+		PYCXX_ADD_VARARGS_METHOD( encrypt, _encrypt, "doc: encrypt(encryption_key,hmac_key)" );
+		PYCXX_ADD_VARARGS_METHOD( decrypt, _decrypt, "doc: decrypt(encryption_key,hmac_key)" );
+		
 		behaviors().readyType();
+	}
+	
+	Py::Object _encrypt(const Py::Tuple &args)
+	{
+		try 
+		{
+			byte *key_enc;
+			ssize_t enc_sz;
+			byte *key_mac;
+			ssize_t mac_sz;
+			if (args.size() < 2)
+			{
+				throw Py::RuntimeError("encrypt takes at least two arguments: the encryption key and the mac key and an optional argument a bool, whether to use convergent encryption");
+			}
+			
+			convert_and_check_key(args[0],&key_enc,&enc_sz);
+			convert_and_check_key(args[1],&key_mac,&mac_sz);
+			
+			bool use_convergent = false;
+			if (args.size() > 2 && args[2].isTrue())
+			{
+				use_convergent = true;
+			}
+			
+			encrypt_and_sign(key_enc,key_mac,use_convergent);
+		}
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+		}
+		return Py::None();
+	}
+	PYCXX_VARARGS_METHOD_DECL( State, _encrypt )
+	
+	Py::Object _decrypt(const Py::Tuple &args)
+	{
+		try
+		{
+			byte *key_enc;
+			ssize_t enc_sz;
+			byte *key_mac;
+			ssize_t mac_sz;
+			if (args.size() != 2)
+			{
+				throw Py::RuntimeError("decrypt takes two arguments: the encryption key and the mac key.");
+			}
+			
+			convert_and_check_key(args[0],&key_enc,&enc_sz);
+			convert_and_check_key(args[1],&key_mac,&mac_sz);
+			
+			check_sig_and_decrypt(key_enc,key_mac);
+		}
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+		}
+		return Py::None();
+	}
+	PYCXX_VARARGS_METHOD_DECL( State, _decrypt )
+	
+private:
+	void convert_and_check_key(Py::Object in_key,byte **out_key,ssize_t *out_sz)
+	{
+		if (py_as_string_and_size(in_key.ptr(),(char**)out_key,out_sz))
+		{
+			throw Py::RuntimeError("Invalid encryption key.");
+		}
+		if (*out_sz != shacham_waters_private_data::key_size)
+		{
+			std::stringstream ss;
+			ss << "Encryption key must be " << shacham_waters_private_data::key_size << " bytes in length." << std::endl;
+			throw Py::RuntimeError(ss.str());
+		}
 	}
 };
 
@@ -198,13 +287,22 @@ public:
 		: PyBytesStateAccessiblePyClass<SwPriv,shacham_waters_private>(self,args,kwds) 
 	{
 		//std::cout << "SwPriv constructor called..." << std::endl;
+		try 
+		{
+			gen();
+			
+			//std::cout << "heartbeat generated." << std::endl;
+		}
+		catch (const std::exception &e)
+		{
+			throw Py::RuntimeError(e.what());
+		}
 	}
 
 	static void init_type()
 	{
 		PyBytesStateAccessiblePyClass<SwPriv,shacham_waters_private>::init_type_dont_ready("SwPriv");
 		
-		PYCXX_ADD_NOARGS_METHOD( gen, _gen, "doc: gen()" );
 		PYCXX_ADD_NOARGS_METHOD( get_public, _get_public, "doc: get_public()" );
 		PYCXX_ADD_VARARGS_METHOD( encode, _encode, "doc: (tag,state) = encode(file)" );
 		PYCXX_ADD_VARARGS_METHOD( gen_challenge, _gen_challenge, "doc: challenge = gen_challenge(state)" );
@@ -213,28 +311,6 @@ public:
 		
 		behaviors().readyType();
 	}
-	
-	Py::Object _gen()
-	{
-		try 
-		{
-			gen();
-			
-			//std::cout << "heartbeat generated." << std::endl;
-			
-			return Py::None();
-		}
-		catch (const std::exception &e)
-		{
-			throw Py::RuntimeError(e.what());
-			return Py::None();
-		}
-		catch (const Py::Exception &)
-		{
-			return Py::None();
-		}
-	}
-	PYCXX_NOARGS_METHOD_DECL( SwPriv, _gen )
 	
 	Py::Object _get_public()
 	{

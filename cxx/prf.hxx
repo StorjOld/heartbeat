@@ -41,27 +41,29 @@ class prf
 public:
 	prf()
 	{
-		init_iv();
+		init();
 	}
 	
 	prf(const prf &p)
 	{
-		init_iv();
+		init();
 		copy(p);
 	}
 	
 	 prf& operator= (const prf &other)
     {
-		init_iv();
+		init();
         copy(other);
         return *this;
     }
 	
-	void init_iv()
+	void init()
 	{
 		_iv_sz = _aes.DefaultIVLength();
 		_iv = smart_buffer(new unsigned char[_iv_sz]);
 		memset(_iv.get(),0,_iv_sz);
+		_buffer_sz = 0;
+		_key_sz = 0;
 	}
 	
 	void copy(const prf &p)

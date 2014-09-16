@@ -131,15 +131,17 @@ class Proof(object):
 
 class PySwPriv(object):
     def __init__(self, sectors=10, key=None, prime=None, primebits=1024):
-        self.key = key
-        self.prime = prime
+        if (key == None):
+            self.key = Random.new().read(32)
+        else:
+            self.key = key
+        if (prime == None):
+            self.prime = number.getPrime(self.primebits)
+        else:
+            self.prime = prime
         self.sectors = sectors
         self.sectorsize = primebits//8
         self.primebits = primebits
-
-    def gen(self):
-        self.key = Random.new().read(32)
-        self.prime = number.getPrime(self.primebits)
 
     def get_public(self):
         return PySwPriv(self.sectors, None, self.prime)

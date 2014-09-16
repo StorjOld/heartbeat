@@ -115,14 +115,15 @@ class Merkle(object):
         self.n = n
         self.i = i
         self.chunksz = chunksz
-        self.key = key
-        self.seed = seed
+        if (key == None):
+            self.key = os.urandom(32)
+        else:
+            self.key = key
+        if (seed == None):
+            self.seed = os.urandom(32)
+        else:
+            self.seed = seed
         self.root = root
-
-    def gen(self):
-        self.key = os.urandom(32)
-        self.seed = os.urandom(32)
-        return None
 
     def get_public(self):
         return Merkle(self.i, self.n, self.chunksz)

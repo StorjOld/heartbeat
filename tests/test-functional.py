@@ -73,10 +73,10 @@ class Contract(object):
 
 class TestFunctional(unittest.TestCase):
     def setUp(self):
-        self.file_path = "tests/files/test.txt"
-        self.file_path2 = "tests/files/test2.txt"
-        self.file_path3 = "tests/files/test3.txt"
-        self.size_path = "tests/files/test4.txt"
+        self.file_path = "files/test.txt"
+        self.file_path2 = "files/test2.txt"
+        self.file_path3 = "files/test3.txt"
+        self.size_path = "files/test4.txt"
         self.root_seed = "myroot"
 
     def tearDown(self):
@@ -128,8 +128,8 @@ class TestFunctional(unittest.TestCase):
         root_seed = "testing"
 
         # Start
-        chunk = Chunk("tests/files/test4.txt", num_challenges, root_seed)
-        client = Client("tests/files/test4.txt")
+        chunk = Chunk("files/test4.txt", num_challenges, root_seed)
+        client = Client("files/test4.txt")
 
         for i in range(num_challenges):
             challenge = chunk.challenge()
@@ -147,7 +147,7 @@ class TestFunctional(unittest.TestCase):
             time.sleep(0.25)
 
     def test_challenges(self):
-        contract = Contract("tests/files/test4.txt", 3, 100, "testing")
+        contract = Contract("files/test4.txt", 3, 100, "testing")
         contract.run()
 
 if __name__ == '__main__':

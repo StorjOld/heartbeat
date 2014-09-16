@@ -81,7 +81,7 @@ public:
 		void serialize(CryptoPP::BufferedTransformation &bt) const;
 		void deserialize(CryptoPP::BufferedTransformation &bt);
 		
-		void encrypt_and_sign(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size]);
+		void encrypt_and_sign(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size],bool convergent_encryption = false);
 		bool check_sig_and_decrypt(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size]);
 		void public_interpretation();
 		

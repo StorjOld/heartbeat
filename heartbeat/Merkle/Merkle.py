@@ -115,11 +115,11 @@ class Merkle(object):
         self.n = n
         self.i = i
         self.chunksz = chunksz
-        if (key == None):
+        if (key is None):
             self.key = os.urandom(32)
         else:
             self.key = key
-        if (seed == None):
+        if (seed is None):
             self.seed = os.urandom(32)
         else:
             self.seed = seed

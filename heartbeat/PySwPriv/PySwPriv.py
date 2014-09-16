@@ -131,11 +131,11 @@ class Proof(object):
 
 class PySwPriv(object):
     def __init__(self, sectors=10, key=None, prime=None, primebits=1024):
-        if (key == None):
+        if (key is None):
             self.key = Random.new().read(32)
         else:
             self.key = key
-        if (prime == None):
+        if (prime is None):
             self.prime = number.getPrime(self.primebits)
         else:
             self.prime = prime

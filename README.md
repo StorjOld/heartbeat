@@ -57,16 +57,11 @@ Verifies in a public verification scheme that the file exists.
 
 #### Installation
 
-To build the heartbeat modules, including C++ SwPriv python extension module which is a privately verifiable Homomorphic Linear Authentication scheme, use setup.py.  You must have Crypto++ installed.
-
-To build and install heartbeat.SwPriv on a linux system:
+To build the heartbeat modules, including C++ SwPriv python extension module which is a privately verifiable Homomorphic Linear Authentication scheme, use pip.  You must have Crypto++ installed.
 
 ```
-python3 setup.py build
-sudo python3 setup.py install
+pip install .
 ```
 
-Your C++ compiler must support C++11, although really only for support of std::unique_ptr, which isn't included in the standard library before C++11.
-
-Also note that setup.py is configured to compile against the static Crypto++ library, not the DLL, and so on windows it defaults to searching for cryptlib, not cryptopp.
+Also note that setup.py is configured to compile against the static Crypto++ library, not the DLL, and so on windows it defaults to searching for cryptlib, not cryptopp.  Make sure cryptlib is located in the library search directory.
 

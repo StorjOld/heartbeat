@@ -37,12 +37,6 @@ lopt = {}
 libs = {'mingw32': ['cryptopp'],
         'unix': ['cryptopp'],
         'msvc': ['cryptlib']}
-
-#cryptopp_url = "http://www.cryptopp.com/cryptopp562.zip"
-#cryptopp_install_dir = "build/cryptopp"
-#crytpopp_sha256 = "5cbfd2fcb4a6b3aab35902e2e0f3b59d9171fee12b3fc2b363e1801dfec53574"
-
-#install_cpp_lib(cryptopp_url,cryptopp_install_dir,cryptopp_sha256)
         
 class build_ext_subclass(build_ext):
     def build_extensions(self):
@@ -71,23 +65,7 @@ swpriv = Extension('heartbeat.SwPriv',
                    define_macros=[('MAJOR_VERSION', '1'),
                                   ('MINOR_VERSION', '0')],
                    include_dirs=['cxx/pycxx','cxx'],
-                   # libraries=['cryptopp'],
-                   # library_dirs=['/usr/local/lib'],
                    sources=all_sources)
-
-# setup(name='SwPriv',
-      # version=__version__,
-      # description='Private homomorphic authenticator based proof of storage.',
-      # author='William T. James',
-      # author_email='jameswt@gmail.com',
-      # url='',
-      # long_description='''
-# Implements a privately verifiable homomorphic authentication
-# scheme from Shacham and Waters.
-# ''',
-      # ext_modules=[swpriv],
-      # cmdclass={'build_ext': build_ext_subclass})
-
 
 setup(
     name='heartbeat',

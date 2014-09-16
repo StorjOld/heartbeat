@@ -28,7 +28,7 @@
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
-from heartbeat import __version__
+import heartbeat
 
 copt = {'mingw32': [],
         'unix': [],
@@ -68,8 +68,8 @@ swpriv = Extension('heartbeat.SwPriv',
                    sources=all_sources)
 
 setup(
-    name='heartbeat',
-    version=__version__,
+    name='storj-heartbeat',
+    version=heartbeat.__version__,
     url='https://github.com/Storj/heartbeat',
     license='The MIT License',
     author='Storj Labs',

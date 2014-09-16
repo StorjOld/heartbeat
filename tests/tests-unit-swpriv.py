@@ -36,8 +36,8 @@ from decimal import Decimal
 from heartbeat.exc import HeartbeatError
 import heartbeat
 from heartbeat import SwPriv
-
-
+    
+   
 class TestSubClasses(unittest.TestCase):
     def setUp(self):
         self.challenge1 = SwPriv.Challenge()
@@ -78,5 +78,26 @@ class TestSubClasses(unittest.TestCase):
         state2 = self.state2.__getstate__()
         self.assertEqual(state1,state2)
 
+        
+class TestCorrectness(unittest.TestCase):
+    def setUp(self):
+        self.priv = SwPriv.SwPriv()
+        self.pub = self.priv.get_public()
+    
+    def tearDown(self):
+        del self.priv
+        del self.pub
+        
+    def test_correct(self):
+        file = open('files/test.txt','rb')
+        (tag,state) = self.priv.encode(file)
+        file.close()
+        chal = self.priv.gen_challenge(state)
+        file = open('files/test.txt','rb')
+        proof = self.pub.prove(file,chal,tag)
+        file.close()
+        self.assertTrue(self.priv.verify(proof,chal,state))
+        
+        
 if __name__ == '__main__':
     unittest.main()

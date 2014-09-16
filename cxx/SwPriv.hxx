@@ -331,10 +331,6 @@ public:
 			throw Py::RuntimeError(e.what());
 			return Py::None();
 		}
-		catch (const Py::Exception &)
-		{
-			return Py::None();
-		}
 	}
 	PYCXX_NOARGS_METHOD_DECL( SwPriv, _get_public )
 	
@@ -368,10 +364,6 @@ public:
 			throw Py::RuntimeError(e.what());
 			return Py::None();
 		}
-		catch (const Py::Exception &)
-		{
-			return Py::None();
-		}
 	}
 	PYCXX_VARARGS_METHOD_DECL( SwPriv, _encode )
 	
@@ -398,10 +390,6 @@ public:
 		catch (const std::exception &e)
 		{
 			throw Py::RuntimeError(e.what());
-			return Py::None();
-		}
-		catch (const Py::Exception &)
-		{
 			return Py::None();
 		}
 	}
@@ -431,10 +419,6 @@ public:
 		catch (const std::exception &e)
 		{
 			throw Py::RuntimeError(e.what());
-			return Py::None();
-		}
-		catch (const Py::Exception &)
-		{
 			return Py::None();
 		}
 	}

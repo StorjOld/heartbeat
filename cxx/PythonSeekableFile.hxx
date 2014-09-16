@@ -34,7 +34,15 @@ THE SOFTWARE.
 class PythonSeekableFile : public seekable_file
 {
 public:
-	PythonSeekableFile(Py::Object file) : _file(file) {}
+	PythonSeekableFile(Py::Object file) : _file(file) 
+	{
+		/*
+		if (!_file.callMemberFunction("seekable").isTrue())
+		{
+			throw std::runtime_error("File must be seekable.");
+		}
+		*/
+	}
 	
 	virtual size_t read(unsigned char *buffer,size_t sz)
 	{
@@ -47,14 +55,16 @@ public:
 	
 	virtual size_t seek(size_t i)
 	{
-		return (long)Py::Long(_file.callMemberFunction("seek",Py::TupleN(Py::Long((long)i))));
+		_file.callMemberFunction("seek",Py::TupleN(Py::Long((long)i)));
+		return (long)Py::Long(_file.callMemberFunction("tell"));
 	}
 	
 	virtual size_t bytes_remaining()
 	{
 		size_t start = (long)Py::Long(_file.callMemberFunction("tell"));
-		size_t end = (long)Py::Long(_file.callMemberFunction("seek",Py::TupleN(Py::Long(0),Py::Long(2))));
-		seek(start);
+		_file.callMemberFunction("seek",Py::TupleN(Py::Long(0L),Py::Long(2L)));
+		size_t end = (long)Py::Long(_file.callMemberFunction("tell"));
+		_file.callMemberFunction("seek",Py::TupleN(Py::Long((long)start)));
 		return end-start;
 	}
 private:

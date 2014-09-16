@@ -86,7 +86,7 @@ class OneHash(object):
         try:
             self.file_object.close()
         except:
-            None
+            pass
 
     def generate_challenges(self, num, root_seed):
         """ Generate the specified number of hash challenges.

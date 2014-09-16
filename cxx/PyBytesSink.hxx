@@ -71,7 +71,7 @@ public:
 		if (py_resize(&_buffer,n))
 		{
 			std::stringstream msg;
-			msg << "Unable to resize PyBytesSink.  Requested size: " << n << ", new buffer is at " << std::hex << (int)_buffer;
+			msg << "Unable to resize PyBytesSink.  Requested size: " << n;
 			throw std::runtime_error(msg.str());
 		}
 		//std::cout << "Buffer resized to: " << std::hex << (int)_buffer << std::endl;
@@ -102,7 +102,7 @@ public:
 		if (py_resize(&_buffer,_offset))
 		{
 			std::stringstream msg;
-			msg << "Unable to resize PyBytesSink.  Requested size: " << _offset << ", new buffer is at " << std::hex << (int)_buffer;
+			msg << "Unable to resize PyBytesSink.  Requested size: " << _offset;
 			throw std::runtime_error(msg.str());
 		}
 		//std::cout << "Buffer resized to: " << std::hex << (int)_buffer << std::endl;

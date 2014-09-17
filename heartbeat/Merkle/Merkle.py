@@ -29,7 +29,6 @@ import random
 
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA256
-from Crypto import Random
 
 from .MerkleTree import MerkleTree
 from ..exc import HeartbeatError
@@ -43,11 +42,11 @@ class Challenge(object):
     """
     def __init__(self, seed, index):
         """Initialization method
-        
-        :param seed: this is the seed for this challenge, representing the seed to use
-        when calculating the HMAC of the specified block
-        :param index: this is challenge index, the index of the particular branch of the
-        merkle tree 
+
+        :param seed: this is the seed for this challenge, representing the
+        seed to use when calculating the HMAC of the specified block
+        :param index: this is challenge index, the index of the
+        particular branch of the merkle tree
         """
         self.seed = seed
         self.index = index
@@ -55,12 +54,13 @@ class Challenge(object):
 
 # tag is the stripped merkle tree
 class Tag(object):
-    """The Tag class represents the file tag that is a stripped merkle tree, that is
-    a merkle tree without the leaves, which are the seeded hashes of each chunk."""
-    
+    """The Tag class represents the file tag that is a stripped merkle
+    tree, that is a merkle tree without the leaves, which are the seeded
+    hashes of each chunk."""
+
     def __init__(self, tree):
         """Initialization method
-        
+
         :param tree: this is the stripped merkle tree
         """
         self.tree = tree
@@ -68,25 +68,26 @@ class Tag(object):
 # state is unused, since we don't have any secret data
 # that needs to be stored on the server
 
+
 class State(object):
-    """The State class represents the state of a file, which can be encrypted and
-    stored on the server, or held plaintext by the client.  It is mutable, i.e. it will
-    change every time a challenge is issued, since it holds the current seed and the 
-    merkle branch index for the last challenge.  If it is stored on the server
-    it should be signed
+    """The State class represents the state of a file, which can be encrypted
+    and stored on the server, or held plaintext by the client.  It is mutable,
+    i.e. it will change every time a challenge is issued, since it holds the
+    current seed and the merkle branch index for the last challenge.  If it
+    is stored on the server it should be signed
     """
     def __init__(self, index, seed):
         self.index = index
         self.seed = seed
         self.hmac = None
-        
+
     def sign(self, key):
         # sign
         h = HMAC.new(key, None, SHA256)
         h.update(self.index)
         h.update(self.seed)
         self.hmac = h.digest()
-        
+
     def checksig(self, key):
         # check sig
         h = HMAC.new(key, None, SHA256)
@@ -94,16 +95,15 @@ class State(object):
         h.update(self.seed)
         if (h.digest() != self.hmac):
             raise HeartbeatError("Signature invalid on state.")
-        
-        
+
 
 # proof is the leaf and branch
 class Proof(object):
     """The proof class encpasulates proof that a file exists"""
     def __init__(self, leaf, branch):
         """Initialization method
-        
-        :param leaf: this is leaf of the merkle tree branch, i.e. the seeded 
+
+        :param leaf: this is leaf of the merkle tree branch, i.e. the seeded
         HMAC of the file chunk that was specified in the challenge.
         :param branch: this is the merkle tree branch without the leaf
         """
@@ -113,9 +113,9 @@ class Proof(object):
 
 # this is the heartbeat object
 class Merkle(object):
-    """This class represents a heartbeat based on a merkle tree hash.  The client generates a key, which is
-    used for the generation of challenges.  Then the client generates a number of challenges based on this 
-    key.
+    """This class represents a heartbeat based on a merkle tree hash.  The client
+    generates a key, which is used for the generation of challenges.  Then the
+    client generates a number of challenges based on this key.
     """
     def __init__(self,
                  n=256,
@@ -134,11 +134,12 @@ class Merkle(object):
         return Merkle(self.n, self.chunksz)
 
     def encode(self, file):
-        """ this function generates a merkle tree with the leaves as seed file hashes,
-        the seed for each leaf being a deterministic seed generated from a key.
+        """ this function generates a merkle tree with the leaves as seed file
+        hashes, the seed for each leaf being a deterministic seed generated
+        from a key.
         """
         mt = MerkleTree()
-        state = State(0,os.urandom(32))
+        state = State(0, os.urandom(32))
         seed = MerkleHelper.get_next_seed(self.key, state.get_seed())
         for i in range(0, self.n):
             file.seek(0)
@@ -153,7 +154,8 @@ class Merkle(object):
         return (tag, state)
 
     def gen_challenge(self, state):
-        # returns the next challenge and increments the seed and index in the state
+        # returns the next challenge and increments the seed and index
+        # in the state
         state.checksig(self.key)
         if (state.index >= self.n):
             raise HeartbeatError("Out of challenges.")
@@ -171,6 +173,7 @@ class Merkle(object):
         return MerkleTree.verify_branch(proof.leaf,
                                         proof.branch,
                                         self.root)
+
 
 def MerkleHelper(object):
     @staticmethod

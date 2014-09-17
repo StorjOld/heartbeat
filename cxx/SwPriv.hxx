@@ -50,7 +50,7 @@ class PyBytesStateAccessible : public T
 public:
 	enum encoding_type { binary = 0, base64 = 1 };
 	
-	PyBytesStateAccessible() : _encoding(base64) {}
+	PyBytesStateAccessible() : _encoding(binary) {}
 
 	py_array get_state()
 	{

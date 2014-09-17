@@ -108,8 +108,8 @@ public:
 
 	static void init_type_dont_ready(const char *T_type_name,const char *doc = "")
 	{
-		behaviors().name(T_type_name);
-		behaviors().doc(doc);
+		Tthis::behaviors().name(T_type_name);
+		Tthis::behaviors().doc(doc);
 		
 		Tthis::PYCXX_ADD_NOARGS_METHOD( __getstate__, _get_state, "__getstate__()\nReturns the state of this object for serialization." );
 		Tthis::PYCXX_ADD_VARARGS_METHOD(  __setstate__, _set_state, "__setstate__( state )\nTakes the state as returned by __getstate__ as an argument.  Sets the object's internal state to that specified.");
@@ -120,7 +120,7 @@ public:
 	{
 		init_type_dont_ready(T_type_name,doc);
 		
-		behaviors.readyType();
+		Tthis::behaviors.readyType();
 	}
 	
 	Py::Object getattro( const Py::String &name_ )

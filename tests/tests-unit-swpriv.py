@@ -69,7 +69,7 @@ class TestSubClasses(unittest.TestCase):
         self.assign_and_compare_states(self.challenge1, self.challenge2)
         self.assign_and_compare_states(self.tag1, self.tag2)
         self.assign_and_compare_states(self.proof1, self.proof2)
-        key = os.urandom(32)
+        key = os.urandom(self.state1.keysize())
         self.state1.encrypt(key,key,True)
         state1 = self.state1.__getstate__()
         self.state2.__setstate__(state1)

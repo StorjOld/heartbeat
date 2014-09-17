@@ -167,6 +167,7 @@ public:
 		
 		PYCXX_ADD_VARARGS_METHOD( encrypt, _encrypt, "doc: encrypt(encryption_key,hmac_key)" );
 		PYCXX_ADD_VARARGS_METHOD( decrypt, _decrypt, "doc: decrypt(encryption_key,hmac_key)" );
+		PYCXX_ADD_NOARGS_METHOD( keysize, _keysize, "doc: sz = keysize()" );
 		
 		behaviors().readyType();
 	}
@@ -229,6 +230,12 @@ public:
 	}
 	PYCXX_VARARGS_METHOD_DECL( State, _decrypt )
 	
+	Py::Object _keysize()
+	{
+		return Py::Long((long)shacham_waters_private_data::key_size);
+	}
+	PYCXX_NOARGS_METHOD_DECL( State, _keysize )
+	
 private:
 	void convert_and_check_key(Py::Object in_key,byte **out_key,ssize_t *out_sz)
 	{
@@ -239,7 +246,7 @@ private:
 		if (*out_sz != shacham_waters_private_data::key_size)
 		{
 			std::stringstream ss;
-			ss << "Encryption key must be " << shacham_waters_private_data::key_size << " bytes in length." << std::endl;
+			ss << "Encryption key must be " << shacham_waters_private_data::key_size << " bytes in length.  Use keysize() to retrieve the key size." << std::endl;
 			throw Py::RuntimeError(ss.str());
 		}
 	}

@@ -1,9 +1,27 @@
 heartbeat
 =========
 
-This is the API for heartbeat, of which there can be many different types.  There are at least two distinct structures: public and private verifiable schemes.  For publically verifiable schemes, the auditor must only have a public beat (generated from a private beat with `beat.get_public()` ).  
+This is the API for heartbeat which is for proving the existance of a file on a remote server without downloading the entire file.  In theory there are both publicly and privately verifiable schemes.  Publicly verifiable schemes work even when the data auditor does not have access to any more information than the person storing the data.  Privately verifiable schemes work only when the auditor has access to secrets that the storer does not have.
 
 #### Overview
+
+In practice, the client and server will run an implementation of this software.  Before uploading, the client `tag`s the target `file` and some `state` information is generated.  Then the `tag`, `state` and `file` are stored on the remote server.  When the client wants to verify that the server is storing the data, he retrieves the `state` information, generates a `challenge`, and sends that `challenge` to the server.  The server then sends back a `proof` that is calculated from the `challenge`, the `tag`, and the `file`.  The client can then verify from the `proof` that the server is storing the `file`.
+
+The `file` is a binary readable object that implements methods `read`, `seek`, and `tell`.
+
+The `tag` is a potentially large set of information that matches the particular file that is stored.
+
+The `state` is a possibly encrypted and signed set of data that represents some of the information about how the tags were generated, and allows verification of the file by the client.  In a publicly verificable scheme, the state information would not be encrypted, and might not be necessary.
+
+The `challenge` is a set of data that informs the server how to calculate a proof.  It is not predictable by the server and therefore the response cannot be predetermined.
+
+The `proof` is a set of data that represents proof that the server has read access to the complete file contents.
+
+For transferring of data between client and server the `tag`, `state`, `challenge`, and `proof` objects can be pickled since they should provide at the very least __getstate__() and __setstate__() methods.
+
+#### Usage
+
+The API for a heartbeat module is given below.  The specific implementation of each heartbeat type should be subclasses of the heartbeat class as used below.
 
 ```python
 beat = heartbeat()

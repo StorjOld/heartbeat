@@ -85,7 +85,7 @@ public:
 		_msb_mask = p._msb_mask;
 	}
 	
-	void set_key(unsigned char *key,unsigned int key_length)
+	void set_key(const unsigned char *key,unsigned int key_length)
 	{
 		_key_sz = key_length;
 		_key = smart_buffer(new unsigned char[_key_sz]);

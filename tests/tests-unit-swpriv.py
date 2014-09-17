@@ -32,11 +32,13 @@ import random
 import hashlib
 import unittest
 from decimal import Decimal
+import pickle
 
 from heartbeat.exc import HeartbeatError
 import heartbeat
 from heartbeat import SwPriv
-    
+
+from GenericCorrectnessTests import GenericCorrectnessTests
    
 class TestSubClasses(unittest.TestCase):
     def setUp(self):
@@ -66,109 +68,34 @@ class TestSubClasses(unittest.TestCase):
         self.assertEqual(state1,state2)
         
     def test_get_set_state(self):
+        print('checking challenge')
         self.assign_and_compare_states(self.challenge1, self.challenge2)
+        print('checking tag')
         self.assign_and_compare_states(self.tag1, self.tag2)
+        print('checking proof')
         self.assign_and_compare_states(self.proof1, self.proof2)
+        print('generating key')
         key = os.urandom(self.state1.keysize())
+        print('encrypting')
         self.state1.encrypt(key,key,True)
+        print('getting state')
         state1 = self.state1.__getstate__()
+        print('setting state')
         self.state2.__setstate__(state1)
+        print('decrypting')
         self.state2.decrypt(key,key)
+        print('encrypting')
         self.state2.encrypt(key,key,True)
+        print('getting state')
         state2 = self.state2.__getstate__()
+        print('checking')
         self.assertEqual(state1,state2)
 
-        
 class TestCorrectness(unittest.TestCase):
-    def setUp(self):
-        pass
-    
-    def tearDown(self):
-        pass
-        
-    def test_correct(self):
-        priv = SwPriv.SwPriv()
-        pub = priv.get_public()
-        file = open('files/test.txt','rb')
-        (tag,state) = priv.encode(file)
-        file.close()
-        chal = priv.gen_challenge(state)
-        file = open('files/test.txt','rb')
-        proof = pub.prove(file,chal,tag)
-        file.close()
-        self.assertTrue(priv.verify(proof,chal,state))
-        
-        file = open('files/test3.txt','rb')
-        proof = pub.prove(file,chal,tag)
-        file.close()
-        self.assertFalse(priv.verify(proof,chal,state))
-        
+    def test_correctness(self):
+        GenericCorrectnessTests.generic_correctness_test(self,SwPriv.SwPriv)
     def test_scheme(self):
-        # set up client
-        client = SwPriv.SwPriv()
-        
-        # send public heart beat to server
-        pub = client.get_public()
-        message = pub.__getstate__()
-        
-        del pub
-        
-        # set up server
-        server = SwPriv.SwPriv()
-        server.__setstate__(message)
-        
-        # encode the file
-        file = open('files/test.txt','rb')
-        (tag,state) = client.encode(file)
-        file.close()
-        
-        message = (tag.__getstate__(),state.__getstate__())
-        # file would also be sent
-        
-        # delete client side information
-        del state,tag
-        
-        # store server side information
-        serv_tag = SwPriv.Tag()
-        serv_tag.__setstate__(message[0])
-        serv_state = SwPriv.State()
-        serv_state.__setstate__(message[1])
-        
-        # client now wants to challenge server
-        # client requests state from server
-        
-        # server sends back state
-        message = serv_state.__getstate__()
-        
-        # client interprets state from server
-        state = SwPriv.State()
-        state.__setstate__(message)
-        
-        # client generates challenge
-        chal = client.gen_challenge(state)
-        
-        # client sends challenge to server
-        message = chal.__getstate__()
-        
-        # server interprets challenge from client
-        serv_chal = SwPriv.Challenge()
-        serv_chal.__setstate__(message)
-        
-        # server generates proof
-        file = open('files/test.txt','rb')
-        serv_proof = server.prove(file,serv_chal,serv_tag)
-        file.close()
-        
-        # send proof back to client
-        message = serv_proof.__getstate__()
-        
-        # client interprets proof from server
-        proof = SwPriv.Proof()
-        proof.__setstate__(message)
-        
-        # client checks proof
-        self.assertTrue(client.verify(proof,chal,state))
-        
+        GenericCorrectnessTests.generic_scheme_test(self,SwPriv.SwPriv)
         
         
 if __name__ == '__main__':

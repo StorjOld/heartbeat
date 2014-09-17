@@ -53,7 +53,7 @@ class build_ext_subclass(build_ext):
                 e.libraries = libs[c]
         build_ext.build_extensions(self)
 
-swpriv_sources = ['cxx/shacham_waters_private.cxx', 'cxx/SwPriv.cxx']
+swpriv_sources = ['cxx/shacham_waters_private.cxx', 'cxx/SwPriv.cxx', 'cxx/base64.cxx']
 pycxx_sources = ['cxx/pycxx/Src/cxxsupport.cxx',
                  'cxx/pycxx/Src/cxx_extensions.cxx',
                  'cxx/pycxx/Src/cxxextensions.c',

@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 */
 
-//#define CRYPTOPP_IMPORTS 
+//#define CRYPTOPP_IMPORTS
 //#include <cryptopp/dll.h>
 
 #include "shacham_waters_private.hxx"
@@ -411,7 +411,7 @@ void shacham_waters_private_data::state::public_interpretation()
 {
 	if (!_encrypted_and_signed)
 	{
-		throw std::runtime_error("in shacham_waters_private_data::state::check_sig_and_decrypt, data must be encrypted before decryption and checking signature.");
+		throw std::runtime_error("in shacham_waters_private_data::state::check_sig_and_decrypt, data must be encrypted before extracting n");
 	}
 	
 	// simply gets n out of the stream
@@ -426,14 +426,11 @@ void shacham_waters_private_data::state::public_interpretation()
 	_n = ntohl(n);
 }
 
-inline CryptoPP::Integer shacham_waters_private_data::challenge::v(unsigned int i) const
+inline void shacham_waters_private_data::challenge::set_key(const unsigned char* key,unsigned int key_length)
 {
-	return _v.evaluate(i);
-}
-
-inline CryptoPP::Integer shacham_waters_private_data::challenge::i(unsigned int i) const
-{
-	return _i.evaluate(i);
+	_key_sz = key_length;
+	_key = smart_buffer(new unsigned char[_key_sz]);
+	memcpy(_key.get(),key,_key_sz);
 }
 
 void shacham_waters_private_data::challenge::serialize(CryptoPP::BufferedTransformation &bt) const
@@ -450,16 +447,15 @@ void shacham_waters_private_data::challenge::serialize(CryptoPP::BufferedTransfo
 	bt.Put(get_key(),get_key_size());
 	
 	// write B size
-	CryptoPP::Integer B = _v.get_limit();
 	
-	unsigned int B_sz = B.MinEncodedSize();
+	unsigned int B_sz = _v_max.MinEncodedSize();
 	n = htonl(B_sz);
 	
 	bt.PutWord32(n);
 	
 	// write B
 	//std::cout << "Encoding B in " << B_sz << " bytes." << std::endl;
-	B.Encode(bt,B_sz);
+	_v_max.Encode(bt,B_sz);
 }
 
 void shacham_waters_private_data::challenge::deserialize(CryptoPP::BufferedTransformation &bt)
@@ -470,31 +466,21 @@ void shacham_waters_private_data::challenge::deserialize(CryptoPP::BufferedTrans
 	bt.GetWord32(n);
 	_l = ntohl(n);
 	
-	smart_buffer key;
 	// get key size
 	bt.GetWord32(n);
-	n = ntohl(n);
-	key = smart_buffer(new unsigned char[n]);
+	_key_sz = ntohl(n);
+	_key = smart_buffer(new unsigned char[_key_sz]);
 	
-	bt.Get(key.get(),n);
-	
-	if (n > 0) 
-	{
-		set_key(key.get(),n);
-	}
+	// read key
+	bt.Get(_key.get(),_key_sz);
 	
 	// read B size
 	bt.GetWord32(n);
 	n = ntohl(n);
 	
-	CryptoPP::Integer B;
-	
 	// read B
 	//std::cout << "Dencoding B in " << n << " bytes." << std::endl;
-	B.Decode(bt,n);
-	
-	// set B
-	_v.set_limit(B);
+	_v_max.Decode(bt,n);
 }
 
 void shacham_waters_private_data::proof::serialize(CryptoPP::BufferedTransformation &bt) const
@@ -649,26 +635,20 @@ void shacham_waters_private::encode(tag &t, state &s, simple_file &f)
 	s.encrypt_and_sign(_k_enc,_k_mac);
 }
 
-void shacham_waters_private::gen_challenge(challenge &c, const state &s)
+void shacham_waters_private::gen_challenge(challenge &c, const state &s_enc)
 {
-	if (!gen_challenge(c,s,s.get_n(),_p))
+	state s = s_enc;
+	// decrypt and check sig of state
+	if (s.encrypted() && !s.check_sig_and_decrypt(_k_enc,_k_mac))
 	{
-		throw std::runtime_error("Signature check on state failed.");
+		throw std::runtime_error("Signature check or decryption failed in generating challenge.  State of remote file cannot be verified.");
 	}
+	gen_challenge(c,s.get_n(),_p);
 }
 
-bool shacham_waters_private::gen_challenge(challenge &c, const state &s_enc, unsigned int l, const CryptoPP::Integer &B)
+void shacham_waters_private::gen_challenge(challenge &c, unsigned int l, const CryptoPP::Integer &B)
 {
 	//std::cout << "Generating challenge..." << std::endl;
-	
-	state s = s_enc;
-	
-	// decrypt and check sig of state
-	if (!s.check_sig_and_decrypt(_k_enc,_k_mac))
-	{
-		std::cout << "Signature check or decryption failed..." << std::endl;
-		return false;
-	}
 	
 	CryptoPP::AutoSeededRandomPool rng;
 	
@@ -679,9 +659,6 @@ bool shacham_waters_private::gen_challenge(challenge &c, const state &s_enc, uns
 	
 	c.set_key(k,shacham_waters_private_data::key_size);
 	c.set_v_limit(B);
-	c.set_i_limit(s.get_n());
-	
-	return true;
 }
 
 void shacham_waters_private::prove(proof &p, seekable_file &f, const challenge &c, const tag &t)
@@ -691,16 +668,17 @@ void shacham_waters_private::prove(proof &p, seekable_file &f, const challenge &
 	
 	//f.redefine_chunks(_sector_size,_sectors);
 	
-	
-	
 	unsigned int chunk_size = _sectors*_sector_size;
 	smart_buffer buffer(new unsigned char[_sector_size]);
 	
 	// serializer cannot get indexer limits, so we manually set here
-	prf indexer = c.get_i();
-	// no longer want to require state in prove, removing that requirement
-	//indexer.set_limit(s.get_n());
+	prf indexer;
+	indexer.set_key(c.get_key(),c.get_key_size());
 	indexer.set_limit(t.sigma().size());
+	
+	prf v;
+	v.set_key(c.get_key(),c.get_key_size());
+	v.set_limit(c.get_v_limit());
 	
 	
 	p.mu().clear();
@@ -715,7 +693,7 @@ void shacham_waters_private::prove(proof &p, seekable_file &f, const challenge &
 			if (f.seek(pos) == pos)
 			{
 				size_t bytes_read = f.read(buffer.get(),_sector_size);
-				p.mu().at(j) += c.v(i) * CryptoPP::Integer(buffer.get(),bytes_read);
+				p.mu().at(j) += v.evaluate(i) * CryptoPP::Integer(buffer.get(),bytes_read);
 				p.mu().at(j) %= _p;
 			}
 			else
@@ -731,7 +709,7 @@ void shacham_waters_private::prove(proof &p, seekable_file &f, const challenge &
 	for (unsigned int i=0;i<c.get_l();i++)
 	{
 		//std::cout << "sigma += v_" << i << " * sigma_" << indexer.evaluate(i) << std::endl;
-		p.sigma() += c.v(i) * t.sigma().at(indexer.evaluate(i).ConvertToLong());
+		p.sigma() += v.evaluate(i) * t.sigma().at(indexer.evaluate(i).ConvertToLong());
 		p.sigma() %= _p;
 	}
 	
@@ -746,22 +724,27 @@ bool shacham_waters_private::verify(const proof &p, const challenge &c, const st
 	state s = s_enc;
 	
 	// decrypt and check sig of state
-	if (!s.check_sig_and_decrypt(_k_enc,_k_mac))
+	if (s.encrypted() && !s.check_sig_and_decrypt(_k_enc,_k_mac))
 	{
-		std::cout << "Signature check or decryption failed..." << std::endl;
+		std::cout << "Signature check or decryption failed." << std::endl;
 		return false;
 	}
 	
 	// serializer will not get manual limits, ensure they are set here
-	prf indexer = c.get_i();
+	prf indexer;
+	indexer.set_key(c.get_key(),c.get_key_size());
 	indexer.set_limit(s.get_n());
+	
+	prf v;
+	v.set_key(c.get_key(),c.get_key_size());
+	v.set_limit(c.get_v_limit());
 	
 	s.set_f_limit(_p);
 	s.set_alpha_limit(_p);
 	
 	for (unsigned int i=0;i<c.get_l();i++)
 	{
-		rhs += c.v(i) * s.f(indexer.evaluate(i).ConvertToLong());
+		rhs += v.evaluate(i) * s.f(indexer.evaluate(i).ConvertToLong());
 		rhs %= _p;
 	}
 	

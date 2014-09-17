@@ -81,6 +81,7 @@ public:
 		void serialize(CryptoPP::BufferedTransformation &bt) const;
 		void deserialize(CryptoPP::BufferedTransformation &bt);
 		
+		bool encrypted() const { return _encrypted_and_signed; }
 		void encrypt_and_sign(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size],bool convergent_encryption = false);
 		bool check_sig_and_decrypt(byte k_enc[shacham_waters_private_data::key_size],byte k_mac[shacham_waters_private_data::key_size]);
 		void public_interpretation();
@@ -108,29 +109,26 @@ public:
 	class challenge : public serializable 
 	{
 	public:
+		challenge() : _key_sz(0) {}
+	
 		unsigned int get_l() const { return _l; }
 		void set_l(unsigned int l) { _l = l; }
 		
-		CryptoPP::Integer v(unsigned int i) const;
-		CryptoPP::Integer i(unsigned int i) const;
+		void set_v_limit(const CryptoPP::Integer &limit) { _v_max = limit; }
+		const CryptoPP::Integer& get_v_limit() const { return _v_max; }
 		
-		void set_v_limit(const CryptoPP::Integer &limit) { _v.set_limit(limit); }
-		void set_i_limit(unsigned int limit) { _i.set_limit(CryptoPP::Integer(CryptoPP::Integer::POSITIVE,(CryptoPP::lword)limit)); }
-		
-		void set_key(unsigned char* key,unsigned int key_length) { _v.set_key(key,key_length); _i.set_key(key,key_length); }
-		const unsigned char *get_key() const {return _v.get_key(); }
-		unsigned int get_key_size() const { return _v.get_key_size(); }
+		void set_key(const unsigned char* key,unsigned int key_length);
+		const unsigned char *get_key() const {return _key.get(); }
+		unsigned int get_key_size() const { return _key_sz; }
 		
 		void serialize(CryptoPP::BufferedTransformation &bt) const;
 		void deserialize(CryptoPP::BufferedTransformation &bt);
 		
-		const prf& get_v() const { return _v; }
-		const prf& get_i() const { return _i; }
-		
 	private:
 		unsigned int _l;
-		prf _v;
-		prf _i;
+		CryptoPP::Integer _v_max;
+		smart_buffer _key;
+		unsigned int _key_sz;
 	};
 	
 	class proof : public serializable
@@ -172,7 +170,7 @@ public:
 	// generates a challenge for the beat with some specific parameters for this scheme
 	// l is the number of chunks to check for, defaulting to n, and B is the basis for 
 	// the challenge vector, defaulting to p
-	bool gen_challenge(challenge &c, const state &s, unsigned int l, const CryptoPP::Integer &B);
+	void gen_challenge(challenge &c, unsigned int l, const CryptoPP::Integer &B);
 	
 	// gets a proof of storage for the file
 	void prove(proof &p, seekable_file &f, const challenge &c,const tag &t);

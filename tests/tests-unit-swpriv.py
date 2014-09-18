@@ -130,7 +130,7 @@ class TestSwPriv(unittest.TestCase):
         # when encoded in binary the tag will be a tenth the size of the file
         # plus some overhead for storage of the integers.  the overhead should be
         # 4 bytes per 128 byte integer, plus 4 bytes for the number of integers
-        self.assertLessEqual(len_tag,len_file*0.103125 + 4)
+        self.assertLessEqual(len_tag,len_file*0.104 + 4)
     
 class TestCorrectness(unittest.TestCase):
     def test_correctness(self):

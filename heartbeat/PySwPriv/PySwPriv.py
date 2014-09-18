@@ -30,19 +30,35 @@ from Crypto.Util import number
 
 
 class KeyedPRF(object):
-    # keyed prf is a psuedo random function
-    # it hashes the input, pads it to the correct output
-    # length, and then encrypts it with AES
-    # finally it checks that the result is within the desired range
-    # if it is it returns the value as a long integer
+    """KeyedPRK is a psuedo random function. It hashes the input, pads it to
+    the correct output length, and then encrypts it with AES. Finally it
+    checks that the result is within the desired range. If it is it returns
+    the value as a long integer, if it isn't, it increments a nonce in the
+    input and recalculates until it finds an integer in the given range
+    """
     @staticmethod
     def pad(data, length):
+        """This function returns a padded version of the input data to the
+        given length.  this function will shorten the given data to the length
+        specified if necessary.  post-condition: len(data) = length
+
+        :param data: the data byte array to pad
+        :param length: the length to pad the array to
+        """
         if (len(data) > length):
             return data[0:length]
         else:
             return data + b"\0"*(length-len(data))
 
     def __init__(self, key, range):
+        """Initialization method
+
+        :param key: the key to use for the PRF.  this key is the only source
+        of randomness for the output of this function. should be a hashable
+        object, preferably a byte array or string
+        :param range: the output range as a long of the function. the output
+        of the function will be in [0:range)
+        """
         self.key = key
         self.range = range
         # we need a mask because the number we'll generate will be of a
@@ -52,6 +68,10 @@ class KeyedPRF(object):
         self.mask = (1 << number.size(self.range))-1
 
     def eval(self, x):
+        """This method returns the evaluation of the function with input x
+
+        :param x: this is the input as a Long
+        """
         aes = AES.new(self.key, AES.MODE_CFB, "\0"*AES.block_size)
         while True:
             nonce = 0
@@ -64,23 +84,45 @@ class KeyedPRF(object):
 
 
 class Challenge(object):
-    # chunks : number of chunks to challenge
-    # v_max : largest coefficient value
-    # key : the key for this challenge
+    """The challenge object that represents a challenge posed to the server
+    for proof of storage of a file.
+    """
     def __init__(self, chunks, v_max, key):
+        """Initialization method
+
+        :param chunks: number of chunks to challenge
+        :param v_max: largest coefficient value
+        :param key: the key for this challenge
+        """
         self.chunks = chunks
         self.v_max = v_max
         self.key = key
 
 
 class Tag(object):
+    """The file tag, generated before uploading by the client.
+    """
     def __init__(self):
+        """Initialization method
+        """
         self.sigma = list()
 
 
 class State(object):
+    """The state which contains two psueod random function keys for generating
+    the coeffients for the file tag and verification.
+    """
     def __init__(self, f_key, alpha_key, chunks=0,
                  encrypted=False, iv=None, hmac=None):
+        """Initialization method
+
+        :param f_key: this is the key for the f psuedo random function
+        :param alpha_key: this is the key for the alpha PRF
+        :param chunks: the number of chunks in the tagged file
+        :param encrypted: whether the state is encrypted (and signed)
+        :param iv: the initialization vector for encryption/decryption
+        :param hmac: the HMAC signature
+        """
         self.f_key = f_key
         self.alpha_key = alpha_key
         self.chunks = chunks
@@ -89,6 +131,12 @@ class State(object):
         self.hmac = hmac
 
     def encrypt(self, key):
+        """This method encrypts and signs the state to make it unreadable by
+        the server, since it contains information that would allow faking
+        proof of storage.
+
+        :param key: the key to encrypt and sign with
+        """
         if (self.encrypted):
             return
         # encrypt
@@ -106,6 +154,10 @@ class State(object):
         self.encrypted = True
 
     def decrypt(self, key):
+        """This method checks the signature on the state and decrypts it.
+
+        :param key: the key to decrypt and sign with
+        """
         if (not self.encrypted):
             return
         # check signature
@@ -124,29 +176,52 @@ class State(object):
 
 
 class Proof(object):
+    """This class encapsulates proof of storage
+    """
     def __init__(self):
+        """Initialization method"""
         self.mu = list()
         self.sigma = None
 
 
 class PySwPriv(object):
+    """This class encapsulates the proof of storage engine for the Shacham
+    Waters Private scheme.
+    """
     def __init__(self, sectors=10, key=None, prime=None, primebits=1024):
+        """Initialization method
+
+        :param sectors: the number of sectors to break each chunk into.  this
+        allows a trade off between communication complexity and storage
+        complexity.  increase the number of sectors to decrease the server
+        storage requirement (tag size will decrease) but communication
+        complexity will increase
+        :param key: the key used for encryption and decryption of the state
+        :param prime: the prime to determine the modular group
+        :param primebits: optionally the number of bits to use for generation
+        of a prime if prime is given as None
+        """
         if (key is None):
             self.key = Random.new().read(32)
         else:
             self.key = key
         if (prime is None):
-            self.prime = number.getPrime(self.primebits)
+            self.prime = number.getPrime(primebits)
         else:
             self.prime = prime
         self.sectors = sectors
-        self.sectorsize = primebits//8
-        self.primebits = primebits
+        self.sectorsize = self.prime.bit_length()//8
 
     def get_public(self):
+        """Gets a public version of the object with the key stripped."""
         return PySwPriv(self.sectors, None, self.prime)
 
     def encode(self, file):
+        """This function returns a (tag,state) tuple that is calculated for
+        the given file.  the state will be encrypted with `self.key`
+
+        :param file: the file to encode
+        """
         tag = Tag()
         tag.sigma = list()
 
@@ -179,6 +254,16 @@ class PySwPriv(object):
         return (tag, state)
 
     def gen_challenge(self, state):
+        """This function generates a challenge for given state.  It selects a
+        random number and sets that as the challenge key.  By default, v_max
+        is set to the prime, and the number of chunks to challenge is the
+        number of chunks in the file.  (this doesn't guarantee that the whole
+        file will be checked since some chunks could be selected twice and
+        some selected none.
+
+        :param state: the state to use.  it can be encrypted, as it will
+        have just been received from the server
+        """
         state.decrypt(self.key)
 
         chal = Challenge(state.chunks, self.prime, Random.new().read(32))
@@ -186,7 +271,14 @@ class PySwPriv(object):
         return chal
 
     def prove(self, file, chal, tag):
+        """This function returns a proof calculated from the file, the
+        challenge, and the file tag
 
+        :param file: this is a file like object that supports `read()`,
+        `tell()` and `seek()` methods.
+        :param chal: the challenge to use for proving
+        :param tag: the file tag
+        """
         chunk_size = self.sectors*self.sectorsize
 
         index = KeyedPRF(chal.key, len(tag.sigma))
@@ -199,7 +291,8 @@ class PySwPriv(object):
         for j in range(0, self.sectors):
             for i in range(0, chal.chunks):
                 pos = index.eval(i) * chunk_size + j * self.sectorsize
-                if (file.seek(pos) == pos):
+                file.seek(pos)
+                if (file.tell() == pos):
                     buffer = file.read(self.sectorsize)
                     proof.mu[j] += v.eval(i) * number.bytes_to_long(buffer)
                 else:
@@ -214,6 +307,12 @@ class PySwPriv(object):
         return proof
 
     def verify(self, proof, chal, state):
+        """This returns True if the proof matches the challenge and file state
+
+        :param proof: the proof that was returned from the server
+        :param chal: the challenge sent to the server
+        :param state: the state of the file, which can be encrypted
+        """
         state.decrypt(self.key)
 
         index = KeyedPRF(chal.key, state.chunks)

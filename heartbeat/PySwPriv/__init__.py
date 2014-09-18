@@ -27,4 +27,4 @@
 
 from .PySwPriv import KeyedPRF, Challenge, Tag, State, Proof, PySwPriv  # NOQA
 
-__version__ = "0.1.0"
+__version__ = "0.1.4"

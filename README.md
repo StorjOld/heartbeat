@@ -15,7 +15,7 @@ The `file` is a binary readable object that implements methods `read`, `seek`, a
 
 The `tag` is a potentially large set of information that matches the particular file that is stored.
 
-The `state` is a possibly encrypted and signed set of data that represents some of the information about how the tags were generated, and allows verification of the file by the client.  In a publicly verificable scheme, the state information would not be encrypted, and might not be necessary.
+The `state` is a possibly encrypted and signed set of data that represents some of the information about how the tags were generated, and allows verification of the file by the client.  In a publicly verificable scheme, the state information would not be encrypted, and might not be necessary.  Additionally, sometimes the state contains state information for generation of the next challenges.
 
 The `challenge` is a set of data that informs the server how to calculate a proof.  It is not predictable by the server and therefore the response cannot be predetermined.
 
@@ -27,7 +27,7 @@ This scheme setup is designed so that the client only has to maintain a few piec
 
 #### Usage
 
-The API for a heartbeat module is given below.  The specific implementation of each heartbeat type should be subclasses of the heartbeat class as used below.
+The API for a heartbeat module is given below.  The specific implementation of each heartbeat type should be subclasses of the heartbeat class as used below.  See the Implementations section for more detail on the specific implementations of this heartbeat base class.
 
 ```python
 beat = heartbeat()
@@ -126,7 +126,7 @@ Please see the paper or the code for more details.  This scheme as described abo
 
 ##### PySwPriv
 
-This is the same as SwPriv but written in pure python.  It is significantly slower (understandably) but provides the same functionality.
+This is the same as SwPriv but written in pure python.  It is significantly slower (understandably) but provides basically the same functionality.
 
 #### Installation
 

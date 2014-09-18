@@ -109,6 +109,8 @@ class State(object):
 
     def sign(self, key):
         """This function signs the state with a key to prevent modification.
+        This should not need to be explicitly used since the encode function
+        outputs a signed state.
 
         :param key: the key to use for signing
         """
@@ -122,7 +124,9 @@ class State(object):
 
     def checksig(self, key):
         """This function checks the state signature.  It raises a
-        HeartbeatError in the event of a signature failure.
+        HeartbeatError in the event of a signature failure.  This should not
+        need to be explicitly used since the gen_challenge and verify methods
+        check the signature of the state.
 
         :param key: the key to use for checking the signature
         """
@@ -170,7 +174,7 @@ class Merkle(object):
         return Merkle()
 
     def encode(self, file, n=256, chunksz=8192):
-        """ this function generates a merkle tree with the leaves as seed file
+        """This function generates a merkle tree with the leaves as seed file
         hashes, the seed for each leaf being a deterministic seed generated
         from a key.
 
@@ -214,8 +218,9 @@ class Merkle(object):
         return chal
 
     def prove(self, file, challenge, tag):
-        """returns a proof of ownership of the given file based on the
-        challenge.  returns the hash of the file chunk,
+        """Returns a proof of ownership of the given file based on the
+        challenge.  The proof consists of a hash of the specified file chunk
+        and the complete merkle branch.
 
         :param file: a file that supports `read()`, `seek()` and `tell()`
         :param challenge: the challenge to use for generating this proof

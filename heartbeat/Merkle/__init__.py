@@ -28,4 +28,4 @@
 from .Merkle import Challenge, Tag, State, Proof, Merkle, MerkleHelper        # NOQA
 from .MerkleTree import MerkleTree     # NOQA
 
-__version__ = "0.1.0"
+__version__ = "0.1.4"

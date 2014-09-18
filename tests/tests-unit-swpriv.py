@@ -6,6 +6,7 @@
 # The MIT License (MIT)
 #
 # Copyright (c) 2014 Paul Durivage <pauldurivage+git@gmail.com> for Storj Labs
+# Copyright (c) 2014 Will James <jameswt@gmail.com> for Storj Labs
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -113,7 +114,24 @@ class TestSwPriv(unittest.TestCase):
             
         ex_msg = ex.exception.message
         self.assertEqual("Encryption key must be "+str(key_len)+" bytes in length.  Use keysize() to retrieve the key size.",ex_msg)
+    
+    def test_size(self):
+        beat = SwPriv.SwPriv()
         
+        with open('files/test7.txt','rb') as file:
+            file.seek(0,2)
+            len_file = file.tell()
+        
+        with open('files/test7.txt','rb') as file:
+            (tag,state) = beat.encode(file)
+        
+        len_tag = len(tag.__getstate__())
+        
+        # when encoded in binary the tag will be a tenth the size of the file
+        # plus some overhead for storage of the integers.  the overhead should be
+        # 4 bytes per 128 byte integer, plus 4 bytes for the number of integers
+        self.assertLessEqual(len_tag,len_file*0.103125 + 4)
+    
 class TestCorrectness(unittest.TestCase):
     def test_correctness(self):
         GenericCorrectnessTests.generic_correctness_test(self,SwPriv.SwPriv)

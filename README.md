@@ -96,7 +96,7 @@ function `f`. These values serve as her secret key. She calculates an authentica
 block `i` as
 
 ```
-sigma_i = f_k(i) + alpha*m_i
+sigma_i = f_k(i) + alpha * m_i
 ```
 
 where `m_i` is a small chunk of the file in `Zp` (a prime, by default 1024 bits long).

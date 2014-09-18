@@ -30,7 +30,7 @@ from Crypto.Util import number
 
 
 class KeyedPRF(object):
-    """KeyedPRK is a psuedo random function. It hashes the input, pads it to
+    """KeyedPRF is a psuedo random function. It hashes the input, pads it to
     the correct output length, and then encrypts it with AES. Finally it
     checks that the result is within the desired range. If it is it returns
     the value as a long integer, if it isn't, it increments a nonce in the

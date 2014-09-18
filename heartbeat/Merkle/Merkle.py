@@ -266,7 +266,8 @@ class MerkleHelper(object):
         :param chunksz: the size of the chunk to check
         :param bufsz: an optional buffer size to use for reading the file.
         """
-        filesz = file.seek(0, 2)
+        file.seek(0, 2)
+        filesz = file.tell()
         if (filesz < chunksz):
             chunksz = filesz//10
         random.seed(seed)

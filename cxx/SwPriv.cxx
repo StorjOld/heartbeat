@@ -36,6 +36,8 @@ THE SOFTWARE.
 #define PyInit_SwPriv initSwPriv
 #endif
 
+Py::Object SwPriv::PyHeartbeatException::_exception = Py::Object();
+
 extern "C" PyObject *PyInit_SwPriv()
 {
 	static Module* module = new Module;

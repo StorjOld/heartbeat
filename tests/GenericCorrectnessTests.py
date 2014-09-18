@@ -17,7 +17,7 @@ class GenericCorrectnessTests(object):
         test.assertFalse(priv.verify(proof,chal,state))
         
     @staticmethod
-    def generic_scheme_test(test,hb):
+    def generic_scheme_test(test,hb,n=20):
         # set up client
         client = hb()
         
@@ -43,34 +43,35 @@ class GenericCorrectnessTests(object):
         # store server side information
         (serv_tag,serv_state) = pickle.loads(message)
         
-        # client now wants to challenge server
-        # client requests state from server
-        
-        # server sends back state
-        message = pickle.dumps(serv_state,2)
-        
-        # client interprets state from server
-        state = pickle.loads(message)
-        
-        # client generates challenge
-        chal = client.gen_challenge(state)
-        
-        # client sends challenge to server
-        message = pickle.dumps(chal,2)
-        
-        # server interprets challenge from client
-        serv_chal = pickle.loads(message)
-        
-        # server generates proof
-        with open('files/test.txt','rb') as file:
-            serv_proof = server.prove(file,serv_chal,serv_tag)
-        
-        # send proof back to client
-        message = pickle.dumps(serv_proof,2)
-        
-        # client interprets proof from server
-        proof = pickle.loads(message)
-        
-        # client checks proof
-        test.assertTrue(client.verify(proof,chal,state))
+        for i in range(0,n):
+            # client now wants to challenge server
+            # client requests state from server
+            
+            # server sends back state
+            message = pickle.dumps(serv_state,2)
+            
+            # client interprets state from server
+            state = pickle.loads(message)
+            
+            # client generates challenge
+            chal = client.gen_challenge(state)
+            
+            # client sends challenge and new state to server
+            message = pickle.dumps((chal,state),2)
+            
+            # server interprets challenge from client
+            (serv_chal,serv_state) = pickle.loads(message)
+            
+            # server generates proof
+            with open('files/test.txt','rb') as file:
+                serv_proof = server.prove(file,serv_chal,serv_tag)
+            
+            # send proof back to client
+            message = pickle.dumps(serv_proof,2)
+            
+            # client interprets proof from server
+            proof = pickle.loads(message)
+            
+            # client checks proof
+            test.assertTrue(client.verify(proof,chal,state))
         

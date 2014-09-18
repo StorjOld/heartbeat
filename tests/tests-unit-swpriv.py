@@ -67,29 +67,53 @@ class TestSubClasses(unittest.TestCase):
         self.assertEqual(state1,state2)
         
     def test_get_set_state(self):
-        print('checking challenge')
         self.assign_and_compare_states(self.challenge1, self.challenge2)
-        print('checking tag')
         self.assign_and_compare_states(self.tag1, self.tag2)
-        print('checking proof')
         self.assign_and_compare_states(self.proof1, self.proof2)
-        print('generating key')
         key = os.urandom(self.state1.keysize())
-        print('encrypting')
         self.state1.encrypt(key,key,True)
-        print('getting state')
         state1 = self.state1.__getstate__()
-        print('setting state')
         self.state2.__setstate__(state1)
-        print('decrypting')
         self.state2.decrypt(key,key)
-        print('encrypting')
         self.state2.encrypt(key,key,True)
-        print('getting state')
         state2 = self.state2.__getstate__()
-        print('checking')
         self.assertEqual(state1,state2)
 
+class TestSwPriv(unittest.TestCase):
+    def test_exceptions(self):
+        state = SwPriv.State()
+        with self.assertRaises(HeartbeatError) as ex:
+            state.__setstate__()
+        
+        ex_msg = ex.exception.message
+        self.assertEqual("__setstate__ only takes one argument: state",ex_msg)
+        
+        with self.assertRaises(HeartbeatError) as ex:
+            state.encrypt()
+        
+        ex_msg = ex.exception.message
+        self.assertEqual("encrypt() takes at least two arguments: the encryption key and the mac key and an optional argument a bool, whether to use convergent encryption",ex_msg)
+        
+        with self.assertRaises(HeartbeatError) as ex:
+            state.decrypt()
+            
+        ex_msg = ex.exception.message
+        self.assertEqual("decrypt() takes two arguments: the encryption key and the mac key.",ex_msg)
+        
+        with self.assertRaises(HeartbeatError) as ex:
+            state.encrypt(None,None)
+            
+        ex_msg = ex.exception.message
+        self.assertEqual("Invalid encryption key.",ex_msg)
+        
+        key_len = state.keysize()
+        
+        with self.assertRaises(HeartbeatError) as ex:
+            state.encrypt(os.urandom(key_len-1),os.urandom(key_len-1))
+            
+        ex_msg = ex.exception.message
+        self.assertEqual("Encryption key must be "+str(key_len)+" bytes in length.  Use keysize() to retrieve the key size.",ex_msg)
+        
 class TestCorrectness(unittest.TestCase):
     def test_correctness(self):
         GenericCorrectnessTests.generic_correctness_test(self,SwPriv.SwPriv)

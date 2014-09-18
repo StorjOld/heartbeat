@@ -25,7 +25,7 @@ import math
 import hashlib
 
 # numbering scheme:
-# branches                               0
+# nodes                                   0
 #                         1                               2
 #                 3               4               5
 #             7      8        9      10      11
@@ -35,52 +35,47 @@ import hashlib
 
 
 class MerkleTree(object):
-    def __init__(self, order=0):
-        self.branches = list()
+    """This provides a simple MerkleTree implementation for use in the Merkle
+    proof of storage scheme.  A leaf refers to the bottom level of the tree,
+    while a branch is a list of pairs between the leaf and the root, not
+    including the leaf or root.
+
+    Generally, this is designed to be a static tree, in that you add the
+    leaves using the `add_lead()` method, and then construct the tree using
+    the `build()` method.
+    """
+    def __init__(self):
+        """Initialization method
+
+        Creates an empty tree
+        """
+        self.nodes = list()
         self.order = 0
         self.leaves = list()
 
-    @staticmethod
-    def get_parent(i):
-        return (i+1)//2-1
-
-    @staticmethod
-    def get_partner(i):
-        if MerkleTree.is_left(i):
-            return i+1
-        else:
-            return i-1
-
-    @staticmethod
-    def is_left(i):
-        return i % 2 != 0
-
-    @staticmethod
-    def get_left_child(i):
-        return (i+1)*2-1
-
-    @staticmethod
-    def get_right_child(i):
-        return (i+1)*2
-
-    @staticmethod
-    def get_order(n):
-        return math.ceil(math.log2(n))
-
     def add_leaf(self, leaf):
+        """Adds a leaf to the list of leaves.  Does not build the tree so call
+        `build()` to construct the rest of the tree from the added leaves.
+
+        :param leaf: the leaf to add.  should be a hashable object
+        """
         self.leaves.append(leaf)
 
     def build(self):
+        """Builds the tree from the leaves that have been added.
+
+        This function populates the tree from the leaves down non-recursively
+        """
         self.order = MerkleTree.get_order(len(self.leaves))
         n = 2**self.order
-        self.branches = [None]*2*n
+        self.nodes = [None]*2*n
 
-        # populate lowest branches with leaf hashes
+        # populate lowest nodes with leaf hashes
         for j in range(0, n):
             if (j < len(self.leaves)):
                 h = hashlib.sha256()
                 h.update(self.leaves[j])
-                self.branches[j+n-1] = h.digest()
+                self.nodes[j+n-1] = h.digest()
             else:
                 break
 
@@ -90,30 +85,108 @@ class MerkleTree(object):
             for j in range(0, p):
                 k = p+j-1
                 h = hashlib.sha256()
-                l = self.branches[MerkleTree.get_left_child(k)]
+                l = self.nodes[MerkleTree.get_left_child(k)]
                 if (l):
                     h.update(l)
-                r = self.branches[MerkleTree.get_right_child(k)]
+                r = self.nodes[MerkleTree.get_right_child(k)]
                 if (r):
                     h.update(r)
-                self.branches[k] = h.digest()
+                self.nodes[k] = h.digest()
 
-    # gets the branch of leaf i
     def get_branch(self, i):
+        """Gets a branch associated with leaf i.  This will trace the tree
+        from the leaves down to the root, constructing a list of tuples that
+        represent the pairs of nodes all the way from leaf i to the root.
+
+        :param i: the leaf identifying the branch to retrieve
+        """
         branch = [None]*(self.order)
         j = i + 2**self.order - 1
 
         for k in range(0, self.order):
             if (self.is_left(j)):
-                branch[k] = (self.branches[j], self.branches[j+1])
+                branch[k] = (self.nodes[j], self.nodes[j+1])
             else:
-                branch[k] = (self.branches[j-1], self.branches[j])
+                branch[k] = (self.nodes[j-1], self.nodes[j])
             j = MerkleTree.get_parent(j)
 
         return branch
 
+    def get_root(self):
+        """Returns the merkle root of the tree"""
+        return self.nodes[0]
+
+    def strip_leaves(self):
+        """strips the leaves off the tree"""
+        self.leaves = list()
+
+    @staticmethod
+    def get_parent(i):
+        """This method returns the node id of the parent of the given node
+
+        :param i: the node id specifying the node to get the parent of
+        """
+        return (i+1)//2-1
+
+    @staticmethod
+    def get_partner(i):
+        """Returns the partner node of the given node id
+
+        :param i: the node id to get the partner of
+        """
+        if MerkleTree.is_left(i):
+            return i+1
+        else:
+            return i-1
+
+    @staticmethod
+    def is_left(i):
+        """Returns True if the given node is a left node
+
+        :param i: the node id to check
+        """
+        return i % 2 != 0
+
+    @staticmethod
+    def get_left_child(i):
+        """Returns the node id of the left child of the given node
+
+        :param i: the node id to get the left child of
+        """
+        return (i+1)*2-1
+
+    @staticmethod
+    def get_right_child(i):
+        """Returns the right chid of the given node
+
+        :param i: the node id to get the right child of
+        """
+        return (i+1)*2
+
+    @staticmethod
+    def get_order(n):
+        """Returns the order of the tree with n leaves.  This is the required
+        number of levels of the tree given that there will be n leaves.
+
+        :param n: the number of leaves of the tree to obtain the order of
+        """
+        return int(math.ceil(math.log(n,2)))
+
     @staticmethod
     def verify_branch(leaf, branch, root):
+        """This will verify that the given branch fits the given leaf and root
+        It calculates the hash of the leaf, and then verifies that one of the
+        bottom level nodes in the branch matches the leaf hash.  Then it
+        calculates the hash of the two nodes on the next level and checks that
+        one of the nodes on the level above matches.  It continues this until
+        it reaches the top level of the tree where it asserts that the root is
+        equal to the hash of the nodes below
+
+        :param leaf: the leaf to check
+        :param branch: a list of tuples (pairs) of the nodes in the branch,
+        ordered from leaf to root.
+        :param root: the root node
+        """
         # just check the hashes are correct
         lh = hashlib.sha256(leaf).digest()
         for i in range(0, len(branch)):
@@ -128,10 +201,3 @@ class MerkleTree(object):
         if (root != lh):
             return False
         return True
-
-    # gets the merkle root
-    def get_root(self):
-        return self.branches[0]
-
-    def strip_leaves(self):
-        self.leaves = list()

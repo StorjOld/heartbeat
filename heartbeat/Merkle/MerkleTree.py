@@ -170,7 +170,7 @@ class MerkleTree(object):
 
         :param n: the number of leaves of the tree to obtain the order of
         """
-        return int(math.ceil(math.log(n,2)))
+        return int(math.ceil(math.log(n, 2)))
 
     @staticmethod
     def verify_branch(leaf, branch, root):

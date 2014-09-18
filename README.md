@@ -17,7 +17,7 @@ The `challenge` is a set of data that informs the server how to calculate a proo
 
 The `proof` is a set of data that represents proof that the server has read access to the complete file contents.
 
-For transferring of data between client and server the `tag`, `state`, `challenge`, and `proof` objects can be pickled since they should provide at the very least __getstate__() and __setstate__() methods.
+For transferring of data between client and server the `tag`, `state`, `challenge`, and `proof` objects can be pickled since they should provide at the very least `__getstate__()` and `__setstate__()` methods.
 
 #### Usage
 

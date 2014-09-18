@@ -25,7 +25,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .Merkle import Merkle              # NOQA
-from .MerkleTree import MerkleTree      # NOQA
+from .Merkle import Challenge, Tag, State, Proof, Merkle, MerkleHelper        # NOQA
+from .MerkleTree import MerkleTree     # NOQA
 
 __version__ = "0.1.0"

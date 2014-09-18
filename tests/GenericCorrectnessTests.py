@@ -5,18 +5,15 @@ class GenericCorrectnessTests(object):
     def generic_correctness_test(test,hb):
         priv = hb()
         pub = priv.get_public()
-        file = open('files/test.txt','rb')
-        (tag,state) = priv.encode(file)
-        file.close()
+        with open('files/test.txt','rb') as file:
+            (tag,state) = priv.encode(file)
         chal = priv.gen_challenge(state)
-        file = open('files/test.txt','rb')
-        proof = pub.prove(file,chal,tag)
-        file.close()
+        with open('files/test.txt','rb') as file:
+            proof = pub.prove(file,chal,tag)
         test.assertTrue(priv.verify(proof,chal,state))
         
-        file = open('files/test3.txt','rb')
-        proof = pub.prove(file,chal,tag)
-        file.close()
+        with open('files/test3.txt','rb') as file:
+            proof = pub.prove(file,chal,tag)
         test.assertFalse(priv.verify(proof,chal,state))
         
     @staticmethod
@@ -34,9 +31,8 @@ class GenericCorrectnessTests(object):
         server = pickle.loads(message)
         
         # encode the file
-        file = open('files/test.txt','rb')
-        (tag,state) = client.encode(file)
-        file.close()
+        with open('files/test.txt','rb') as file:
+            (tag,state) = client.encode(file)
         
         message = pickle.dumps((tag,state),2)
         # file would also be sent
@@ -66,9 +62,8 @@ class GenericCorrectnessTests(object):
         serv_chal = pickle.loads(message)
         
         # server generates proof
-        file = open('files/test.txt','rb')
-        serv_proof = server.prove(file,serv_chal,serv_tag)
-        file.close()
+        with open('files/test.txt','rb') as file:
+            serv_proof = server.prove(file,serv_chal,serv_tag)
         
         # send proof back to client
         message = pickle.dumps(serv_proof,2)

@@ -35,7 +35,6 @@ from decimal import Decimal
 import pickle
 
 from heartbeat.exc import HeartbeatError
-import heartbeat
 from heartbeat import SwPriv
 
 from GenericCorrectnessTests import GenericCorrectnessTests

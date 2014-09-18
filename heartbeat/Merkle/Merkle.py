@@ -56,17 +56,18 @@ class Challenge(object):
 class Tag(object):
     """The Tag class represents the file tag that is a stripped merkle
     tree, that is a merkle tree without the leaves, which are the seeded
-    hashes of each chunk."""
+    hashes of each chunk.  it also includes the chunk size used for breaking
+    up the file
+    """
 
-    def __init__(self, tree):
+    def __init__(self, tree, chunksz):
         """Initialization method
 
         :param tree: this is the stripped merkle tree
+        :param chunksz: this is the chunk size used for dividing up the file
         """
         self.tree = tree
-
-# state is unused, since we don't have any secret data
-# that needs to be stored on the server
+        self.chunksz = chunksz
 
 
 class State(object):
@@ -76,28 +77,48 @@ class State(object):
     current seed and the merkle branch index for the last challenge.  If it
     is stored on the server it should be signed
     """
-    def __init__(self, index, seed):
+    def __init__(self, index, seed, n, root=None):
+        """Initialization method
+
+        :param index: this is the index of the most recently issued challenge
+        :param seed: this is the seed of the most recently issued challenge,
+        and is used to calculate the next seed.
+        :param n: this is the maximum number of challenges that can be issued
+        :param root: this is the merkle root of the tree
+        """
         self.index = index
         self.seed = seed
+        self.n = n
+        self.root = root
         self.hmac = None
 
     def sign(self, key):
-        # sign
+        """This function signs the state with a key to prevent modification.
+
+        :param key: the key to use for signing
+        """
         h = HMAC.new(key, None, SHA256)
-        h.update(self.index)
+        h.update(str(self.index).encode())
         h.update(self.seed)
+        h.update(str(self.n).encode())
+        h.update(self.root)
         self.hmac = h.digest()
 
     def checksig(self, key):
-        # check sig
+        """This function checks the state signature.  It raises a
+        HeartbeatError in the event of a signature failure.
+
+        :param key: the key to use for checking the signature
+        """
         h = HMAC.new(key, None, SHA256)
-        h.update(self.index)
+        h.update(str(self.index).encode())
         h.update(self.seed)
+        h.update(str(self.n).encode())
+        h.update(self.root)
         if (h.digest() != self.hmac):
             raise HeartbeatError("Signature invalid on state.")
 
 
-# proof is the leaf and branch
 class Proof(object):
     """The proof class encpasulates proof that a file exists"""
     def __init__(self, leaf, branch):
@@ -111,79 +132,119 @@ class Proof(object):
         self.branch = branch
 
 
-# this is the heartbeat object
 class Merkle(object):
-    """This class represents a heartbeat based on a merkle tree hash.  The client
-    generates a key, which is used for the generation of challenges.  Then the
-    client generates a number of challenges based on this key.
+    """This class represents a heartbeat based on a merkle tree hash.  The
+    client generates a key, which is used for the generation of challenges.
+    Then the client generates a number of challenges based on this key.
     """
-    def __init__(self,
-                 n=256,
-                 chunksz=8192,
-                 key=None,
-                 root=None):
-        self.n = n
-        self.chunksz = chunksz
+    def __init__(self, key=None):
+        """Initialization method
+
+        :param key: the key for signing the state and generating seeds
+        """
         if (key is None):
             self.key = os.urandom(32)
         else:
             self.key = key
-        self.root = root
 
     def get_public(self):
-        return Merkle(self.n, self.chunksz)
+        """This function returns a Merkle object that has it's key
+        stripped."""
+        return Merkle()
 
-    def encode(self, file):
+    def encode(self, file, n=256, chunksz=8192):
         """ this function generates a merkle tree with the leaves as seed file
         hashes, the seed for each leaf being a deterministic seed generated
         from a key.
+
+        :param file: a file like object that supports the `read()`, `seek()`
+        and `tell()` methods
+        :param n: the number of challenges to generate
+        :param chunksz: the chunk size for breaking up the file.
         """
         mt = MerkleTree()
-        state = State(0, os.urandom(32))
-        seed = MerkleHelper.get_next_seed(self.key, state.get_seed())
-        for i in range(0, self.n):
+        state = State(0, os.urandom(32), n)
+        seed = MerkleHelper.get_next_seed(self.key, state.seed)
+        for i in range(0, n):
             file.seek(0)
-            leaf = MerkleHelper.get_chunk_hash(file, seed, self.chunksz)
+            leaf = MerkleHelper.get_chunk_hash(file, seed, chunksz)
             mt.add_leaf(leaf)
             seed = MerkleHelper.get_next_seed(self.key, seed)
         mt.build()
-        self.root = mt.get_root()
+        state.root = mt.get_root()
         mt.strip_leaves()
-        tag = Tag(mt)
+        tag = Tag(mt, chunksz)
         state.sign(self.key)
         return (tag, state)
 
     def gen_challenge(self, state):
-        # returns the next challenge and increments the seed and index
-        # in the state
+        """returns the next challenge and increments the seed and index
+        in the state.
+
+        :param state: the state to use for generating the challenge.  will
+        verify the integrity of the state object before using it to generate
+        a challenge.  it will then modify the state by incrementing the seed
+        and index and resign the state for passing back to the server for
+        storage
+        """
         state.checksig(self.key)
-        if (state.index >= self.n):
+        if (state.index >= state.n):
             raise HeartbeatError("Out of challenges.")
         state.seed = MerkleHelper.get_next_seed(self.key, state.seed)
-        chal = Challenge(self.seed, state.index)
+        chal = Challenge(state.seed, state.index)
         state.index += 1
         state.sign(self.key)
         return chal
 
     def prove(self, file, challenge, tag):
-        leaf = MerkleHelper.get_chunk_hash(file, challenge.seed, self.chunksz)
+        """returns a proof of ownership of the given file based on the
+        challenge.  returns the hash of the file chunk,
+
+        :param file: a file that supports `read()`, `seek()` and `tell()`
+        :param challenge: the challenge to use for generating this proof
+        :param tag: the file tag as provided from the client
+        """
+        leaf = MerkleHelper.get_chunk_hash(file, challenge.seed, tag.chunksz)
         return Proof(leaf, tag.tree.get_branch(challenge.index))
 
-    def verify(self, proof, challenge, state=None):
+    def verify(self, proof, challenge, state):
+        """returns true if the proof matches the challenge.  verifies that the
+        server possesses the encoded file.
+
+        :param proof: the proof that was returned from the server
+        :param challenge: the challenge provided to the server
+        :param state: the state of the file, which includes the merkle root of
+        of the merkle tree, for verification.
+        """
+        state.checksig(self.key)
         return MerkleTree.verify_branch(proof.leaf,
                                         proof.branch,
-                                        self.root)
+                                        state.root)
 
 
-def MerkleHelper(object):
+class MerkleHelper(object):
+    """This object provides several helper functions for the Merkle class"""
     @staticmethod
     def get_next_seed(key, seed):
-        # we use an HMAC function to ensure authenticity of the seeds
+        """This takes a seed and generates the next seed in the sequence.
+        it simply calculates the hmac of the seed with the key.  It returns
+        the next seed
+
+        :param key: the key to use for the HMAC
+        :param seed: the seed to permutate
+        """
         return hmac.new(key, seed, hashlib.sha256).digest()
 
     @staticmethod
     def get_file_hash(file, seed, bufsz=65536):
-        # we use an HMCA to ensure authenticity of the file hash
+        """This method generates a secure has of the given file.  Returns the
+        hash
+
+        :param file: a file like object to get a hash of.  should support
+        `read()`
+        :param seed: the seed to use for key of the HMAC function
+        :param bufsz: an optional buffer size to use for reading the file
+        """
         h = hmac.new(seed, None, hashlib.sha256)
         while (True):
             buffer = file.read(bufsz)
@@ -194,7 +255,20 @@ def MerkleHelper(object):
 
     @staticmethod
     def get_chunk_hash(file, seed, chunksz=8192, bufsz=65536):
+        """returns a hash of a chunk of the file provided.  the position of
+        the chunk is determined by the seed.  additionally, the hmac of the
+        chunk is calculated from the seed.
+
+        :param file: a file like object to get the chunk hash from.  should
+        support `read()`, `seek()` and `tell()`.
+        :param seed: the seed to use for calculating the chunk position and
+        chunk hash
+        :param chunksz: the size of the chunk to check
+        :param bufsz: an optional buffer size to use for reading the file.
+        """
         filesz = file.seek(0, 2)
+        if (filesz < chunksz):
+            chunksz = filesz//10
         random.seed(seed)
         i = random.randint(0, filesz-chunksz)
         file.seek(i)

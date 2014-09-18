@@ -26,6 +26,7 @@ import hashlib
 import hmac
 import os
 import random
+import time
 
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA256
@@ -75,9 +76,21 @@ class State(object):
     and stored on the server, or held plaintext by the client.  It is mutable,
     i.e. it will change every time a challenge is issued, since it holds the
     current seed and the merkle branch index for the last challenge.  If it
-    is stored on the server it should be signed
+    is stored on the server it should be signed.  A timestamp is included so
+    that the client can verify that this is the most recent state being sent
+    back from the server.  The client should ensure that the timestamp is not
+    older than the last challenge time.  For instance, if the challenge
+    frequency is 1 per hour, the timestamp should be no older than 1 hour at
+    any time it is received from the server, or else the server is using an
+    old state.  If the server does send back an old state, the index and seed
+    can be incremented multiple times in order to reach the present state.
     """
-    def __init__(self, index, seed, n, root=None):
+    def __init__(self,
+                 index,
+                 seed,
+                 n,
+                 root=None,
+                 timestamp=time.gmtime()):
         """Initialization method
 
         :param index: this is the index of the most recently issued challenge
@@ -85,11 +98,13 @@ class State(object):
         and is used to calculate the next seed.
         :param n: this is the maximum number of challenges that can be issued
         :param root: this is the merkle root of the tree
+        :param timestamp: this is the timestamp of when the state was generated
         """
         self.index = index
         self.seed = seed
         self.n = n
         self.root = root
+        self.timestamp = timestamp
         self.hmac = None
 
     def sign(self, key):
@@ -102,6 +117,7 @@ class State(object):
         h.update(self.seed)
         h.update(str(self.n).encode())
         h.update(self.root)
+        h.update(str(self.timestamp).encode())
         self.hmac = h.digest()
 
     def checksig(self, key):
@@ -115,6 +131,7 @@ class State(object):
         h.update(self.seed)
         h.update(str(self.n).encode())
         h.update(self.root)
+        h.update(str(self.timestamp).encode())
         if (h.digest() != self.hmac):
             raise HeartbeatError("Signature invalid on state.")
 

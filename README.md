@@ -21,6 +21,8 @@ The `proof` is a set of data that represents proof that the server has read acce
 
 For transferring of data between client and server the `tag`, `state`, `challenge`, and `proof` objects can be pickled since they should provide at the very least `__getstate__()` and `__setstate__()` methods.
 
+This scheme setup is designed so that the client only has to maintain a few pieces of information.  The client must maintain the heartbeat used to encode the files (one desired feature is a way to generate this from a passphrase), and a file list.  Multiple files can be encoded with the same heartbeat.
+
 #### Usage
 
 The API for a heartbeat module is given below.  The specific implementation of each heartbeat type should be subclasses of the heartbeat class as used below.
@@ -49,7 +51,7 @@ After a time has passed, when an auditor wants to verify the challenge, if neces
 challenge = beat.gen_challenge(state)
 ```
 
-This should generate a challenge key which is unique.  This step may or may not be necessary, since in some schemes the challenge information could be drawn by the server from another source (for instance, last hash of bitcoin blockchain header).  In the publically verifiable case it should be possible to call `public_beat.gen_challenge()` and in many cases it is possible to call the static message `heartbeat.gen_challenge()`.  Then, the challenge, and possibly the public_beat if not already sent, are sent to the server who proves the file existance by running:
+This should generate a challenge key which is unique.  This step may or may not be necessary, since in some schemes the challenge information could be drawn by the server from another source (for instance, last hash of bitcoin blockchain header).  In the publically verifiable case it should be possible to call `public_beat.gen_challenge()` and in many cases it is possible to call the static message `heartbeat.gen_challenge()`.  Then, the challenge, and possibly the public_beat if not already sent, (and in some cases the updated state), are sent to the server who proves the file existance by running:
 
 ```python
 proof = public_beat.prove(file,challenge,tag)
@@ -81,7 +83,7 @@ Verifies in a public verification scheme that the file exists.
 
 This is a merkle tree hash proof of storage scheme.  It works by pre-generating a large number of deterministic hash challenges from a secret seed and file chunks.  Then it forms a merkle tree from these challenges and uploads the file and the merkle tree (with leaves stripped) to the server.  To verify presence of the file, a new seed is deterministically generated and sent to the server.  Then the appropriate branch of the merkle tree is sent back along with the leaf.  The client can verify that the merkle tree branch is valid, thereby verifying existance of the file.
 
-The current implementation uses a random chunk of the file for each challenge, so any one challenge cannot verify the presence of the entire file.
+The current implementation uses a random chunk of the file for each challenge, so any one challenge cannot verify the presence of the entire file.  In addition, the `state` must be transmitted back to the server after it has been modified by the gen_challenge().  Some information must be maintained in order to ensure that an old state is not returned by the server.  The state contains a timestamp field which was the time.gmtime() at which the state was created.  This information could be used if heartbeats are regular.  If heartbeats are irregular, then an index must be locally maintained for each remote file, and then checked against the state as the state is received from the server.  Or, the state could be maintained locally.
 
 ##### SwPriv
 
@@ -118,7 +120,7 @@ Now verifier can check that the response was correctly formed by checking that
 sigma ?= alpha * mu + sum(v_i * f_k(i))
 ```
 
-Please see the paper or the code for more details.  This scheme as described above obviously requires 2x storage on the server since the file tags are the same size as the file.  However, it is possible to reduce the storage requirement significantly at the cost of increasing the communication by a small amount, which the implementation currently does.  By default it reduces the extra storage requirement by 10 times, so that the storage requirement is 1.1x.
+Please see the paper or the code for more details.  This scheme as described above obviously requires 2x storage on the server since the file tags are the same size as the file.  However, it is possible to reduce the storage requirement significantly at the cost of increasing the communication by a small amount, which the implementation currently does.  By default it reduces the extra storage requirement by 10 times, so that the storage requirement is 1.1x.  The advantage of this scheme is that it is stateless, avoiding the issue of maintaining a state for each file as above.
 
 ##### PySwPriv
 

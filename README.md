@@ -77,13 +77,13 @@ Verifies in a public verification scheme that the file exists.
 
 #### Implementations
 
-### Merkle
+##### Merkle
 
 This is a merkle tree hash proof of storage scheme.  It works by pre-generating a large number of deterministic hash challenges from a secret seed and file chunks.  Then it forms a merkle tree from these challenges and uploads the file and the merkle tree (with leaves stripped) to the server.  To verify presence of the file, a new seed is deterministically generated and sent to the server.  Then the appropriate branch of the merkle tree is sent back along with the leaf.  The client can verify that the merkle tree branch is valid, thereby verifying existance of the file.
 
 The current implementation uses a random chunk of the file for each challenge, so any one challenge cannot verify the presence of the entire file.
 
-### SwPriv
+##### SwPriv
 
 This is a homomorphic linear authentication scheme based on work by Shacham and Waters, see Shacham, Waters "Compact proofs of Retrievability".  Please see that paper or look at the code for details of the implementation.  From the paper:
 
@@ -118,9 +118,9 @@ Now verifier can check that the response was correctly formed by checking that
 sigma ?= alpha * mu + sum(v_i * f_k(i))
 ```
 
-Please see the paper or the code for more details.  This scheme as written obviously requires 2x storage on the server since the file tags are the same size as the file.  However, it is possible to reduce the storage requirement significantly at the cost of increasing the communication by a small amount.  This is also described in the paper.
+Please see the paper or the code for more details.  This scheme as described above obviously requires 2x storage on the server since the file tags are the same size as the file.  However, it is possible to reduce the storage requirement significantly at the cost of increasing the communication by a small amount, which the implementation currently does.  By default it reduces the extra storage requirement by 10 times, so that the storage requirement is 1.1x.
 
-### PySwPriv
+##### PySwPriv
 
 This is the same as SwPriv but written in pure python.  It is significantly slower (understandably) but provides the same functionality.
 

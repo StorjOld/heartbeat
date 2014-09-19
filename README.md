@@ -1,5 +1,6 @@
 heartbeat
 =========
+[![Build Status](https://travis-ci.org/Storj/heartbeat.svg?branch=devel)](https://travis-ci.org/Storj/heartbeat)
 
 This is the API for heartbeat which is for proving the existance of a file on a remote server without downloading the entire file.  In theory there are both publicly and privately verifiable schemes.  Publicly verifiable schemes work even when the data auditor does not have access to any more information than the person storing the data.  Privately verifiable schemes work only when the auditor has access to secrets that the storer does not have.
 
@@ -130,4 +131,3 @@ pip install .
 ```
 
 Also note that setup.py is configured to compile against the static Crypto++ library, not the DLL, and so on windows it defaults to searching for cryptlib, not cryptopp.  Make sure cryptlib is located in the library search directory.
-

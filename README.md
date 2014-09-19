@@ -1,8 +1,6 @@
 heartbeat
 =========
 
-[![Build Status](https://drone.io/github.com/Storj/heartbeat/status.png)](https://drone.io/github.com/Storj/heartbeat/latest)
-
 This is the API for heartbeat which is for proving the existance of a file on a remote server without downloading the entire file.  In theory there are both publicly and privately verifiable schemes.  Publicly verifiable schemes work even when the data auditor does not have access to any more information than the person storing the data.  Privately verifiable schemes work only when the auditor has access to secrets that the storer does not have.
 
 Right now there are three working implementations of this scheme.  Merkle, SwPriv, and PySwPriv.  See Implementations below for more information.

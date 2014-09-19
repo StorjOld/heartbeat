@@ -135,4 +135,3 @@ pip install .
 ```
 
 Also note that setup.py is configured to compile against the static Crypto++ library, not the DLL, and so on windows it defaults to searching for cryptlib, not cryptopp.  Make sure cryptlib is located in the library search directory.
-

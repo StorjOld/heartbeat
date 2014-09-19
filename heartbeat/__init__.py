@@ -26,3 +26,10 @@
 # SOFTWARE.
 
 __version__ = "0.1.4"
+
+def Heartbeat(basebeat=None):
+    if (basebeat is None):
+        import heartbeat.SwPriv
+        return heartbeat.SwPriv.SwPriv()
+    else:
+        return basebeat()

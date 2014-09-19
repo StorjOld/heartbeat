@@ -62,8 +62,6 @@ pycxx_sources = ['cxx/pycxx/Src/cxxsupport.cxx',
 all_sources = swpriv_sources + pycxx_sources
 
 swpriv = Extension('heartbeat.SwPriv',
-                   define_macros=[('MAJOR_VERSION', '1'),
-                                  ('MINOR_VERSION', '0')],
                    include_dirs=['cxx/pycxx','cxx'],
                    sources=all_sources)
 

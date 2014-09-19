@@ -61,7 +61,39 @@ class TestCorrectness(unittest.TestCase):
         GenericCorrectnessTests.generic_correctness_test(self,PySwPriv.PySwPriv)
     def test_scheme(self):
         GenericCorrectnessTests.generic_scheme_test(self,PySwPriv.PySwPriv)
+
+class TestPySwiv(unittest.TestCase):
+    def test_encryption(self):
+        state = PySwPriv.State(os.urandom(32),os.urandom(32),100)
+        k = os.urandom(32)
+        state.encrypt(k)
+        state.encrypt(k)
+        # modify state and check that signature fails
+        state.chunks=10
+        with self.assertRaises(HeartbeatError) as ex:
+            state.decrypt(k)
+            
+        ex_msg = ex.exception.message
+        self.assertEqual("Signature invalid on state.",ex_msg)
+    
+    def test_initialization(self):
+        k = b"test pass phrase"
+        beat = PySwPriv.PySwPriv(10,k)
+        self.assertEqual(beat.key,k)
+    
+    def test_sectors(self):
+        memfile = io.BytesIO(os.urandom(1290))
         
+        beat = PySwPriv.PySwPriv()
+        
+        (tag,state) = beat.encode(memfile)
+            
+        chal = beat.gen_challenge(state)
+        
+        memfile.seek(0)
+        proof = beat.prove(memfile,chal,tag)
+        
+        self.assertTrue(beat.verify(proof,chal,state))
         
 if __name__ == '__main__':
     unittest.main()

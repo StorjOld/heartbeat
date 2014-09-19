@@ -82,9 +82,9 @@ class TestPySwiv(unittest.TestCase):
         self.assertEqual(beat.key,k)
     
     def test_sectors(self):
-        memfile = io.BytesIO(os.urandom(1290))
+        memfile = io.BytesIO(os.urandom(10))
         
-        beat = PySwPriv.PySwPriv()
+        beat = PySwPriv.PySwPriv(10)
         
         (tag,state) = beat.encode(memfile)
             

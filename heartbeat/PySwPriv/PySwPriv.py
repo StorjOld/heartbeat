@@ -288,17 +288,21 @@ class PySwPriv(object):
         proof.mu = [0]*self.sectors
         proof.sigma = 0
 
-        for j in range(0, self.sectors):
-            for i in range(0, chal.chunks):
+        
+        for i in range(0, chal.chunks):
+            for j in range(0, self.sectors):
                 pos = index.eval(i) * chunk_size + j * self.sectorsize
                 file.seek(pos)
-                if (file.tell() == pos):
-                    buffer = file.read(self.sectorsize)
+                buffer = file.read(self.sectorsize)
+                if (len(buffer) > 0):
                     proof.mu[j] += v.eval(i) * number.bytes_to_long(buffer)
-                else:
-                    break
-            proof.mu[j] %= self.prime
+                
+                if (len(buffer) != self.sectorsize):
+                    break;
 
+        for j in range(0, self.sectors):
+            proof.mu[j] %= self.prime
+        
         for i in range(0, chal.chunks):
             proof.sigma += v.eval(i) * tag.sigma[index.eval(i)]
 

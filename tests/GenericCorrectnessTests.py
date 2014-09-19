@@ -2,22 +2,23 @@ import pickle
 
 class GenericCorrectnessTests(object):
     @staticmethod
-    def generic_correctness_test(test,hb):
+    def generic_correctness_test(test,hb,fn1='files/test.txt',fn2='files/test3.txt'):
         priv = hb()
         pub = priv.get_public()
-        with open('files/test.txt','rb') as file:
+        with open(fn1,'rb') as file:
             (tag,state) = priv.encode(file)
         chal = priv.gen_challenge(state)
-        with open('files/test.txt','rb') as file:
+        with open(fn1,'rb') as file:
             proof = pub.prove(file,chal,tag)
         test.assertTrue(priv.verify(proof,chal,state))
         
-        with open('files/test3.txt','rb') as file:
+        with open(fn2,'rb') as file:
             proof = pub.prove(file,chal,tag)
         test.assertFalse(priv.verify(proof,chal,state))
-        
+    
+    
     @staticmethod
-    def generic_scheme_test(test,hb,n=20):
+    def generic_scheme_test(test,hb,n=20,fn='files/test.txt'):
         # set up client
         client = hb()
         
@@ -31,7 +32,7 @@ class GenericCorrectnessTests(object):
         server = pickle.loads(message)
         
         # encode the file
-        with open('files/test.txt','rb') as file:
+        with open(fn,'rb') as file:
             (tag,state) = client.encode(file)
         
         message = pickle.dumps((tag,state),2)
@@ -63,7 +64,7 @@ class GenericCorrectnessTests(object):
             (serv_chal,serv_state) = pickle.loads(message)
             
             # server generates proof
-            with open('files/test.txt','rb') as file:
+            with open(fn,'rb') as file:
                 serv_proof = server.prove(file,serv_chal,serv_tag)
             
             # send proof back to client

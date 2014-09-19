@@ -138,9 +138,9 @@ class TestFunctional(unittest.TestCase):
                 response = client.answer(challenge)
             except ValueError:
                 response = "IO"
-            print("Client: a - " + str(response))
+            # print("Client: a - " + str(response))
             correct = chunk.response(response)
-            print("Node: " + str(correct) + "\n")
+            # print("Node: " + str(correct) + "\n")
 
             if not correct:
                 break

@@ -117,10 +117,7 @@ class OneHash(object):
         object
         """
         chunk_size = min(1024, self.file_size // 10)
-        try:
-            seed = bytes(str(challenge.seed), 'utf-8')
-        except TypeError:
-            seed = bytes(str(challenge.seed))
+        seed = challenge.seed
 
         h = hashlib.sha256()
         self.file_object.seek(challenge.block)
@@ -137,7 +134,7 @@ class OneHash(object):
 
         h.update(seed)
 
-        return h.hexdigest()
+        return h.digest()
 
     @staticmethod
     def generate_seeds(num, root_seed, secret):
@@ -155,15 +152,17 @@ class OneHash(object):
             raise HeartbeatError('secret can not be of type NoneType')
 
         seeds = []
-        root_seed = str(root_seed)
-        tmp_seed = hashlib.sha256(root_seed.encode('utf-8')).hexdigest()
+        try:
+            tmp_seed = hashlib.sha256(root_seed).digest()
+        except TypeError:
+            tmp_seed = hashlib.sha256(str(root_seed).encode()).digest()
 
         # Deterministically generate the rest of the seeds
         for x in range(num):
             seeds.append(tmp_seed)
-            h = hashlib.sha256(tmp_seed.encode('utf-8'))
-            h.update(secret.encode('utf-8'))
-            tmp_seed = h.hexdigest()
+            h = hashlib.sha256(tmp_seed)
+            h.update(secret)
+            tmp_seed = h.digest()
 
         return seeds
 

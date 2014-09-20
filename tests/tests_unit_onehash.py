@@ -53,7 +53,7 @@ class TestChallenge(unittest.TestCase):
 class TestOneHash(unittest.TestCase):
     def setUp(self):
         self.file_loc = os.path.abspath('files/test.txt')
-        self.secret = "mysecret"
+        self.secret = b"mysecret"
         self.hb = OneHash(self.file_loc, self.secret)
 
     def tearDown(self):
@@ -84,25 +84,31 @@ class TestOneHash(unittest.TestCase):
         integer = random.randint(0, 65535)
         decimal_ = Decimal(random.random()) + 5
         hashobj = hashlib.sha256(os.urandom(24))
+        byteobj = os.urandom(32)
         hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
 
-        seeds = self.hb.generate_seeds(4, integer, self.secret)
+        seeds = self.hb.generate_seeds(4, bytes(integer), self.secret)
         self.assertEqual(len(seeds), 4)
 
         seeds = self.hb.generate_seeds(4, decimal_, self.secret)
         self.assertEqual(len(seeds), 4)
         for seed in seeds:
-            self.assertTrue(seed, str)
+            self.assertIsInstance(seed, bytes)
 
         seeds = self.hb.generate_seeds(4, hashobj, self.secret)
         self.assertEqual(len(seeds), 4)
         for seed in seeds:
-            self.assertIsInstance(seed, str)
+            self.assertIsInstance(seed, bytes)
+            
+        seeds = self.hb.generate_seeds(4, byteobj, self.secret)
+        self.assertEqual(len(seeds), 4)
+        for seed in seeds:
+            self.assertIsInstance(seed, bytes)
 
         seeds = self.hb.generate_seeds(4, hexdigest, self.secret)
         self.assertEqual(len(seeds), 4)
         for seed in seeds:
-            self.assertIsInstance(seed, str)
+            self.assertIsInstance(seed, bytes)
 
     def test_generate_seeds_invalid_num(self):
         integer = random.randint(0, 65535)
@@ -112,23 +118,24 @@ class TestOneHash(unittest.TestCase):
         self.assertEqual('-1 is not greater than 0', ex_msg)
 
     def test_denerate_seeds_no_secret(self):
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
+        digest = hashlib.sha256(os.urandom(24)).digest()
         with self.assertRaises(HeartbeatError) as ex:
-            self.hb.generate_seeds(4, hexdigest, None)
+            self.hb.generate_seeds(4, digest, None)
         ex_msg = ex.exception.message
         self.assertEqual('secret can not be of type NoneType', ex_msg)
 
     def test_generate_seeds_deterministic(self):
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
+        digest = hashlib.sha256(os.urandom(24)).digest()
 
-        seed_group_1 = self.hb.generate_seeds(5, hexdigest, self.secret)
-        seed_group_2 = self.hb.generate_seeds(5, hexdigest, self.secret)
+        seed_group_1 = self.hb.generate_seeds(5, digest, self.secret)
+        seed_group_2 = self.hb.generate_seeds(5, digest, self.secret)
         self.assertEqual(seed_group_1, seed_group_2)
 
     def test_pick_blocks(self):
         integer = random.randint(0, 65535)
         decimal_ = Decimal(random.random()) + 5
         hashobj = hashlib.sha256(os.urandom(24))
+        bytesobj = os.urandom(32)
         hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
 
         seeds = self.hb.pick_blocks(4, integer)
@@ -144,6 +151,11 @@ class TestOneHash(unittest.TestCase):
         for seed in seeds:
             self.assertIsInstance(seed, int)
 
+        seeds = self.hb.pick_blocks(4, bytesobj)
+        self.assertEqual(len(seeds), 4)
+        for seed in seeds:
+            self.assertIsInstance(seed, int)
+            
         seeds = self.hb.pick_blocks(4, hexdigest)
         self.assertEqual(len(seeds), 4)
         for seed in seeds:
@@ -155,15 +167,15 @@ class TestOneHash(unittest.TestCase):
         self.assertEqual('-1 is not greater than 0', ex_msg)
 
     def test_pick_blocks_deterministic(self):
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
+        digest = hashlib.sha256(os.urandom(24)).digest()
 
-        seed_group_1 = self.hb.pick_blocks(5, hexdigest)
-        seed_group_2 = self.hb.pick_blocks(5, hexdigest)
+        seed_group_1 = self.hb.pick_blocks(5, digest)
+        seed_group_2 = self.hb.pick_blocks(5, digest)
         self.assertEqual(seed_group_1, seed_group_2)
 
     def test_meet_challenge(self):
         block = 0
-        root_seed = random.random()
+        root_seed = os.urandom(32)
         challenge = Challenge(block, root_seed)
 
         chunk_size = min(1024, self.hb.file_size // 10)
@@ -171,19 +183,15 @@ class TestOneHash(unittest.TestCase):
         self.hb.file_object.seek(block)
         h = hashlib.sha256()
         h.update(self.hb.file_object.read(chunk_size))
-        try:
-            encoded_seed = bytes(str(root_seed), 'utf-8')
-        except TypeError:
-            encoded_seed = bytes(str(root_seed))
-        h.update(encoded_seed)
-        hexdigest = h.hexdigest()
+        h.update(root_seed)
+        digest = h.digest()
 
         result = self.hb.meet_challenge(challenge)
-        self.assertEqual(hexdigest, result)
+        self.assertEqual(digest, result)
 
     def test_meet_challenge_near_eof(self):
         block = 3100
-        root_seed = random.random()
+        root_seed = os.urandom(32)
         challenge = Challenge(block, root_seed)
         chunk_size = min(1024, self.hb.file_size // 10)
 
@@ -195,26 +203,22 @@ class TestOneHash(unittest.TestCase):
         h.update(self.hb.file_object.read(end_slice))
         self.hb.file_object.seek(0)
         h.update(self.hb.file_object.read(chunk_size - end_slice))
-        try:
-            encoded_seed = bytes(str(root_seed), 'utf-8')
-        except TypeError:
-            encoded_seed = bytes(str(root_seed))
-        h.update(encoded_seed)
-        hexdigest = h.hexdigest()
+        h.update(root_seed)
+        digest = h.digest()
 
         result = self.hb.meet_challenge(challenge)
-        self.assertEqual(hexdigest, result)
+        self.assertEqual(digest, result)
 
     def test_generate_challenges(self):
         num = random.randint(5, 10)
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
+        digest = hashlib.sha256(os.urandom(24)).digest()
 
-        self.hb.generate_challenges(num, hexdigest)
+        self.hb.generate_challenges(num, digest)
         for item in self.hb.challenges:
             self.assertIsInstance(item, Challenge)
 
-        seeds = self.hb.generate_seeds(num, hexdigest, self.secret)
-        blocks = self.hb.pick_blocks(num, hexdigest)
+        seeds = self.hb.generate_seeds(num, digest, self.secret)
+        blocks = self.hb.pick_blocks(num, digest)
 
         for index in range(num):
             challenge = self.hb.challenges[index]
@@ -225,8 +229,8 @@ class TestOneHash(unittest.TestCase):
 
     def test_check_answer(self):
         num = 1
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
-        self.hb.generate_challenges(num, hexdigest)
+        digest = hashlib.sha256(os.urandom(24)).digest()
+        self.hb.generate_challenges(num, digest)
 
         value = self.hb.challenges[0].response
         result = self.hb.check_answer(value)
@@ -234,16 +238,16 @@ class TestOneHash(unittest.TestCase):
 
     def test_check_answer_wrong_hash(self):
         num = 1
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
-        self.hb.generate_challenges(num, hexdigest)
+        digest = hashlib.sha256(os.urandom(24)).digest()
+        self.hb.generate_challenges(num, digest)
         value = "test value that doesn't matter.  ;)"
         result = self.hb.check_answer(value)
         self.assertIs(False, result)
 
     def test_delete_challenge(self):
         num = 5
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
-        self.hb.generate_challenges(num, hexdigest)
+        digest = hashlib.sha256(os.urandom(24)).digest()
+        self.hb.generate_challenges(num, digest)
 
         choice = self.hb.challenges[2].response
         result = self.hb.delete_challenge(choice)
@@ -252,18 +256,18 @@ class TestOneHash(unittest.TestCase):
 
     def test_delete_challenge_wrong_hash(self):
         num = 5
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
-        self.hb.generate_challenges(num, hexdigest)
+        digest = hashlib.sha256(os.urandom(24)).digest()
+        self.hb.generate_challenges(num, digest)
 
-        choice = "invalid hash that doesn't matter"
+        choice = b"invalid hash that doesn't matter"
         result = self.hb.delete_challenge(choice)
         self.assertIs(result, False)
         self.assertTrue(len(self.hb.challenges), 5)
 
     def test_random_challenge(self):
         num = 5
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
-        self.hb.generate_challenges(num, hexdigest)
+        digest = hashlib.sha256(os.urandom(24)).digest()
+        self.hb.generate_challenges(num, digest)
 
         rand_chal = self.hb.random_challenge()
         self.assertIsInstance(rand_chal, Challenge)
@@ -275,8 +279,8 @@ class TestOneHash(unittest.TestCase):
 
     def test_challenges_size(self):
         num = 5
-        hexdigest = hashlib.sha256(os.urandom(24)).hexdigest()
-        self.hb.generate_challenges(num, hexdigest)
+        digest = hashlib.sha256(os.urandom(24)).digest()
+        self.hb.generate_challenges(num, digest)
 
         self.assertEqual(self.hb.challenges_size,
                          sys.getsizeof(self.hb.challenges))

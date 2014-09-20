@@ -36,7 +36,7 @@ from heartbeat.OneHash import OneHash
 
 class Chunk(object):
     def __init__(self, file_path, num_challenges, root_seed):
-        self.secret = "mysecret"
+        self.secret = b"mysecret"
         self.target_file = OneHash(file_path, self.secret)
         self.target_file.generate_challenges(num_challenges, root_seed)
 
@@ -49,7 +49,7 @@ class Chunk(object):
 
 class Client(object):
     def __init__(self, file_path):
-        self.target_file = OneHash(file_path, "mysecret")
+        self.target_file = OneHash(file_path, b"mysecret")
 
     def answer(self, challenge):
         return self.target_file.meet_challenge(challenge)
@@ -60,7 +60,7 @@ class Contract(object):
         self.chunk_list = []
         for i in range(redundancy):
             self.chunk_list.append(
-                Chunk(file_path, num_challenges, root_seed + str(i))
+                Chunk(file_path, num_challenges, root_seed + bytes(i))
             )
 
     def send_contract(self):
@@ -77,7 +77,7 @@ class TestFunctional(unittest.TestCase):
         self.file_path2 = "files/test2.txt"
         self.file_path3 = "files/test3.txt"
         self.size_path = "files/test4.txt"
-        self.root_seed = "myroot"
+        self.root_seed = b"myroot"
 
     def tearDown(self):
         del self.file_path
@@ -87,7 +87,7 @@ class TestFunctional(unittest.TestCase):
         del self.root_seed
 
     def test_heartbeat_and_challenge(self):
-        file1 = OneHash(self.file_path, "mysecret")
+        file1 = OneHash(self.file_path, b"mysecret")
         file1.generate_challenges(10, self.root_seed)
         challenge = file1.random_challenge()
 
@@ -105,7 +105,7 @@ class TestFunctional(unittest.TestCase):
 
     def test_size(self):
         def num_challenges(number):
-            file1 = OneHash(self.size_path, "mysecret")
+            file1 = OneHash(self.size_path, b"mysecret")
             file1.generate_challenges(number, self.root_seed)
 
         def size1():
@@ -125,7 +125,7 @@ class TestFunctional(unittest.TestCase):
 
     def test_generate_many_challenges(self):
         num_challenges = 100
-        root_seed = "testing"
+        root_seed = b"testing"
 
         # Start
         chunk = Chunk("files/test4.txt", num_challenges, root_seed)
@@ -147,7 +147,7 @@ class TestFunctional(unittest.TestCase):
             time.sleep(0.25)
 
     def test_challenges(self):
-        contract = Contract("files/test4.txt", 3, 100, "testing")
+        contract = Contract("files/test4.txt", 3, 100, b"testing")
         contract.run()
 
 if __name__ == '__main__':

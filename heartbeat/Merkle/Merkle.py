@@ -54,11 +54,18 @@ class Challenge(object):
         self.index = index
 
     def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
         return {'seed': base64.b64encode(self.seed).decode(), 
                 'index': self.index}
     
     @staticmethod
     def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new Challenge 
+        object from the dictionary.
+        
+        :param dict: the dictionary to convert
+        """
         seed = base64.b64decode(dict['seed'].encode())
         index = dict['index']
         return Challenge(seed,index)
@@ -81,11 +88,18 @@ class Tag(object):
         self.chunksz = chunksz
         
     def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
         return {'tree': self.tree.todict(),
                 'chunksz': self.chunksz}
 
     @staticmethod
     def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new Tag object
+        from the dictionary.
+        
+        :param dict: the dictionary to convert
+        """
         tree = MerkleTree.fromdict(dict['tree'])
         chunksz = dict['chunksz']
         return Tag(tree,chunksz)
@@ -129,6 +143,8 @@ class State(object):
         self.timestamp = timestamp
         
     def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
         return {'index': self.index,
                 'seed': base64.b64encode(self.seed).decode(),
                 'n': self.n,
@@ -138,6 +154,11 @@ class State(object):
     
     @staticmethod
     def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new State object
+        from the dictionary.
+        
+        :param dict: the dictionary to convert
+        """
         index = dict['index']
         seed = base64.b64decode(dict['seed'].encode())
         n = dict['n']
@@ -148,6 +169,10 @@ class State(object):
         return self
     
     def get_hmac(self,key):
+        """Returns the keyed HMAC for authentication of this state data.
+        
+        :param key: the key for the keyed hash function
+        """
         h = HMAC.new(key, None, SHA256)
         h.update(str(self.index).encode())
         h.update(self.seed)
@@ -218,10 +243,17 @@ class Merkle(object):
             self.key = key
             
     def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
         return {'key': base64.b64encode(self.key).decode()}
     
     @staticmethod
     def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new Proof object
+        from the dictionary.
+        
+        :param dict: the dictionary to convert
+        """
         key = base64.b64decode(dict['key'].encode())
         return Merkle(key)
 
@@ -302,15 +334,26 @@ class Merkle(object):
 
     @staticmethod
     def tag_type():
-        return Tag;
+        """Returns the type of the tag object associated with this heartbeat
+        """
+        return Tag
     
+    @staticmethod
     def state_type():
+        """Returns the type of the state object associated with this heartbeat
+        """
         return State
-        
+    
+    @staticmethod
     def challenge_type():
+        """Returns the type of the challenge object associated with this
+        heartbeat"""
         return Challenge
-        
+    
+    @staticmethod
     def proof_type():
+        """Returns the type of the proof object associated with this heartbeat
+        """
         return Proof
 
 

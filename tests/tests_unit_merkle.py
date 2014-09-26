@@ -32,7 +32,6 @@ import sys
 import random
 import hashlib
 import unittest
-from decimal import Decimal
 import pickle
 import json
 

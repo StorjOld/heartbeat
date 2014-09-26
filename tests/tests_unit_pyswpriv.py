@@ -67,7 +67,6 @@ class TestPySwiv(unittest.TestCase):
         state = PySwPriv.State(os.urandom(32),os.urandom(32),100)
         k = os.urandom(32)
         state.encrypt(k)
-        state.encrypt(k)
         # modify state and check that signature fails
         state.chunks=10
         with self.assertRaises(HeartbeatError) as ex:

@@ -34,6 +34,8 @@ import hashlib
 import unittest
 from decimal import Decimal
 import pickle
+import json
+
 
 from heartbeat.exc import HeartbeatError
 from heartbeat import Merkle
@@ -105,7 +107,17 @@ class TestMerkleTree(unittest.TestCase):
         for i in range(0,10):
             self.assertFalse(Merkle.MerkleTree.verify_branch(mt.leaves[i],mt.get_branch(i),os.urandom(32)))
 
-
+    def test_serialization(self):
+        mt = Merkle.MerkleTree()
+        for i in range(0,10):
+            mt.add_leaf(os.urandom(32))
+        mt.build()
+        
+        d = mt.todict()
+        mt2 = Merkle.MerkleTree.fromdict(d)
+        
+        self.assertEqual(mt,mt2)
+            
 class TestMerkle(unittest.TestCase):
     def test_signing(self):
         state = Merkle.State(0,os.urandom(32),256,os.urandom(32))

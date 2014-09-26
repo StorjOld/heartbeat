@@ -65,17 +65,24 @@ template<typename T>
 class PyBytesStateAccessible : public T
 {
 public:
-	enum encoding_type { binary = 0, base64 = 1 };
+	enum encoding_type { inherit = -1, binary = 0, base64 = 1 };
 	
 	PyBytesStateAccessible() : _encoding(binary) {}
 
-	py_array get_state()
+	py_array get_state(encoding_type encoding = inherit)
 	{
+		//std::cout << "Entering get_state()" << std::endl;
+		if (encoding == inherit)
+		{
+			encoding = _encoding;
+		}
 		// serialize the underlying and output
-		if (_encoding == binary)
+		if (encoding == binary)
 		{
 			PyBytesSink sink;
 			this->serialize(sink);
+			
+			//std::cout << "Leaving get_state()" << std::endl;
 			return sink.finish();
 		}
 		else
@@ -84,24 +91,33 @@ public:
 			CryptoPP::StringSink sink(bin);
 			this->serialize(sink);
 			std::string b64 = base64_encode((const unsigned char*)bin.c_str(),bin.size());
+			
+			//std::cout << "Leaving get_state()" << std::endl;
 			return py_array(b64);
 		}
 	}
 	
-	void set_state(py_array state)
+	void set_state(py_array state, encoding_type encoding = inherit)
 	{
+		//std::cout << "Entering set_state()" << std::endl;
+		if (encoding == inherit)
+		{
+			encoding = _encoding;
+		}
 		CryptoPP::StringSource *ss;
-		if (_encoding == binary)
+		if (encoding == binary)
 		{
 			ss = new CryptoPP::StringSource(state,true);
 		}
 		else
 		{
-			std::string bin = base64_decode(state.as_std_string());
+			std::string bin = base64_decode(state);
 			ss = new CryptoPP::StringSource(bin,true);
 		}
 		// deserializep takes ownership of the stringsource and deletes it after use, so we do not have to cleanup StringSource
 		this->deserializep(ss);
+		
+		//std::cout << "Leaving get_state()" << std::endl;
 	}
 	
 	encoding_type get_encoding() const { return _encoding; }
@@ -131,6 +147,9 @@ public:
 		Tthis::PYCXX_ADD_NOARGS_METHOD( __getstate__, _get_state, "__getstate__()\nReturns the state of this object for serialization." );
 		Tthis::PYCXX_ADD_VARARGS_METHOD(  __setstate__, _set_state, "__setstate__( state )\nTakes the state as returned by __getstate__ as an argument.  Sets the object's internal state to that specified.");
 		Tthis::PYCXX_ADD_NOARGS_METHOD(  __reduce__, _reduce, "__reduce__()\nReduces the object and returns a tuple of the callable constructor, any arguments to that constructor, and the object state.");
+		Tthis::PYCXX_ADD_NOARGS_METHOD( todict, _todict, "todict()\nReturns a dictionary fully representing this object.");
+		
+		add_method("fromdict", _fromdict, METH_VARARGS | METH_STATIC, "fromdict(dict)\nReturns a new object of this type from the given dictionary.");
 	}
 	
 	static void init_type(const char *T_type_name,const char *doc = "")
@@ -187,6 +206,50 @@ public:
 		return Py::TupleN( Tthis::type(), Py::TupleN(), _get_state() );
 	}
 	PYCXX_NOARGS_METHOD_DECL( Tthis, _reduce )
+	
+	Py::Object _todict()
+	{
+		try 
+		{
+			//std::cout << "Entering _todict()" << std::endl;
+			Py::Dict d;
+			d["swpriv_internal"] = this->get_state(base64).decode("utf-8");
+			//std::cout << "Leaving _todict()" << std::endl;
+			return d;
+		} 
+		catch (const std::exception &e)
+		{
+			throw PyHeartbeatException(e.what());
+		}
+	}
+	PYCXX_NOARGS_METHOD_DECL( Tthis, _todict )
+	
+	static PyObject * _fromdict( PyObject *, PyObject *_a)
+	{
+		try
+		{
+			//std::cout << "Entering _fromdict()" << std::endl;
+			Py::Callable class_type( Tthis::type() );
+			Py::PythonClassObject<Tthis> pyobj( class_type.apply( Py::Tuple() ) );
+			Tthis *obj = pyobj.getCxxObject();
+			
+			Py::Tuple a(_a);
+			Py::Dict d = a[0];
+			obj->set_state(Py::String(d["swpriv_internal"]).encode("utf-8"),base64);
+			
+			//std::cout << "Leaving _fromdict()" << std::endl;
+			return Py::new_reference_to( pyobj.ptr() );
+		}
+		catch (const std::exception &e)
+		{
+			PyHeartbeatException(e.what());
+			return 0;
+		}
+		catch ( Py::Exception & )
+		{
+			return 0;
+		}
+	}
 };
 
 class Tag : public PyBytesStateAccessiblePyClass<Tag,shacham_waters_private_data::tag>
@@ -403,6 +466,11 @@ the client for verification." );
 		PYCXX_ADD_VARARGS_METHOD( verify, _verify, "is_valid = verify(proof,challenge,state)\nReturns a boolean representing whether the\n\
 proof is valid given the challenge and file state. This function will decypt\n\
 the state if necessary." );
+
+		add_method( "tag_type", _tag_type, METH_NOARGS | METH_STATIC, "tag_type()\nReturns the type of tag.");
+		add_method( "state_type", _state_type, METH_NOARGS | METH_STATIC, "state_type()\nReturns the type of state.");
+		add_method( "proof_type", _proof_type, METH_NOARGS | METH_STATIC, "proof_type()\nReturns the type of proof.");
+		add_method( "challenge_type", _challenge_type, METH_NOARGS | METH_STATIC, "challenge_type()\nReturns the type of challenge.");
 		
 		behaviors().readyType();
 	}
@@ -555,6 +623,26 @@ the state if necessary." );
 		}
 	}
 	PYCXX_VARARGS_METHOD_DECL( SwPriv, _verify )
+	
+	static PyObject * _tag_type( PyObject *, PyObject *)
+	{
+		return Py::new_reference_to( reinterpret_cast<PyObject*>(Tag::type_object()) );
+	}
+	
+	static PyObject * _state_type( PyObject *, PyObject * )
+	{
+		return Py::new_reference_to( reinterpret_cast<PyObject*>(State::type_object()) );
+	}
+	
+	static PyObject * _proof_type( PyObject *, PyObject *)
+	{
+		return Py::new_reference_to( reinterpret_cast<PyObject*>(Proof::type_object()) );
+	}
+	
+	static PyObject * _challenge_type( PyObject *, PyObject *)
+	{
+		return Py::new_reference_to( reinterpret_cast<PyObject*>(Challenge::type_object()) );
+	}
 };
 
 }

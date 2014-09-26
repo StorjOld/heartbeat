@@ -21,6 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ..util import hb_encode, hb_decode
 from ..exc import HeartbeatError
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC
@@ -97,6 +98,17 @@ class Challenge(object):
         self.chunks = chunks
         self.v_max = v_max
         self.key = key
+        
+    def todict(self):
+        return {"chunks": self.chunks,
+                "v_max": self.v_max,
+                "key": hb_encode(self.key)}
+    
+    @staticmethod
+    def fromdict(dict):
+        return Challenge(dict["chunks"],
+                         dict["v_max"],
+                         hb_decode(dict["key"]))
 
 
 class Tag(object):
@@ -107,6 +119,14 @@ class Tag(object):
         """
         self.sigma = list()
 
+    def todict(self):
+        return {"sigma": hb_encode(self.sigma)}
+        
+    @staticmethod
+    def fromdict(dict):
+        self = Tag()
+        self.sigma = hb_decode(dict["sigma"])
+        return self
 
 class State(object):
     """The state which contains two psueod random function keys for generating
@@ -129,6 +149,23 @@ class State(object):
         self.encrypted = encrypted
         self.iv = iv
         self.hmac = hmac
+        
+    def todict(self):
+        return {"f_key": hb_encode(self.f_key),
+                "alpha_key": hb_encode(self.alpha_key),
+                "chunks": self.chunks,
+                "encrypted": self.encrypted,
+                "iv": hb_encode(self.iv),
+                "hmac": hb_encode(self.hmac)}
+    
+    @staticmethod
+    def fromdict(dict):
+        return State(hb_decode(dict["f_key"]),
+                     hb_decode(dict["alpha_key"]),
+                     dict["chunks"],
+                     dict["encrypted"],
+                     hb_decode(dict["iv"]),
+                     hb_decode(dict["hmac"]))
 
     def encrypt(self, key):
         """This method encrypts and signs the state to make it unreadable by
@@ -183,6 +220,16 @@ class Proof(object):
         self.mu = list()
         self.sigma = None
 
+    def todict(self):
+        return {"mu": hb_encode(self.mu),
+                "sigma": hb_encode(self.sigma)}
+    
+    @staticmethod
+    def fromdict(dict):
+        self = Proof()
+        self.mu = hb_decode(dict["mu"])
+        self.sigma = hb_decode(dict["sigma"])
+        return self
 
 class PySwPriv(object):
     """This class encapsulates the proof of storage engine for the Shacham
@@ -211,6 +258,18 @@ class PySwPriv(object):
             self.prime = prime
         self.sectors = sectors
         self.sectorsize = self.prime.bit_length()//8
+        
+    def todict(self):
+        return {"key": hb_encode(self.key),
+                "prime": self.prime,
+                "sectors": self.sectors,}
+    
+    @staticmethod
+    def fromdict(dict):
+        return PySwPriv(dict["sectors"],
+                        hb_decode(dict["key"]),
+                        dict["prime"])
+                        
 
     def get_public(self):
         """Gets a public version of the object with the key stripped."""
@@ -334,3 +393,15 @@ class PySwPriv(object):
 
         rhs %= self.prime
         return proof.sigma == rhs
+
+    def tag_type():
+        return Tag
+        
+    def state_type():
+        return State
+        
+    def challenge_type():
+        return Challenge
+        
+    def proof_type():
+        return Proof

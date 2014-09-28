@@ -98,14 +98,14 @@ class Challenge(object):
         self.chunks = chunks
         self.v_max = v_max
         self.key = key
-    
+
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
         return {"chunks": self.chunks,
                 "v_max": self.v_max,
                 "key": hb_encode(self.key)}
-    
+
     @staticmethod
     def fromdict(dict):
         """Takes a dictionary as an argument and returns a new Challenge
@@ -127,18 +127,19 @@ class Tag(object):
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
-        return {"sigma": hb_encode(self.sigma)}
-        
+        return {"sigma": self.sigma}
+
     @staticmethod
     def fromdict(dict):
         """Takes a dictionary as an argument and returns a new Tag object
         from the dictionary.
-        
+
         :param dict: the dictionary to convert
         """
         self = Tag()
-        self.sigma = hb_decode(dict["sigma"])
+        self.sigma = dict["sigma"]
         return self
+
 
 class State(object):
     """The state which contains two psueod random function keys for generating
@@ -165,7 +166,7 @@ class State(object):
             self.hmac = self.get_hmac(key)
         else:
             self.hmac = hmac
-        
+
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
@@ -175,12 +176,12 @@ class State(object):
                 "encrypted": self.encrypted,
                 "iv": hb_encode(self.iv),
                 "hmac": hb_encode(self.hmac)}
-    
+
     @staticmethod
     def fromdict(dict):
         """Takes a dictionary as an argument and returns a new State object
         from the dictionary.
-        
+
         :param dict: the dictionary to convert
         """
         return State(hb_decode(dict["f_key"]),
@@ -192,10 +193,9 @@ class State(object):
 
     def get_hmac(self, key):
         """Returns the keyed HMAC for authentication of this state data.
-        
+
         :param key: the key for the keyed hash function
         """
-        print("{0} {1} {2} {3}".format(self.iv,self.chunks,self.f_key,self.alpha_key))
         h = HMAC.new(key, None, SHA256)
         h.update(self.iv)
         h.update(str(self.chunks).encode())
@@ -251,20 +251,21 @@ class Proof(object):
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
-        return {"mu": hb_encode(self.mu),
-                "sigma": hb_encode(self.sigma)}
-    
+        return {"mu": self.mu,
+                "sigma": self.sigma}
+
     @staticmethod
     def fromdict(dict):
         """Takes a dictionary as an argument and returns a new Proof object
         from the dictionary.
-        
+
         :param dict: the dictionary to convert
         """
         self = Proof()
-        self.mu = hb_decode(dict["mu"])
-        self.sigma = hb_decode(dict["sigma"])
+        self.mu = dict["mu"]
+        self.sigma = dict["sigma"]
         return self
+
 
 class PySwPriv(object):
     """This class encapsulates the proof of storage engine for the Shacham
@@ -293,25 +294,24 @@ class PySwPriv(object):
             self.prime = prime
         self.sectors = sectors
         self.sectorsize = self.prime.bit_length()//8
-        
+
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
         return {"key": hb_encode(self.key),
                 "prime": self.prime,
-                "sectors": self.sectors,}
-    
+                "sectors": self.sectors}
+
     @staticmethod
     def fromdict(dict):
         """Takes a dictionary as an argument and returns a new PySwPriv
         object from the dictionary.
-        
+
         :param dict: the dictionary to convert
         """
         return PySwPriv(dict["sectors"],
                         hb_decode(dict["key"]),
                         dict["prime"])
-                        
 
     def get_public(self):
         """Gets a public version of the object with the key stripped."""
@@ -389,7 +389,6 @@ class PySwPriv(object):
         proof.mu = [0]*self.sectors
         proof.sigma = 0
 
-        
         for i in range(0, chal.chunks):
             for j in range(0, self.sectors):
                 pos = index.eval(i) * chunk_size + j * self.sectorsize
@@ -397,13 +396,13 @@ class PySwPriv(object):
                 buffer = file.read(self.sectorsize)
                 if (len(buffer) > 0):
                     proof.mu[j] += v.eval(i) * number.bytes_to_long(buffer)
-                
+
                 if (len(buffer) != self.sectorsize):
-                    break;
+                    break
 
         for j in range(0, self.sectors):
             proof.mu[j] %= self.prime
-        
+
         for i in range(0, chal.chunks):
             proof.sigma += v.eval(i) * tag.sigma[index.eval(i)]
 
@@ -435,25 +434,25 @@ class PySwPriv(object):
 
         rhs %= self.prime
         return proof.sigma == rhs
-    
+
     @staticmethod
     def tag_type():
         """Returns the type of the tag object associated with this heartbeat
         """
         return Tag
-    
+
     @staticmethod
     def state_type():
         """Returns the type of the state object associated with this heartbeat
         """
         return State
-    
+
     @staticmethod
     def challenge_type():
         """Returns the type of the challenge object associated with this
         heartbeat"""
         return Challenge
-    
+
     @staticmethod
     def proof_type():
         """Returns the type of the proof object associated with this heartbeat

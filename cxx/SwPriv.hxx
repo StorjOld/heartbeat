@@ -212,10 +212,10 @@ public:
 		try 
 		{
 			//std::cout << "Entering _todict()" << std::endl;
-			Py::Dict d;
-			d["swpriv_internal"] = this->get_state(PyBytesStateAccessible::base64).decode("utf-8");
+			Py::String s;
+			s = this->get_state(PyBytesStateAccessible::base64).decode("utf-8");
 			//std::cout << "Leaving _todict()" << std::endl;
-			return d;
+			return s;
 		} 
 		catch (const std::exception &e)
 		{
@@ -234,8 +234,8 @@ public:
 			Tthis *obj = pyobj.getCxxObject();
 			
 			Py::Tuple a(_a);
-			Py::Dict d(a[0]);
-			obj->set_state(Py::String(d["swpriv_internal"]).encode("utf-8"),PyBytesStateAccessible::base64);
+			Py::String s(a[0]);
+			obj->set_state(s.encode("utf-8"),PyBytesStateAccessible::base64);
 			
 			//std::cout << "Leaving _fromdict()" << std::endl;
 			return Py::new_reference_to( pyobj.ptr() );

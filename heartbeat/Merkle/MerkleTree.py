@@ -23,7 +23,8 @@
 
 import math
 import hashlib
-import base64
+
+from ..util import hb_encode, hb_decode
 
 # numbering scheme:
 # nodes                                   0
@@ -34,9 +35,10 @@ import base64
 
 # leaves:   0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 0 - 0 - 0 - 0 - 0 - 0 - 0
 
+
 class MerkleBranch(object):
     def __init__(self, order):
-        self.rows = [(b'',b'')]*order
+        self.rows = [(b'', b'')]*order
 
     def get_left(self, i):
         return self.rows[i][0]
@@ -52,20 +54,22 @@ class MerkleBranch(object):
 
     def set_row(self, i, value):
         self.rows[i] = value
-        
+
     def get_order(self):
         return len(self.rows)
 
     def todict(self):
-        return {'rows': list(map(lambda x: (base64.b64encode(x[0]).decode(),base64.b64encode(x[1]).decode()), self.rows)) }
+        return {'rows': list(map(lambda x: (hb_encode(x[0]),
+                hb_encode(x[1])), self.rows))}
 
     @staticmethod
     def fromdict(dict):
         self = MerkleBranch(len(dict['rows']))
-        self.rows = list(map(lambda x: (base64.b64decode(x[0].encode()), base64.b64decode(x[1].encode())), dict['rows']))
+        self.rows = list(map(lambda x: (hb_decode(x[0]),
+                         hb_decode(x[1])), dict['rows']))
         return self
 
-        
+
 class MerkleTree(object):
     """This provides a simple MerkleTree implementation for use in the Merkle
     proof of storage scheme.  A leaf refers to the bottom level of the tree,
@@ -84,22 +88,24 @@ class MerkleTree(object):
         self.nodes = list()
         self.order = 0
         self.leaves = list()
-        
+
     def todict(self):
-        return {'nodes': list(map(lambda x: base64.b64encode(x).decode(), self.nodes)), 
-             'order': self.order, 
-             'leaves': list(map(lambda x: base64.b64encode(x).decode(), self.leaves)) }
-    
+        return {'nodes': hb_encode(self.nodes),
+                'order': self.order,
+                'leaves': hb_encode(self.leaves)}
+
     @staticmethod
     def fromdict(dict):
         self = MerkleTree()
-        self.nodes = list(map(lambda x: base64.b64decode(x.encode()), dict['nodes']))
+        self.nodes = hb_decode(dict['nodes'])
         self.order = dict['order']
-        self.leaves = list(map(lambda x: base64.b64decode(x.encode()), dict['leaves']))
+        self.leaves = hb_decode(dict['leaves'])
         return self
-        
-    def __eq__(self,other):
-        return self.nodes == other.nodes and self.order == other.order and self.leaves == other.leaves
+
+    def __eq__(self, other):
+        return (self.nodes == other.nodes
+                and self.order == other.order
+                and self.leaves == other.leaves)
 
     def add_leaf(self, leaf):
         """Adds a leaf to the list of leaves.  Does not build the tree so call
@@ -153,9 +159,9 @@ class MerkleTree(object):
 
         for k in range(0, self.order):
             if (self.is_left(j)):
-                branch.set_row(k,(self.nodes[j], self.nodes[j+1]))
+                branch.set_row(k, (self.nodes[j], self.nodes[j+1]))
             else:
-                branch.set_row(k,(self.nodes[j-1], self.nodes[j]))
+                branch.set_row(k, (self.nodes[j-1], self.nodes[j]))
             j = MerkleTree.get_parent(j)
 
         return branch

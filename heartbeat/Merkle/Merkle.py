@@ -27,13 +27,14 @@ import hmac
 import os
 import random
 import time
-import base64
+
 
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA256
 
 from .MerkleTree import MerkleTree, MerkleBranch
 from ..exc import HeartbeatError
+from ..util import hb_encode, hb_decode
 
 
 # challenge is a the seed and index
@@ -56,19 +57,20 @@ class Challenge(object):
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
-        return {'seed': base64.b64encode(self.seed).decode(), 
+        return {'seed': hb_encode(self.seed),
                 'index': self.index}
-    
+
     @staticmethod
     def fromdict(dict):
-        """Takes a dictionary as an argument and returns a new Challenge 
+        """Takes a dictionary as an argument and returns a new Challenge
         object from the dictionary.
-        
+
         :param dict: the dictionary to convert
         """
-        seed = base64.b64decode(dict['seed'].encode())
+        seed = hb_decode(dict['seed'])
         index = dict['index']
-        return Challenge(seed,index)
+        return Challenge(seed, index)
+
 
 # tag is the stripped merkle tree
 class Tag(object):
@@ -86,7 +88,7 @@ class Tag(object):
         """
         self.tree = tree
         self.chunksz = chunksz
-        
+
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
@@ -97,12 +99,13 @@ class Tag(object):
     def fromdict(dict):
         """Takes a dictionary as an argument and returns a new Tag object
         from the dictionary.
-        
+
         :param dict: the dictionary to convert
         """
         tree = MerkleTree.fromdict(dict['tree'])
         chunksz = dict['chunksz']
-        return Tag(tree,chunksz)
+        return Tag(tree, chunksz)
+
 
 class State(object):
     """The State class represents the state of a file, which can be encrypted
@@ -141,36 +144,36 @@ class State(object):
         self.root = root
         self.hmac = hmac
         self.timestamp = timestamp
-        
+
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
         return {'index': self.index,
-                'seed': base64.b64encode(self.seed).decode(),
+                'seed': hb_encode(self.seed),
                 'n': self.n,
-                'root': base64.b64encode(self.root).decode(),
-                'hmac': base64.b64encode(self.hmac).decode(),
+                'root': hb_encode(self.root),
+                'hmac': hb_encode(self.hmac),
                 'timestamp': self.timestamp}
-    
+
     @staticmethod
     def fromdict(dict):
         """Takes a dictionary as an argument and returns a new State object
         from the dictionary.
-        
+
         :param dict: the dictionary to convert
         """
         index = dict['index']
-        seed = base64.b64decode(dict['seed'].encode())
+        seed = hb_decode(dict['seed'])
         n = dict['n']
-        root = base64.b64decode(dict['root'].encode())
-        hmac = base64.b64decode(dict['hmac'].encode())
+        root = hb_decode(dict['root'])
+        hmac = hb_decode(dict['hmac'])
         timestamp = dict['timestamp']
-        self = State(index,seed,n,root,hmac,timestamp)
+        self = State(index, seed, n, root, hmac, timestamp)
         return self
-    
-    def get_hmac(self,key):
+
+    def get_hmac(self, key):
         """Returns the keyed HMAC for authentication of this state data.
-        
+
         :param key: the key for the keyed hash function
         """
         h = HMAC.new(key, None, SHA256)
@@ -180,7 +183,7 @@ class State(object):
         h.update(self.root)
         h.update(str(self.timestamp).encode())
         return h.digest()
-        
+
     def sign(self, key):
         """This function signs the state with a key to prevent modification.
         This should not need to be explicitly used since the encode function
@@ -188,7 +191,7 @@ class State(object):
 
         :param key: the key to use for signing
         """
-        
+
         self.hmac = self.get_hmac(key)
 
     def checksig(self, key):
@@ -199,7 +202,6 @@ class State(object):
 
         :param key: the key to use for checking the signature
         """
-        
         if (self.get_hmac(key) != self.hmac):
             raise HeartbeatError("Signature invalid on state.")
 
@@ -215,16 +217,16 @@ class Proof(object):
         """
         self.leaf = leaf
         self.branch = branch
-    
+
     def todict(self):
-        return {'leaf': base64.b64encode(self.leaf).decode(),
-                'branch': self.branch.todict() }
-    
+        return {'leaf': hb_encode(self.leaf),
+                'branch': self.branch.todict()}
+
     @staticmethod
     def fromdict(dict):
-        leaf = base64.b64decode(dict['leaf'].encode())
+        leaf = hb_decode(dict['leaf'])
         branch = MerkleBranch.fromdict(dict['branch'])
-        return Proof(leaf,branch)
+        return Proof(leaf, branch)
 
 
 class Merkle(object):
@@ -241,20 +243,20 @@ class Merkle(object):
             self.key = os.urandom(32)
         else:
             self.key = key
-            
+
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
-        return {'key': base64.b64encode(self.key).decode()}
-    
+        return {'key': hb_encode(self.key)}
+
     @staticmethod
     def fromdict(dict):
         """Takes a dictionary as an argument and returns a new Proof object
         from the dictionary.
-        
+
         :param dict: the dictionary to convert
         """
-        key = base64.b64decode(dict['key'].encode())
+        key = hb_decode(dict['key'])
         return Merkle(key)
 
     def get_public(self):
@@ -337,19 +339,19 @@ class Merkle(object):
         """Returns the type of the tag object associated with this heartbeat
         """
         return Tag
-    
+
     @staticmethod
     def state_type():
         """Returns the type of the state object associated with this heartbeat
         """
         return State
-    
+
     @staticmethod
     def challenge_type():
         """Returns the type of the challenge object associated with this
         heartbeat"""
         return Challenge
-    
+
     @staticmethod
     def proof_type():
         """Returns the type of the proof object associated with this heartbeat

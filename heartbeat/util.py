@@ -28,7 +28,7 @@ def hb_encode(obj):
     if (type(obj) is list):
         return list(map(lambda x: hb_encode(x), obj))
     else:  # elif (type(obj) is bytes):
-        return base64.b64encode(obj)
+        return base64.b64encode(obj).encode('utf-8')
     # else:
     #     return obj
 
@@ -37,6 +37,6 @@ def hb_decode(obj):
     if (type(obj) is list):
         return list(map(lambda x: hb_decode(x), obj))
     else:  # elif (type(obj) is str or type(obj) is unicode):
-        return base64.b64decode(obj)
+        return base64.b64decode(obj.decode('utf-8'))
     # else:
     #     return obj

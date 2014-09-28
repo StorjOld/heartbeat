@@ -213,7 +213,7 @@ public:
 		{
 			//std::cout << "Entering _todict()" << std::endl;
 			Py::String s;
-			s = this->get_state(PyBytesStateAccessible::base64).decode("utf-8");
+			s = this->get_state(PyBytesStateAccessible<Tbase>::base64);
 			//std::cout << "Leaving _todict()" << std::endl;
 			return s;
 		} 
@@ -235,7 +235,7 @@ public:
 			
 			Py::Tuple a(_a);
 			Py::String s(a[0]);
-			obj->set_state(s.encode("utf-8"),PyBytesStateAccessible::base64);
+			obj->set_state(s,PyBytesStateAccessible<Tbase>::base64);
 			
 			//std::cout << "Leaving _fromdict()" << std::endl;
 			return Py::new_reference_to( pyobj.ptr() );

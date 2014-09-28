@@ -5,7 +5,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014 Paul Durivage, William T. James
+# Copyright (c) 2014 Paul Durivage <pauldurivage+git@gmail.com> for Storj Labs
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,58 +25,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from setuptools import setup, Extension
-from setuptools.command.build_ext import build_ext
+from setuptools import setup
 
-import heartbeat
-
-copt = {'mingw32': [],
-        'unix': [],
-        'msvc': ['/EHsc']}
-lopt = {}
-libs = {'mingw32': ['cryptopp'],
-        'unix': ['cryptopp'],
-        'msvc': ['cryptlib']}
-        
-class build_ext_subclass(build_ext):
-    def build_extensions(self):
-        c = self.compiler.compiler_type
-        print("Compiling with "+c)
-        if c in copt:
-            for e in self.extensions:
-                e.extra_compile_args = copt[c]
-        if c in lopt:
-            for e in self.extensions:
-                e.extra_link_args = lopt[c]
-        if c in libs:
-            for e in self.extensions:
-                e.libraries = libs[c]
-        build_ext.build_extensions(self)
-
-swpriv_sources = ['cxx/shacham_waters_private.cxx', 'cxx/SwPriv.cxx', 'cxx/base64.cxx']
-pycxx_sources = ['cxx/pycxx/Src/cxxsupport.cxx',
-                 'cxx/pycxx/Src/cxx_extensions.cxx',
-                 'cxx/pycxx/Src/cxxextensions.c',
-                 'cxx/pycxx/Src/IndirectPythonInterface.cxx']
-
-all_sources = swpriv_sources + pycxx_sources
-
-swpriv = Extension('heartbeat.SwPriv',
-                   include_dirs=['cxx/pycxx','cxx'],
-                   sources=all_sources)
+from heartbeat import __version__
 
 setup(
-    name='storj-heartbeat',
-    version=heartbeat.__version__,
+    name='heartbeat',
+    version=__version__,
     url='https://github.com/Storj/heartbeat',
     license='The MIT License',
     author='Storj Labs',
     author_email='info@storj.io',
     description='Python library for verifying existence of a file',
-    install_requires=[
-        'pycrypto >= 2.6.1',
-    ],
-    packages=['heartbeat', 'heartbeat.Merkle', 'heartbeat.OneHash', 'heartbeat.PySwPriv'],
-    ext_modules=[swpriv],
-    cmdclass={'build_ext': build_ext_subclass}
+    packages=['heartbeat'],
 )

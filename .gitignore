@@ -52,23 +52,5 @@ docs/_build/
 # PyBuilder
 target/
 
-# C++ autotools and binary object stuff
-config.h.in
-config.status
-config.log
-config/
-configure
-Makefile.in
-*.o
-*.l[ao]
-*~
-Makefile
-autom4te.cache/
-.deps/
-*.Po
-stamp-h1
-*.exe
-aclocal.m4
-
 # PyCharm/Intellij
 .idea

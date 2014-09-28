@@ -28,11 +28,13 @@ import os
 import random
 import time
 
+
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA256
 
-from .MerkleTree import MerkleTree
+from .MerkleTree import MerkleTree, MerkleBranch
 from ..exc import HeartbeatError
+from ..util import hb_encode, hb_decode
 
 
 # challenge is a the seed and index
@@ -52,6 +54,23 @@ class Challenge(object):
         self.seed = seed
         self.index = index
 
+    def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
+        return {'seed': hb_encode(self.seed),
+                'index': self.index}
+
+    @staticmethod
+    def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new Challenge
+        object from the dictionary.
+
+        :param dict: the dictionary to convert
+        """
+        seed = hb_decode(dict['seed'])
+        index = dict['index']
+        return Challenge(seed, index)
+
 
 # tag is the stripped merkle tree
 class Tag(object):
@@ -69,6 +88,23 @@ class Tag(object):
         """
         self.tree = tree
         self.chunksz = chunksz
+
+    def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
+        return {'tree': self.tree.todict(),
+                'chunksz': self.chunksz}
+
+    @staticmethod
+    def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new Tag object
+        from the dictionary.
+
+        :param dict: the dictionary to convert
+        """
+        tree = MerkleTree.fromdict(dict['tree'])
+        chunksz = dict['chunksz']
+        return Tag(tree, chunksz)
 
 
 class State(object):
@@ -90,7 +126,8 @@ class State(object):
                  seed,
                  n,
                  root=None,
-                 timestamp=time.gmtime()):
+                 hmac=None,
+                 timestamp=time.time()):
         """Initialization method
 
         :param index: this is the index of the most recently issued challenge
@@ -98,14 +135,54 @@ class State(object):
         and is used to calculate the next seed.
         :param n: this is the maximum number of challenges that can be issued
         :param root: this is the merkle root of the tree
+        :param hmac: this is the hmac of the signed data
         :param timestamp: this is the timestamp of when the state was generated
         """
         self.index = index
         self.seed = seed
         self.n = n
         self.root = root
+        self.hmac = hmac
         self.timestamp = timestamp
-        self.hmac = None
+
+    def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
+        return {'index': self.index,
+                'seed': hb_encode(self.seed),
+                'n': self.n,
+                'root': hb_encode(self.root),
+                'hmac': hb_encode(self.hmac),
+                'timestamp': self.timestamp}
+
+    @staticmethod
+    def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new State object
+        from the dictionary.
+
+        :param dict: the dictionary to convert
+        """
+        index = dict['index']
+        seed = hb_decode(dict['seed'])
+        n = dict['n']
+        root = hb_decode(dict['root'])
+        hmac = hb_decode(dict['hmac'])
+        timestamp = dict['timestamp']
+        self = State(index, seed, n, root, hmac, timestamp)
+        return self
+
+    def get_hmac(self, key):
+        """Returns the keyed HMAC for authentication of this state data.
+
+        :param key: the key for the keyed hash function
+        """
+        h = HMAC.new(key, None, SHA256)
+        h.update(str(self.index).encode())
+        h.update(self.seed)
+        h.update(str(self.n).encode())
+        h.update(self.root)
+        h.update(str(self.timestamp).encode())
+        return h.digest()
 
     def sign(self, key):
         """This function signs the state with a key to prevent modification.
@@ -114,13 +191,8 @@ class State(object):
 
         :param key: the key to use for signing
         """
-        h = HMAC.new(key, None, SHA256)
-        h.update(str(self.index).encode())
-        h.update(self.seed)
-        h.update(str(self.n).encode())
-        h.update(self.root)
-        h.update(str(self.timestamp).encode())
-        self.hmac = h.digest()
+
+        self.hmac = self.get_hmac(key)
 
     def checksig(self, key):
         """This function checks the state signature.  It raises a
@@ -130,13 +202,7 @@ class State(object):
 
         :param key: the key to use for checking the signature
         """
-        h = HMAC.new(key, None, SHA256)
-        h.update(str(self.index).encode())
-        h.update(self.seed)
-        h.update(str(self.n).encode())
-        h.update(self.root)
-        h.update(str(self.timestamp).encode())
-        if (h.digest() != self.hmac):
+        if (self.get_hmac(key) != self.hmac):
             raise HeartbeatError("Signature invalid on state.")
 
 
@@ -151,6 +217,16 @@ class Proof(object):
         """
         self.leaf = leaf
         self.branch = branch
+
+    def todict(self):
+        return {'leaf': hb_encode(self.leaf),
+                'branch': self.branch.todict()}
+
+    @staticmethod
+    def fromdict(dict):
+        leaf = hb_decode(dict['leaf'])
+        branch = MerkleBranch.fromdict(dict['branch'])
+        return Proof(leaf, branch)
 
 
 class Merkle(object):
@@ -167,6 +243,21 @@ class Merkle(object):
             self.key = os.urandom(32)
         else:
             self.key = key
+
+    def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
+        return {'key': hb_encode(self.key)}
+
+    @staticmethod
+    def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new Proof object
+        from the dictionary.
+
+        :param dict: the dictionary to convert
+        """
+        key = hb_decode(dict['key'])
+        return Merkle(key)
 
     def get_public(self):
         """This function returns a Merkle object that has it's key
@@ -242,6 +333,30 @@ class Merkle(object):
         return MerkleTree.verify_branch(proof.leaf,
                                         proof.branch,
                                         state.root)
+
+    @staticmethod
+    def tag_type():
+        """Returns the type of the tag object associated with this heartbeat
+        """
+        return Tag
+
+    @staticmethod
+    def state_type():
+        """Returns the type of the state object associated with this heartbeat
+        """
+        return State
+
+    @staticmethod
+    def challenge_type():
+        """Returns the type of the challenge object associated with this
+        heartbeat"""
+        return Challenge
+
+    @staticmethod
+    def proof_type():
+        """Returns the type of the proof object associated with this heartbeat
+        """
+        return Proof
 
 
 class MerkleHelper(object):

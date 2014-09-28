@@ -123,7 +123,7 @@ class TestFunctional(unittest.TestCase):
         print(str(timeit.timeit(size2, number=1)) + " seconds")
         print("")
 
-    def test_generate_many_challenges(self):
+    def xtest_generate_many_challenges(self):
         num_challenges = 100
         root_seed = b"testing"
 

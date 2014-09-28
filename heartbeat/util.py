@@ -1,11 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# This file is part of Heartbeat: https://github.com/Storj/heartbeat
 #
-#  The MIT License (MIT)
+# The MIT License (MIT)
 #
-# Copyright (c) 2014 Storj Labs, Paul Durivage, et al.
+# Copyright (c) 2014 William T. James
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +21,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__version__ = "0.1.4"
+import base64
 
 
-def Heartbeat(basebeat=None):
-    if (basebeat is None):
-        import heartbeat.SwPriv
-        return heartbeat.SwPriv.SwPriv()
-    else:
-        return basebeat()
+def hb_encode(obj):
+    if (type(obj) is list):
+        return list(map(lambda x: hb_encode(x), obj))
+    else:  # elif (type(obj) is bytes):
+        return base64.b64encode(obj).decode('utf-8')
+    # else:
+    #     return obj
+
+
+def hb_decode(obj):
+    if (type(obj) is list):
+        return list(map(lambda x: hb_decode(x), obj))
+    else:  # elif (type(obj) is str or type(obj) is unicode):
+        return base64.b64decode(obj.encode('utf-8'))
+    # else:
+    #     return obj

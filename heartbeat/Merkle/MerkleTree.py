@@ -24,6 +24,8 @@
 import math
 import hashlib
 
+from ..util import hb_encode, hb_decode
+
 # numbering scheme:
 # nodes                                   0
 #                         1                               2
@@ -32,6 +34,40 @@ import hashlib
 #          15  16  17  18  19  20  21  22  23
 
 # leaves:   0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 0 - 0 - 0 - 0 - 0 - 0 - 0
+
+
+class MerkleBranch(object):
+    def __init__(self, order):
+        self.rows = [(b'', b'')]*order
+
+    def get_left(self, i):
+        return self.rows[i][0]
+
+    def get_right(self, i):
+        return self.rows[i][1]
+
+    def set_left(self, i, value):
+        self.rows[i][0] = value
+
+    def set_right(self, i, value):
+        self.rows[i][1] = value
+
+    def set_row(self, i, value):
+        self.rows[i] = value
+
+    def get_order(self):
+        return len(self.rows)
+
+    def todict(self):
+        return {'rows': list(map(lambda x: (hb_encode(x[0]),
+                hb_encode(x[1])), self.rows))}
+
+    @staticmethod
+    def fromdict(dict):
+        self = MerkleBranch(len(dict['rows']))
+        self.rows = list(map(lambda x: (hb_decode(x[0]),
+                         hb_decode(x[1])), dict['rows']))
+        return self
 
 
 class MerkleTree(object):
@@ -53,6 +89,24 @@ class MerkleTree(object):
         self.order = 0
         self.leaves = list()
 
+    def todict(self):
+        return {'nodes': hb_encode(self.nodes),
+                'order': self.order,
+                'leaves': hb_encode(self.leaves)}
+
+    @staticmethod
+    def fromdict(dict):
+        self = MerkleTree()
+        self.nodes = hb_decode(dict['nodes'])
+        self.order = dict['order']
+        self.leaves = hb_decode(dict['leaves'])
+        return self
+
+    def __eq__(self, other):
+        return (self.nodes == other.nodes
+                and self.order == other.order
+                and self.leaves == other.leaves)
+
     def add_leaf(self, leaf):
         """Adds a leaf to the list of leaves.  Does not build the tree so call
         `build()` to construct the rest of the tree from the added leaves.
@@ -68,7 +122,7 @@ class MerkleTree(object):
         """
         self.order = MerkleTree.get_order(len(self.leaves))
         n = 2**self.order
-        self.nodes = [None]*2*n
+        self.nodes = [b'']*2*n
 
         # populate lowest nodes with leaf hashes
         for j in range(0, n):
@@ -86,10 +140,10 @@ class MerkleTree(object):
                 k = p+j-1
                 h = hashlib.sha256()
                 l = self.nodes[MerkleTree.get_left_child(k)]
-                if (l):
+                if (len(l) > 0):
                     h.update(l)
                 r = self.nodes[MerkleTree.get_right_child(k)]
-                if (r):
+                if (len(r) > 0):
                     h.update(r)
                 self.nodes[k] = h.digest()
 
@@ -100,14 +154,14 @@ class MerkleTree(object):
 
         :param i: the leaf identifying the branch to retrieve
         """
-        branch = [None]*(self.order)
+        branch = MerkleBranch(self.order)
         j = i + 2**self.order - 1
 
         for k in range(0, self.order):
             if (self.is_left(j)):
-                branch[k] = (self.nodes[j], self.nodes[j+1])
+                branch.set_row(k, (self.nodes[j], self.nodes[j+1]))
             else:
-                branch[k] = (self.nodes[j-1], self.nodes[j])
+                branch.set_row(k, (self.nodes[j-1], self.nodes[j]))
             j = MerkleTree.get_parent(j)
 
         return branch
@@ -189,14 +243,14 @@ class MerkleTree(object):
         """
         # just check the hashes are correct
         lh = hashlib.sha256(leaf).digest()
-        for i in range(0, len(branch)):
-            if (branch[i][0] != lh and branch[i][1] != lh):
+        for i in range(0, branch.get_order()):
+            if (branch.get_left(i) != lh and branch.get_right(i) != lh):
                 return False
             h = hashlib.sha256()
-            if (branch[i][0]):
-                h.update(branch[i][0])
-            if (branch[i][1]):
-                h.update(branch[i][1])
+            if (len(branch.get_left(i)) > 0):
+                h.update(branch.get_left(i))
+            if (len(branch.get_right(i)) > 0):
+                h.update(branch.get_right(i))
             lh = h.digest()
         if (root != lh):
             return False

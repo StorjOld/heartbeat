@@ -21,6 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ..util import hb_encode, hb_decode
 from ..exc import HeartbeatError
 from Crypto.Cipher import AES
 from Crypto.Hash import HMAC
@@ -98,6 +99,22 @@ class Challenge(object):
         self.v_max = v_max
         self.key = key
 
+    def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
+        return {"chunks": self.chunks,
+                "v_max": self.v_max,
+                "key": hb_encode(self.key)}
+
+    @staticmethod
+    def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new Challenge
+        object from the dictionary.
+        """
+        return Challenge(dict["chunks"],
+                         dict["v_max"],
+                         hb_decode(dict["key"]))
+
 
 class Tag(object):
     """The file tag, generated before uploading by the client.
@@ -107,13 +124,29 @@ class Tag(object):
         """
         self.sigma = list()
 
+    def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
+        return {"sigma": self.sigma}
+
+    @staticmethod
+    def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new Tag object
+        from the dictionary.
+
+        :param dict: the dictionary to convert
+        """
+        self = Tag()
+        self.sigma = dict["sigma"]
+        return self
+
 
 class State(object):
     """The state which contains two psueod random function keys for generating
     the coeffients for the file tag and verification.
     """
     def __init__(self, f_key, alpha_key, chunks=0,
-                 encrypted=False, iv=None, hmac=None):
+                 encrypted=False, iv=None, hmac=None, key=None):
         """Initialization method
 
         :param f_key: this is the key for the f psuedo random function
@@ -122,13 +155,54 @@ class State(object):
         :param encrypted: whether the state is encrypted (and signed)
         :param iv: the initialization vector for encryption/decryption
         :param hmac: the HMAC signature
+        :param key: the key with which to sign if hmac is not given
         """
         self.f_key = f_key
         self.alpha_key = alpha_key
         self.chunks = chunks
         self.encrypted = encrypted
         self.iv = iv
-        self.hmac = hmac
+        if (hmac is None and key is not None):
+            self.hmac = self.get_hmac(key)
+        else:
+            self.hmac = hmac
+
+    def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
+        return {"f_key": hb_encode(self.f_key),
+                "alpha_key": hb_encode(self.alpha_key),
+                "chunks": self.chunks,
+                "encrypted": self.encrypted,
+                "iv": hb_encode(self.iv),
+                "hmac": hb_encode(self.hmac)}
+
+    @staticmethod
+    def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new State object
+        from the dictionary.
+
+        :param dict: the dictionary to convert
+        """
+        return State(hb_decode(dict["f_key"]),
+                     hb_decode(dict["alpha_key"]),
+                     dict["chunks"],
+                     dict["encrypted"],
+                     hb_decode(dict["iv"]),
+                     hb_decode(dict["hmac"]))
+
+    def get_hmac(self, key):
+        """Returns the keyed HMAC for authentication of this state data.
+
+        :param key: the key for the keyed hash function
+        """
+        h = HMAC.new(key, None, SHA256)
+        h.update(self.iv)
+        h.update(str(self.chunks).encode())
+        h.update(self.f_key)
+        h.update(self.alpha_key)
+        h.update(str(self.encrypted).encode())
+        return h.digest()
 
     def encrypt(self, key):
         """This method encrypts and signs the state to make it unreadable by
@@ -144,35 +218,26 @@ class State(object):
         aes = AES.new(key, AES.MODE_CFB, self.iv)
         self.f_key = aes.encrypt(self.f_key)
         self.alpha_key = aes.encrypt(self.alpha_key)
-        # sign
-        h = HMAC.new(key, None, SHA256)
-        h.update(self.iv)
-        h.update(str(self.chunks).encode())
-        h.update(self.f_key)
-        h.update(self.alpha_key)
-        self.hmac = h.digest()
         self.encrypted = True
+        # sign
+        self.hmac = self.get_hmac(key)
 
     def decrypt(self, key):
         """This method checks the signature on the state and decrypts it.
 
         :param key: the key to decrypt and sign with
         """
+        # check signature
+        if (self.get_hmac(key) != self.hmac):
+            raise HeartbeatError("Signature invalid on state.")
         if (not self.encrypted):
             return
-        # check signature
-        h = HMAC.new(key, None, SHA256)
-        h.update(self.iv)
-        h.update(str(self.chunks).encode())
-        h.update(self.f_key)
-        h.update(self.alpha_key)
-        if (h.digest() != self.hmac):
-            raise HeartbeatError("Signature invalid on state.")
         # decrypt
         aes = AES.new(key, AES.MODE_CFB, self.iv)
         self.f_key = aes.decrypt(self.f_key)
         self.alpha_key = aes.decrypt(self.alpha_key)
         self.encrypted = False
+        self.hmac = self.get_hmac(key)
 
 
 class Proof(object):
@@ -182,6 +247,24 @@ class Proof(object):
         """Initialization method"""
         self.mu = list()
         self.sigma = None
+
+    def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
+        return {"mu": self.mu,
+                "sigma": self.sigma}
+
+    @staticmethod
+    def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new Proof object
+        from the dictionary.
+
+        :param dict: the dictionary to convert
+        """
+        self = Proof()
+        self.mu = dict["mu"]
+        self.sigma = dict["sigma"]
+        return self
 
 
 class PySwPriv(object):
@@ -211,6 +294,24 @@ class PySwPriv(object):
             self.prime = prime
         self.sectors = sectors
         self.sectorsize = self.prime.bit_length()//8
+
+    def todict(self):
+        """Returns a dictionary fully representing the state of this object
+        """
+        return {"key": hb_encode(self.key),
+                "prime": self.prime,
+                "sectors": self.sectors}
+
+    @staticmethod
+    def fromdict(dict):
+        """Takes a dictionary as an argument and returns a new PySwPriv
+        object from the dictionary.
+
+        :param dict: the dictionary to convert
+        """
+        return PySwPriv(dict["sectors"],
+                        hb_decode(dict["key"]),
+                        dict["prime"])
 
     def get_public(self):
         """Gets a public version of the object with the key stripped."""
@@ -288,7 +389,6 @@ class PySwPriv(object):
         proof.mu = [0]*self.sectors
         proof.sigma = 0
 
-        
         for i in range(0, chal.chunks):
             for j in range(0, self.sectors):
                 pos = index.eval(i) * chunk_size + j * self.sectorsize
@@ -296,13 +396,13 @@ class PySwPriv(object):
                 buffer = file.read(self.sectorsize)
                 if (len(buffer) > 0):
                     proof.mu[j] += v.eval(i) * number.bytes_to_long(buffer)
-                
+
                 if (len(buffer) != self.sectorsize):
-                    break;
+                    break
 
         for j in range(0, self.sectors):
             proof.mu[j] %= self.prime
-        
+
         for i in range(0, chal.chunks):
             proof.sigma += v.eval(i) * tag.sigma[index.eval(i)]
 
@@ -334,3 +434,27 @@ class PySwPriv(object):
 
         rhs %= self.prime
         return proof.sigma == rhs
+
+    @staticmethod
+    def tag_type():
+        """Returns the type of the tag object associated with this heartbeat
+        """
+        return Tag
+
+    @staticmethod
+    def state_type():
+        """Returns the type of the state object associated with this heartbeat
+        """
+        return State
+
+    @staticmethod
+    def challenge_type():
+        """Returns the type of the challenge object associated with this
+        heartbeat"""
+        return Challenge
+
+    @staticmethod
+    def proof_type():
+        """Returns the type of the proof object associated with this heartbeat
+        """
+        return Proof

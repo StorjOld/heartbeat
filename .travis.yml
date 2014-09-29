@@ -10,4 +10,4 @@ after_success:
   - coveralls
 script:
   - flake8 heartbeat/
-  - nosetests -v --with-coverage --cover-package heartbeat tests/
+  - nosetests -v --with-coverage --cover-package=heartbeat -w tests/

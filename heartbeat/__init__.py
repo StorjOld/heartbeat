@@ -35,9 +35,10 @@ def Heartbeat(basebeat=None):
     else:
         return basebeat()
 
+
 def heartbeat_type(basebeat=None):
     if (basebeat is None):
-        import  heartbeat.SwPriv
+        import heartbeat.SwPriv
         return heartbeat.SwPriv.SwPriv
     else:
         return basebeat

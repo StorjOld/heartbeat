@@ -152,7 +152,7 @@ class State(object):
         self.timestamp = timestamp
 
     def __eq__(self, other):
-        return (self.index == other.index and 
+        return (self.index == other.index and
                 self.seed == other.seed and
                 self.n == other.n and
                 self.root == other.root and

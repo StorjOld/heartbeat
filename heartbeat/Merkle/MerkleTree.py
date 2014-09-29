@@ -104,11 +104,6 @@ class MerkleTree(object):
         self.leaves = hb_decode(dict['leaves'])
         return self
 
-    def __eq__(self, other):
-        return (self.nodes == other.nodes
-                and self.order == other.order
-                and self.leaves == other.leaves)
-
     def add_leaf(self, leaf):
         """Adds a leaf to the list of leaves.  Does not build the tree so call
         `build()` to construct the rest of the tree from the added leaves.

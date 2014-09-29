@@ -161,7 +161,10 @@ class State(object):
         self.alpha_key = alpha_key
         self.chunks = chunks
         self.encrypted = encrypted
-        self.iv = iv
+        if (iv is None):
+            self.iv = b''
+        else:
+            self.iv = iv
         if (hmac is None and key is not None):
             self.hmac = self.get_hmac(key)
         else:

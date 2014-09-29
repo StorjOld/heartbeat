@@ -46,12 +46,6 @@ class MerkleBranch(object):
     def get_right(self, i):
         return self.rows[i][1]
 
-    def set_left(self, i, value):
-        self.rows[i][0] = value
-
-    def set_right(self, i, value):
-        self.rows[i][1] = value
-
     def set_row(self, i, value):
         self.rows[i] = value
 

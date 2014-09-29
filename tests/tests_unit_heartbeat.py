@@ -28,7 +28,7 @@
 
 import unittest
 from heartbeat.exc import HeartbeatError
-from heartbeat import Heartbeat
+from heartbeat import Heartbeat, heartbeat_type
 from heartbeat.Merkle import Merkle
     
 class TestHeartbeat(unittest.TestCase):
@@ -56,7 +56,18 @@ class TestHeartbeat(unittest.TestCase):
     def test_specific(self):
         beat = Heartbeat(Merkle)
         
-        self.assertTrue(isinstance(beat,Merkle))
+        self.assertIsInstance(beat,Merkle)
+        
+    def test_type(self):
+        beat = Heartbeat()
+        type = heartbeat_type()
+        
+        self.assertIsInstance(beat,type)
+        
+        beat = Heartbeat(Merkle)
+        type = heartbeat_type(Merkle)
+        
+        self.assertIsInstance(beat,type)
         
 class TestHeartbeatError(unittest.TestCase):
         

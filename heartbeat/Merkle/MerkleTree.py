@@ -40,6 +40,9 @@ class MerkleBranch(object):
     def __init__(self, order):
         self.rows = [(b'', b'')]*order
 
+    def __eq__(self, other):
+        return self.rows == other.rows
+
     def get_left(self, i):
         return self.rows[i][0]
 
@@ -82,6 +85,11 @@ class MerkleTree(object):
         self.nodes = list()
         self.order = 0
         self.leaves = list()
+
+    def __eq__(self, other):
+        return (self.nodes == other.nodes and
+                self.order == other.order and
+                self.leaves == other.leaves)
 
     def todict(self):
         return {'nodes': hb_encode(self.nodes),

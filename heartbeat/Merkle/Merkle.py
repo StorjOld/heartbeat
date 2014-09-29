@@ -54,6 +54,9 @@ class Challenge(object):
         self.seed = seed
         self.index = index
 
+    def __eq__(self, other):
+        return self.seed == other.seed and self.index == other.index
+
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
@@ -88,6 +91,9 @@ class Tag(object):
         """
         self.tree = tree
         self.chunksz = chunksz
+
+    def __eq__(self, other):
+        return self.tree == other.tree and self.chunksz == other.chunksz
 
     def todict(self):
         """Returns a dictionary fully representing the state of this object
@@ -144,6 +150,14 @@ class State(object):
         self.root = root
         self.hmac = hmac
         self.timestamp = timestamp
+
+    def __eq__(self, other):
+        return (self.index == other.index and 
+                self.seed == other.seed and
+                self.n == other.n and
+                self.root == other.root and
+                self.hmac == other.hmac and
+                self.timestamp == other.timestamp)
 
     def todict(self):
         """Returns a dictionary fully representing the state of this object
@@ -218,6 +232,10 @@ class Proof(object):
         self.leaf = leaf
         self.branch = branch
 
+    def __eq__(self, other):
+        return (self.leaf == other.leaf and
+                self.branch == other.branch)
+
     def todict(self):
         return {'leaf': hb_encode(self.leaf),
                 'branch': self.branch.todict()}
@@ -244,6 +262,9 @@ class Merkle(object):
         else:
             self.key = key
 
+    def __eq__(self, other):
+        return self.key == other.key
+
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
@@ -264,7 +285,7 @@ class Merkle(object):
         stripped."""
         return Merkle()
 
-    def encode(self, file, n=256, chunksz=8192):
+    def encode(self, file, n=256, seed=os.urandom(32), chunksz=8192):
         """This function generates a merkle tree with the leaves as seed file
         hashes, the seed for each leaf being a deterministic seed generated
         from a key.
@@ -273,9 +294,10 @@ class Merkle(object):
         and `tell()` methods
         :param n: the number of challenges to generate
         :param chunksz: the chunk size for breaking up the file.
+        :param seed: the root seed for this batch of challenges.
         """
         mt = MerkleTree()
-        state = State(0, os.urandom(32), n)
+        state = State(0, seed, n)
         seed = MerkleHelper.get_next_seed(self.key, state.seed)
         for i in range(0, n):
             file.seek(0)

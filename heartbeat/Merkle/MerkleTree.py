@@ -40,17 +40,14 @@ class MerkleBranch(object):
     def __init__(self, order):
         self.rows = [(b'', b'')]*order
 
+    def __eq__(self, other):
+        return self.rows == other.rows
+
     def get_left(self, i):
         return self.rows[i][0]
 
     def get_right(self, i):
         return self.rows[i][1]
-
-    def set_left(self, i, value):
-        self.rows[i][0] = value
-
-    def set_right(self, i, value):
-        self.rows[i][1] = value
 
     def set_row(self, i, value):
         self.rows[i] = value
@@ -89,6 +86,11 @@ class MerkleTree(object):
         self.order = 0
         self.leaves = list()
 
+    def __eq__(self, other):
+        return (self.nodes == other.nodes and
+                self.order == other.order and
+                self.leaves == other.leaves)
+
     def todict(self):
         return {'nodes': hb_encode(self.nodes),
                 'order': self.order,
@@ -101,11 +103,6 @@ class MerkleTree(object):
         self.order = dict['order']
         self.leaves = hb_decode(dict['leaves'])
         return self
-
-    def __eq__(self, other):
-        return (self.nodes == other.nodes
-                and self.order == other.order
-                and self.leaves == other.leaves)
 
     def add_leaf(self, leaf):
         """Adds a leaf to the list of leaves.  Does not build the tree so call

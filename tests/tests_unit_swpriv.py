@@ -66,6 +66,29 @@ class TestSubClasses(unittest.TestCase):
         item2.__setstate__(state1)
         state2 = item2.__getstate__()
         self.assertEqual(state1,state2)
+    
+    def test_comparison(self):
+        beat = SwPriv.SwPriv()
+        
+        with open('files/test7.txt','rb') as file:
+            (tag3,state3) = beat.encode(file)
+            
+        chal3 = beat.gen_challenge(state3)
+        
+        with open('files/test7.txt','rb') as file:
+            proof3 = beat.prove(file,chal3,tag3)
+        
+        self.assertEqual(self.challenge1,self.challenge2)
+        self.assertNotEqual(self.challenge1,chal3)
+        self.assertEqual(self.tag1,self.tag2)
+        self.assertNotEqual(self.tag1,tag3)
+        key = os.urandom(self.state1.keysize())
+        self.state1.encrypt(key,key,True)
+        self.state2.encrypt(key,key,True)
+        self.assertEqual(self.state1,self.state2)
+        self.assertNotEqual(self.state1,state3)
+        self.assertEqual(self.proof1,self.proof2)
+        self.assertNotEqual(self.state1,state3)
         
     def test_get_set_state(self):
         self.assign_and_compare_states(self.challenge1, self.challenge2)

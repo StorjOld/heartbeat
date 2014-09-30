@@ -69,7 +69,7 @@ public:
 	
 	PyBytesStateAccessible() : _encoding(binary) {}
 
-	py_array get_state(encoding_type encoding = inherit)
+	py_array get_state(encoding_type encoding = inherit) const
 	{
 		//std::cout << "Entering get_state()" << std::endl;
 		if (encoding == inherit)
@@ -143,6 +143,7 @@ public:
 	{
 		Tthis::behaviors().name(T_type_name);
 		Tthis::behaviors().doc(doc);
+		Tthis::behaviors().supportRichCompare();
 		
 		Tthis::PYCXX_ADD_NOARGS_METHOD( __getstate__, _get_state, "__getstate__()\nReturns the state of this object for serialization." );
 		Tthis::PYCXX_ADD_VARARGS_METHOD(  __setstate__, _set_state, "__setstate__( state )\nTakes the state as returned by __getstate__ as an argument.  Sets the object's internal state to that specified.");
@@ -223,6 +224,40 @@ public:
 		}
 	}
 	PYCXX_NOARGS_METHOD_DECL( Tthis, _todict )
+	
+	Py::Object rich_compare( const Py::Object &other, int op )
+	{
+		try {
+			// std::cout << "rich compare called." << std::endl;
+			bool c;
+			
+			const Tthis *obj = Py::PythonClassObject<Tthis>( other ).getCxxObject();
+			
+			switch (op)
+			{
+				case Py_LT: throw Py::NotImplementedError("Less than operator is not implemented.");
+				case Py_LE: throw Py::NotImplementedError("Less than or equal to operator is not implemented.");
+				case Py_EQ: c = this->get_state() == obj->get_state(); break;
+				case Py_NE: c = this->get_state() != obj->get_state(); break;
+				case Py_GT: throw Py::NotImplementedError("Greater than operator is not implemented.");
+				case Py_GE: throw Py::NotImplementedError("Greater than or equal to operator is not implemented.");
+			}
+			
+			// std::cout << "comparison yielded: " << c << std::endl;
+			if (c)
+			{
+				return Py::True();
+			}
+			else
+			{
+				return Py::False();
+			}
+		}
+		catch (std::exception &e)
+		{
+			throw PyHeartbeatException(e.what());
+		}
+	}
 	
 	static PyObject * _fromdict( PyObject *, PyObject *_a)
 	{

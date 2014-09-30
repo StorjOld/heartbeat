@@ -32,15 +32,4 @@ import heartbeat.Merkle    # NOQA
 import heartbeat.PySwPriv  # NOQA
 
 
-def Heartbeat(basebeat=None):
-    if (basebeat is None):
-        return heartbeat.SwPriv.SwPriv()
-    else:
-        return basebeat()
-
-
-def heartbeat_type(basebeat=None):
-    if (basebeat is None):
-        return heartbeat.SwPriv.SwPriv
-    else:
-        return basebeat
+Heartbeat = heartbeat.SwPriv.SwPriv

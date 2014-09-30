@@ -28,7 +28,9 @@
 
 import unittest
 from heartbeat.exc import HeartbeatError
+import heartbeat
 from heartbeat import Heartbeat
+
     
 class TestHeartbeat(unittest.TestCase):
     def test_usage(self):    

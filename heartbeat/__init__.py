@@ -27,19 +27,20 @@
 
 __version__ = "0.1.4"
 
-import heartbeat.SwPriv
-import heartbeat.Merkle
-import heartbeat.PySwPriv
+import heartbeat.SwPriv    # NOQA
+import heartbeat.Merkle    # NOQA
+import heartbeat.PySwPriv  # NOQA
+
 
 def Heartbeat(basebeat=None):
     if (basebeat is None):
-        return SwPriv.SwPriv()
+        return heartbeat.SwPriv.SwPriv()
     else:
         return basebeat()
 
 
 def heartbeat_type(basebeat=None):
     if (basebeat is None):
-        return SwPriv.SwPriv
+        return heartbeat.SwPriv.SwPriv
     else:
         return basebeat

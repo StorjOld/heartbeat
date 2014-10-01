@@ -26,7 +26,7 @@ This scheme setup is designed so that the client only has to maintain a few piec
 
 #### Usage
 
-The API for a heartbeat module is given below.  The specific implementation of each heartbeat type should be implementations of the heartbeat interfface as used below.  See the Implementations section for more detail on the implementations of this heartbeat abstract class. 
+The API for a heartbeat module is given below.  The specific implementation of each heartbeat type should be implementations of the heartbeat interface as used below.  See the Implementations section for more detail on the implementations of this heartbeat abstract class. 
 
 ```python
 import heartbeat

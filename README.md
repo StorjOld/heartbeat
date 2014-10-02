@@ -8,21 +8,23 @@ Right now there are three working implementations of this scheme.  Merkle, SwPri
 
 #### Overview
 
-In practice, the client and server will run an implementation of this software.  Before uploading, the client `tag`s the target `file` and some `state` information is generated.  Then the `tag`, `state` and `file` are stored on the remote server.  When the client wants to verify that the server is storing the data, he retrieves the `state` information, generates a `challenge`, and sends that `challenge` to the server.  The server then sends back a `proof` that is calculated from the `challenge`, the `tag`, and the `file`.  The client can then verify from the `proof` that the server is storing the `file`.
+In practice, the client and server will run an implementation of this software.  Before uploading, the client `tag`s the target `file` and some `state` information is generated.  Then the tag, state and file are stored on the remote server.  When the client wants to verify that the server is storing the data, he retrieves the state information, generates a challenge, and sends that challenge to the server.  The server then sends back a proof that is calculated from the challenge, the tag, and the file.  The client can then verify from the proof that the server is storing the file.
 
-The `file` is a binary readable object that implements methods `read`, `seek`, and `tell`.
+The libraries accept a file that is a binary readable file-like object that implements methods `read()`, `seek()`, and `tell()`.
 
-The `tag` is a potentially large set of information that matches the particular file that is stored.
+The file tag is a potentially large set of information that matches the particular file that is stored.
 
-The `state` is a possibly encrypted and signed set of data that represents some of the information about how the tags were generated, and allows verification of the file by the client.  In a publicly verificable scheme, the state information would not be encrypted, and might not be necessary.  Additionally, sometimes the state contains state information for generation of the next challenges.
+The state is a possibly encrypted and signed set of data that represents some of the information about how the tags were generated, and allows verification of the file by the client.  In a publicly verificable scheme, the state information would not be encrypted, and might not be necessary.  Additionally, sometimes the state contains state information for generation of the next challenges.  It can be stored on the client or the server, since it will be signed and encrypted in most cases.
 
-The `challenge` is a set of data that informs the server how to calculate a proof.  It is not predictable by the server and therefore the response cannot be predetermined.
+The challenge is a set of data that informs the server how to calculate a proof.  It is not predictable by the server and therefore the response cannot be predetermined.
 
-The `proof` is a set of data that represents proof that the server has read access to the complete file contents.
+The proof is a set of data that represents proof that the server has read access to the complete file contents.
 
-For transferring of data between client and server the `tag`, `state`, `challenge`, and `proof` objects can be pickled since they should provide at the very least `__getstate__()` and `__setstate__()` methods.
+For transferring of data between client and server the `tag`, `state`, `challenge`, and `proof` objects can be serialized to JSON through the use of the `todict()` and static `fromdict()` methods.
 
-This scheme setup is designed so that the client only has to maintain a few pieces of information.  The client must maintain the heartbeat used to encode the files (one desired feature is a way to generate this from a passphrase), and a file list.  Multiple files can be encoded with the same heartbeat.
+For local storage of these objects, they also provide `__getstate__()`, `__setstate__()` and `__reduce__()` functions so that the `pickle` library can be used.
+
+This scheme setup is designed so that the client only has to maintain a few pieces of information.  The client must maintain the heartbeat used to encode the files, and a file list.  Multiple files can be encoded with the same heartbeat.
 
 #### Usage
 
@@ -124,10 +126,23 @@ This is the same as SwPriv but written in pure python.  It is significantly slow
 
 #### Installation
 
-To build the heartbeat modules, including C++ SwPriv python extension module which is a privately verifiable Homomorphic Linear Authentication scheme, use pip.  You must have Crypto++ installed.
+To build the heartbeat modules, including C++ SwPriv python extension module, first install Crypto++.  On a debian based system, the following should suffice:
+
+```
+sudo apt-get install libcrypto++-dev
+```
+
+On windows you will need to source the libcrypto library, build it, and then make sure that the Crypto++ headers are in your include path and cryptlib is on the library search path for your compiler.
+
+Then install the module:
 
 ```
 pip install .
 ```
 
-Also note that setup.py is configured to compile against the static Crypto++ library, not the DLL, and so on windows it defaults to searching for cryptlib, not cryptopp.  Make sure cryptlib is located in the library search directory.
+You can run the tests if you have nose installed by running
+
+```
+cd tests
+nosetests
+```

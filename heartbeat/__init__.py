@@ -25,6 +25,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .heartbeat import Challenge, Heartbeat  # NOQA
+__version__ = "0.1.4"
 
-__version__ = "0.1.2"
+
+def Heartbeat(basebeat=None):
+    if (basebeat is None):
+        import heartbeat.SwPriv
+        return heartbeat.SwPriv.SwPriv()
+    else:
+        return basebeat()

@@ -8,7 +8,7 @@ Right now there are three working implementations of this scheme.  Merkle, SwPri
 
 #### Overview
 
-In practice, the client and server will run an implementation of this software.  Before uploading, the client `tag`s the target `file` and some `state` information is generated.  Then the tag, state and file are stored on the remote server.  When the client wants to verify that the server is storing the data, he retrieves the state information, generates a challenge, and sends that challenge to the server.  The server then sends back a proof that is calculated from the challenge, the tag, and the file.  The client can then verify from the proof that the server is storing the file.
+In practice, the client and server will run an implementation of this software.  Before uploading, the client tags the target file and some state information is generated.  Then the tag, state and file are stored on the remote server.  When the client wants to verify that the server is storing the data, he retrieves the state information, generates a challenge, and sends that challenge to the server.  The server then sends back a proof that is calculated from the challenge, the tag, and the file.  The client can then verify from the proof that the server is storing the file.
 
 The libraries accept a file that is a binary readable file-like object that implements methods `read()`, `seek()`, and `tell()`.
 
@@ -137,6 +137,8 @@ On windows you will need to source the libcrypto library, build it, and then mak
 Then install the module:
 
 ```
+git clone https://github.com/storj/heartbeat.git
+cd heartbeat
 pip install .
 ```
 

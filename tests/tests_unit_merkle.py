@@ -150,6 +150,48 @@ class TestMerkle(unittest.TestCase):
 
         ex_msg = ex.exception.message
         self.assertEqual("Out of challenges.",ex_msg)
+        
+    def test_comparison(self):
+        k = os.urandom(32)
+        k3 = os.urandom(32)
+        beat1 = Merkle.Merkle(k)
+        beat2 = Merkle.Merkle(k)
+        beat3 = Merkle.Merkle(k3)
+        
+        s = os.urandom(32)
+        s3 = os.urandom(32)
+        with open('files/test.txt','rb') as file:
+            (tag1,state1) = beat1.encode(file,200,s)
+            file.seek(0)
+            (tag2,state2) = beat2.encode(file,200,s)
+            file.seek(0)
+            (tag3,state3) = beat3.encode(file,200,s3)
+        
+        chal1 = beat1.gen_challenge(state1)
+        chal2 = beat2.gen_challenge(state2)
+        chal3 = beat3.gen_challenge(state3)
+        
+        with open('files/test.txt','rb') as file:
+            proof1 = beat1.prove(file,chal1,tag1)
+            file.seek(0)
+            proof2 = beat2.prove(file,chal2,tag2)
+            file.seek(0)
+            proof3 = beat3.prove(file,chal3,tag3)
+            
+        self.assertEqual(beat1,beat2)
+        self.assertNotEqual(beat1,beat3)
+        
+        self.assertEqual(tag1,tag2)
+        self.assertNotEqual(tag1,tag3)
+        
+        self.assertEqual(state1,state2)
+        self.assertNotEqual(state1,state3)
+        
+        self.assertEqual(chal1,chal2)
+        self.assertNotEqual(chal1,chal3)
+        
+        self.assertEqual(proof1,proof2)
+        self.assertNotEqual(proof1,proof3)
 
 
 class TestCorrectness(unittest.TestCase):

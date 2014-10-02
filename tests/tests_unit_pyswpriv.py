@@ -67,6 +67,7 @@ class TestPySwiv(unittest.TestCase):
         state = PySwPriv.State(os.urandom(32),os.urandom(32),100)
         k = os.urandom(32)
         state.encrypt(k)
+        state.encrypt(k)
         # modify state and check that signature fails
         state.chunks=10
         with self.assertRaises(HeartbeatError) as ex:
@@ -74,6 +75,11 @@ class TestPySwiv(unittest.TestCase):
             
         ex_msg = ex.exception.message
         self.assertEqual("Signature invalid on state.",ex_msg)
+        
+        k = os.urandom(32)
+        state = PySwPriv.State(os.urandom(32), os.urandom(32), 100, False, None, None, k)
+        
+        self.assertEqual(state.hmac,state.get_hmac(k))
     
     def test_initialization(self):
         k = b"test pass phrase"

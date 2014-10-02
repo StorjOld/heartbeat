@@ -50,6 +50,7 @@ class TestSubClasses(unittest.TestCase):
         self.state2 = SwPriv.State()
         self.proof1 = SwPriv.Proof()
         self.proof2 = SwPriv.Proof()
+        self.beat1 = SwPriv.SwPriv()
 
     def tearDown(self):
         del self.challenge1
@@ -60,12 +61,45 @@ class TestSubClasses(unittest.TestCase):
         del self.state2
         del self.proof1
         del self.proof2
+        del self.beat1
 
     def assign_and_compare_states(self, item1, item2):
         state1 = item1.__getstate__()
         item2.__setstate__(state1)
         state2 = item2.__getstate__()
         self.assertEqual(state1,state2)
+    
+    def test_comparison(self):
+        beat2 = pickle.loads(pickle.dumps(self.beat1))
+        beat3 = SwPriv.SwPriv()
+        
+        self.assertEqual(self.beat1,beat2)
+        self.assertNotEqual(self.beat1,beat3)
+        
+        beat2 = self.beat1.get_public()
+        beat3 = self.beat1.get_public()
+        
+        self.assertEqual(beat2,beat3)
+        
+        with open('files/test7.txt','rb') as file:
+            (tag3,state3) = self.beat1.encode(file)
+            
+        chal3 = self.beat1.gen_challenge(state3)
+        
+        with open('files/test7.txt','rb') as file:
+            proof3 = self.beat1.prove(file,chal3,tag3)
+        
+        self.assertEqual(self.challenge1,self.challenge2)
+        self.assertNotEqual(self.challenge1,chal3)
+        self.assertEqual(self.tag1,self.tag2)
+        self.assertNotEqual(self.tag1,tag3)
+        key = os.urandom(self.state1.keysize())
+        self.state1.encrypt(key,key,True)
+        self.state2.encrypt(key,key,True)
+        self.assertEqual(self.state1,self.state2)
+        self.assertNotEqual(self.state1,state3)
+        self.assertEqual(self.proof1,self.proof2)
+        self.assertNotEqual(self.state1,state3)
         
     def test_get_set_state(self):
         self.assign_and_compare_states(self.challenge1, self.challenge2)

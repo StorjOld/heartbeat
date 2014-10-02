@@ -5,7 +5,7 @@
 #
 #  The MIT License (MIT)
 #
-# Copyright (c) 2014 Storj Labs, Paul Durivage, et al.
+# Copyright (c) 2014 Storj Labs, William T. James, Paul Durivage, et al.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,3 @@
 # SOFTWARE.
 
 __version__ = "0.1.4"
-
-import heartbeat.SwPriv    # NOQA
-import heartbeat.Merkle    # NOQA
-import heartbeat.PySwPriv  # NOQA
-
-
-Heartbeat = heartbeat.SwPriv.SwPriv

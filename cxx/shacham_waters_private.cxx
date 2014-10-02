@@ -567,6 +567,9 @@ void shacham_waters_private::get_public(shacham_waters_private &h) const
 	h._p = _p;
 	h._sectors = _sectors;
 	h._sector_size = _sector_size;
+	// null out keys
+	memset(h._k_enc,0,shacham_waters_private_data::key_size);
+	memset(h._k_mac,0,shacham_waters_private_data::key_size);
 }
 
 void shacham_waters_private::encode(tag &t, state &s, simple_file &f)

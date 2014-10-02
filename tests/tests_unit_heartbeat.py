@@ -28,8 +28,9 @@
 
 import unittest
 from heartbeat.exc import HeartbeatError
-from heartbeat import Heartbeat, heartbeat_type
-from heartbeat.Merkle import Merkle
+import heartbeat
+from heartbeat import Heartbeat
+
     
 class TestHeartbeat(unittest.TestCase):
     def test_usage(self):    
@@ -52,22 +53,11 @@ class TestHeartbeat(unittest.TestCase):
             print('file proof invalid')
         
         self.assertTrue(is_valid)
-    
-    def test_specific(self):
-        beat = Heartbeat(Merkle)
-        
-        self.assertIsInstance(beat,Merkle)
         
     def test_type(self):
-        beat = Heartbeat()
-        type = heartbeat_type()
+        b = Heartbeat()
         
-        self.assertIsInstance(beat,type)
-        
-        beat = Heartbeat(Merkle)
-        type = heartbeat_type(Merkle)
-        
-        self.assertIsInstance(beat,type)
+        self.assertIsInstance(b, heartbeat.SwPriv.SwPriv)
         
 class TestHeartbeatError(unittest.TestCase):
         

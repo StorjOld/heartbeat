@@ -113,6 +113,43 @@ class TestSubClasses(unittest.TestCase):
         self.state2.encrypt(key,key,True)
         state2 = self.state2.__getstate__()
         self.assertEqual(state1,state2)
+        
+    def test_serialization(self):
+        dict = self.beat1.todict()
+        beat2 = SwPriv.SwPriv.fromdict(dict)
+        self.assertEqual(self.beat1,beat2)
+        
+        with self.assertRaises(HeartbeatError) as ex:
+            beat3 = SwPriv.SwPriv.fromdict('invalid object')
+        
+        dict = self.challenge1.todict()
+        chal3 = SwPriv.SwPriv.challenge_type().fromdict(dict)
+        self.assertEqual(self.challenge1,chal3)
+        
+        with self.assertRaises(HeartbeatError) as ex:
+            chal3 = SwPriv.SwPriv.challenge_type().fromdict('invalid object')
+        
+        key = os.urandom(self.state1.keysize())
+        self.state1.encrypt(key,key,True)
+        dict = self.state1.todict()
+        state3 = SwPriv.SwPriv.state_type().fromdict(dict)
+        
+        with self.assertRaises(HeartbeatError) as ex:
+            state3 = SwPriv.SwPriv.state_type().fromdict('invalid object')
+        
+        dict = self.tag1.todict()
+        tag3 = SwPriv.SwPriv.tag_type().fromdict(dict)
+        self.assertEqual(self.tag1,tag3)
+        
+        with self.assertRaises(HeartbeatError) as ex:
+            tag3 = SwPriv.SwPriv.tag_type().fromdict('invalid object')
+            
+        dict = self.proof1.todict()
+        proof3 = SwPriv.SwPriv.proof_type().fromdict(dict)
+        self.assertEqual(self.proof1,proof3)
+        
+        with self.assertRaises(HeartbeatError) as ex:
+            proof3 = SwPriv.SwPriv.proof_type().fromdict('invalid object')
 
 class TestSwPriv(unittest.TestCase):
     def test_exceptions(self):

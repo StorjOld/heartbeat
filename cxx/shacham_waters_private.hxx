@@ -62,6 +62,10 @@ public:
 			{
 				throw std::runtime_error("Maximum integer size exceeded");
 			}
+			if (bt.MaxRetrievable() < byteCount)
+			{
+				throw std::runtime_error("Integer not retrievable.");
+			}
 			Decode(bt,byteCount);
 		}
 	private:

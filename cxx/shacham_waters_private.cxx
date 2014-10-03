@@ -64,15 +64,17 @@ void shacham_waters_private_data::tag::deserialize(CryptoPP::BufferedTransformat
 	n = ntohl(n);
 	
 	_sigma.clear();
-	_sigma.resize(n);
-	for (unsigned int i=0;i<_sigma.size();i++)
+	//_sigma.resize(n);
+	for (unsigned int i=0;i<n;i++)
 	{
 		bt.GetWord32(n);
 		
 		n = ntohl(n);
 		
 		//std::cout << "Decoding sigma_" << i << " in " << n << " bytes." << std::endl;
-		_sigma[i].Decode(bt,n);
+		// check size
+		//_sigma[i].Decode(bt,n);
+		_sigma.push_back(safe_integer(bt,n));
 	}
 }
 
@@ -134,6 +136,11 @@ void shacham_waters_private_data::state::deserialize(CryptoPP::BufferedTransform
 	
 	// get the size of the raw data
 	bt.GetWord32(n);
+	if (_raw_sz > max_raw_size)
+	{
+		throw std::runtime_error("Reported size of encrypted state is too large.");
+	}
+	
 	_raw_sz = ntohl(n);
 	//std::cout << "Read raw size: " << _raw_sz << std::endl;
 	
@@ -469,6 +476,10 @@ void shacham_waters_private_data::challenge::deserialize(CryptoPP::BufferedTrans
 	// get key size
 	bt.GetWord32(n);
 	_key_sz = ntohl(n);
+	if (_key_sz > shacham_waters_private_data::key_size)
+	{
+		throw std::runtime_error("Invalid key size.");
+	}
 	_key = smart_buffer(new unsigned char[_key_sz]);
 	
 	// read key
@@ -480,7 +491,7 @@ void shacham_waters_private_data::challenge::deserialize(CryptoPP::BufferedTrans
 	
 	// read B
 	//std::cout << "Dencoding B in " << n << " bytes." << std::endl;
-	_v_max.Decode(bt,n);
+	_v_max = safe_integer(bt,n);
 }
 
 void shacham_waters_private_data::proof::serialize(CryptoPP::BufferedTransformation &bt) const
@@ -517,21 +528,21 @@ void shacham_waters_private::proof::deserialize(CryptoPP::BufferedTransformation
 	n = ntohl(n);
 	
 	_mu.clear();
-	_mu.resize(n);
-	for (unsigned int i=0;i<_mu.size();i++)
+	//_mu.resize(n);
+	for (unsigned int i=0;i<n;i++)
 	{
 		bt.GetWord32(n);
 		
 		n = ntohl(n);
 		
 		//std::cout << "Dencoding mu_" << i << " in " << n << " bytes." << std::endl;
-		_mu[i].Decode(bt,n);
+		_mu.push_back(safe_integer(bt,n));
 	}
 	
 	bt.GetWord32(n);
 	n = ntohl(n);
 	//std::cout << "Dencoding sigma in " << n << " bytes." << std::endl;
-	_sigma.Decode(bt,n);
+	_sigma = safe_integer(bt,n);
 }
 
 void shacham_waters_private::init(unsigned int prime_size_bytes, unsigned int sectors)
@@ -841,5 +852,5 @@ void shacham_waters_private::deserialize(CryptoPP::BufferedTransformation &bt)
 	
 	// read p
 	//std::cout << "Dencoding p in " << n << " bytes." << std::endl;
-	_p.Decode(bt,n);
+	_p = shacham_waters_private_data::safe_integer(bt,n);
 }

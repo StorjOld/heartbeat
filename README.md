@@ -45,8 +45,8 @@ public_beat = beat.get_public()
 Retrieves the public beat, which contains public parameters and set up parameters for sending to the server or auditors.  This strips any private keys but maintains public information.
 
 ```python
-with open('path/to/file','rb') as file:
-    (tag,state) = beat.encode(file)
+with open('path/to/file','rb') as f:
+    (tag,state) = beat.encode(f)
 ```
 
 The tag encapsulates data about the file which will be used by a server to verify that it has stored the file.  The file, tag and state information are sent to server (tag may or may not be quite large).  The state information will be signed and/or encrypted.  The state information is information that can be outsourced but is necessary for verification.  State and tag are sent to the server for storage.  These are separate because in some cases the state information needs to be transmitted apart from the tag.  The client should maintain the heartbeat because it contains the private keys for generation and verification of challenges.
@@ -60,8 +60,8 @@ challenge = beat.gen_challenge(state)
 This should generate a challenge key which is unique.  This step may or may not be necessary, since in some schemes the challenge information could be drawn by the server from another source (for instance, last hash of bitcoin blockchain header).  In the publically verifiable case it should be possible to call `public_beat.gen_challenge()` and in many cases it is possible to call the static message `heartbeat.gen_challenge()`.  Then, the challenge, and possibly the public_beat if not already sent, (and in some cases the updated state), are sent to the server who proves the file existance by running:
 
 ```python
-with open('path/to/file','rb') as file:
-    proof = public_beat.prove(file,challenge,tag)
+with open('path/to/file','rb') as f:
+    proof = public_beat.prove(f,challenge,tag)
 ```
 
 This calculates a proof which shows that the file exists.  Then the proof is sent back to the auditor who verifies the challenge.

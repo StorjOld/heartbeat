@@ -788,7 +788,12 @@ bool shacham_waters_private::verify(const proof &p, const challenge &c, const st
 	// decrypt and check sig of state
 	if (s.encrypted() && !s.check_sig_and_decrypt(_k_enc,_k_mac))
 	{
-		std::cout << "Signature check or decryption failed." << std::endl;
+		//std::cout << "Signature check or decryption failed." << std::endl;
+		return false;
+	}
+	
+	if (p.mu().size() != _sectors)
+	{
 		return false;
 	}
 	

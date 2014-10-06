@@ -177,7 +177,7 @@ public:
 class shacham_waters_private : public heartbeat<shacham_waters_private_data,shacham_waters_private>, public serializable
 {	
 public:
-	shacham_waters_private() : _sectors(0), _sector_size(0) {}
+	shacham_waters_private() : _sectors(0), _sector_size(0), _public(false) {}
 	
 	void gen()
 	{
@@ -209,6 +209,7 @@ public:
 	void deserialize(CryptoPP::BufferedTransformation &bt);
 	
 private:
+	bool _public;
 	byte _k_enc[shacham_waters_private_data::key_size];
 	byte _k_mac[shacham_waters_private_data::key_size];
 
@@ -216,4 +217,6 @@ private:
 	size_t _sector_size;
 	
 	CryptoPP::Integer _p;
+	
+	static const byte _flag_public = 0x01;
 };

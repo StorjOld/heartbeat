@@ -626,6 +626,7 @@ void shacham_waters_private::get_public(shacham_waters_private &h) const
 	h._p = _p;
 	h._sectors = _sectors;
 	h._sector_size = _sector_size;
+	h._public = true;
 	// null out keys
 	memset(h._k_enc,0,shacham_waters_private_data::key_size);
 	memset(h._k_mac,0,shacham_waters_private_data::key_size);
@@ -831,18 +832,35 @@ void shacham_waters_private::serialize(CryptoPP::BufferedTransformation &bt) con
 {
 	unsigned int n;
 	
-	// write key size
-	n = htonl(shacham_waters_private_data::key_size);
-	bt.PutWord32(n);
+	// write flags
+	// 0x01 - public
 	
-	// write encryption key
-	bt.Put(_k_enc,shacham_waters_private_data::key_size);
+	byte f = 0x00;
 	
-	// write key size
-	bt.PutWord32(n);
+	if (_public)
+	{
+		f |= _flag_public;
+	}
 	
-	// write key
-	bt.Put(_k_mac,shacham_waters_private_data::key_size);
+	bt.Put(f);
+
+	if (!_public)
+	{
+		// only write keys if we are not public
+		
+		// write key size
+		n = htonl(shacham_waters_private_data::key_size);
+		bt.PutWord32(n);
+		
+		// write encryption key
+		bt.Put(_k_enc,shacham_waters_private_data::key_size);
+		
+		// write key size
+		bt.PutWord32(n);
+		
+		// write key
+		bt.Put(_k_mac,shacham_waters_private_data::key_size);
+	}
 	
 	// write sectors
 	n = htonl(_sectors);
@@ -864,43 +882,58 @@ void shacham_waters_private::serialize(CryptoPP::BufferedTransformation &bt) con
 
 void shacham_waters_private::deserialize(CryptoPP::BufferedTransformation &bt)
 {
+	byte f;
+	
+	if (bt.Get(f) != sizeof(byte))
+	{
+		throw std::runtime_error("Unable to retrieve heartbeat flags.");
+	}
+	
+	_public = f & _flag_public;
+
 	unsigned int n;
-	// read key size
-	if (bt.GetWord32(n) != sizeof(unsigned int))
-	{
-		throw std::runtime_error("Unable to retrieve key size.");
-	}
-	n = ntohl(n);
 	
-	// check key size
-	if (n != shacham_waters_private_data::key_size)
+	if (!_public)
 	{
-		throw std::runtime_error("Incompatible key sizes.");
-	}
-	
-	// get key
-	if (bt.Get(_k_enc,n) != n)
-	{
-		throw std::runtime_error("Key corrupted.");
-	}
-	
-	// read key size
-	if (bt.GetWord32(n) != sizeof(unsigned int))
-	{
-		throw std::runtime_error("Unable to retrieve key size.");
-	}
-	n = ntohl(n);
-	
-	// check key size
-	if (n != shacham_waters_private_data::key_size)
-	{
-		throw std::runtime_error("Incompatible key sizes.");
-	}
-	
-	// get key
-	if (bt.Get(_k_mac,n) != n)
-	{
-		throw std::runtime_error("Key corrupted.");
+		// only read keys if we are not public 
+		
+		// read key size
+		if (bt.GetWord32(n) != sizeof(unsigned int))
+		{
+			throw std::runtime_error("Unable to retrieve key size.");
+		}
+		n = ntohl(n);
+		
+		// check key size
+		if (n != shacham_waters_private_data::key_size)
+		{
+			throw std::runtime_error("Incompatible key sizes.");
+		}
+		
+		// get key
+		if (bt.Get(_k_enc,n) != n)
+		{
+			throw std::runtime_error("Key corrupted.");
+		}
+		
+		// read key size
+		if (bt.GetWord32(n) != sizeof(unsigned int))
+		{
+			throw std::runtime_error("Unable to retrieve key size.");
+		}
+		n = ntohl(n);
+		
+		// check key size
+		if (n != shacham_waters_private_data::key_size)
+		{
+			throw std::runtime_error("Incompatible key sizes.");
+		}
+		
+		// get key
+		if (bt.Get(_k_mac,n) != n)
+		{
+			throw std::runtime_error("Key corrupted.");
+		}
 	}
 	
 	// read sectors

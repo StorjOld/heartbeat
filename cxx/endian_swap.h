@@ -46,7 +46,7 @@ inline uint32_t htonl(uint32_t hostint)
 	swap(&hostint);
 #else
 #ifndef __LITTLE_ENDIAN__
-#error "__BIG_ENDIAN__ or __LITTLE_ENDIAN__ must be define."
+#error "__BIG_ENDIAN__ or __LITTLE_ENDIAN__ must be defined."
 #endif
 #endif
 	return hostint;
@@ -58,7 +58,7 @@ inline uint32_t ntohl(uint32_t netint)
 	swap(&netint);
 #else
 #ifndef __LITTLE_ENDIAN__
-#error "__BIG_ENDIAN__ or __LITTLE_ENDIAN__ must be define."
+#error "__BIG_ENDIAN__ or __LITTLE_ENDIAN__ must be defined."
 #endif
 #endif
 	return netint;

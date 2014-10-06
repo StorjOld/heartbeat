@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 */
 
-//#define CRYPTOPP_IMPORTS
+//#define CRYPTOPP_IMPORTS 
 //#include <cryptopp/dll.h>
 
 #include "shacham_waters_private.hxx"
@@ -34,8 +34,6 @@ THE SOFTWARE.
 #include <cryptopp/osrng.h>
 #include <cryptopp/hmac.h>
 #include <cryptopp/hex.h>
-
-#include <stdexcept>
 
 void shacham_waters_private_data::tag::serialize(CryptoPP::BufferedTransformation &bt) const
 {
@@ -59,20 +57,29 @@ void shacham_waters_private_data::tag::deserialize(CryptoPP::BufferedTransformat
 {
 	unsigned int n;
 	
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to get sigma count.");
+	}
 	
 	n = ntohl(n);
 	
 	_sigma.clear();
-	_sigma.resize(n);
-	for (unsigned int i=0;i<_sigma.size();i++)
+	//_sigma.resize(n);
+	unsigned int count = n;
+	for (unsigned int i=0;i<count;i++)
 	{
-		bt.GetWord32(n);
+		if (bt.GetWord32(n) != sizeof(unsigned int))
+		{
+			throw std::runtime_error("Unable to get sigma size.");
+		}
 		
 		n = ntohl(n);
 		
 		//std::cout << "Decoding sigma_" << i << " in " << n << " bytes." << std::endl;
-		_sigma[i].Decode(bt,n);
+		// check size
+		//_sigma[i].Decode(bt,n);
+		_sigma.push_back(safe_integer(bt,n));
 	}
 }
 
@@ -133,14 +140,25 @@ void shacham_waters_private_data::state::deserialize(CryptoPP::BufferedTransform
 	unsigned int n;
 	
 	// get the size of the raw data
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to get raw size of state.");
+	}
 	_raw_sz = ntohl(n);
+	
+	if (_raw_sz > max_raw_size)
+	{
+		throw std::runtime_error("Reported size of encrypted state is too large.");
+	}
 	//std::cout << "Read raw size: " << _raw_sz << std::endl;
 	
 	_raw = smart_buffer(new unsigned char[_raw_sz]);
 	
 	// get the raw data
-	bt.Get(_raw.get(),_raw_sz);
+	if (bt.Get(_raw.get(),_raw_sz) != _raw_sz)
+	{
+		throw std::runtime_error("Raw data incorrect size.");
+	}
 	//std::cout << "Got raw data." << std::endl;
 	_encrypted_and_signed = true;
 	
@@ -307,15 +325,24 @@ bool shacham_waters_private_data::state::check_sig_and_decrypt(byte k_enc[shacha
 	unsigned int n;
 	
 	// get signed data size
-	raw_source.GetWord32(n);
+	if (raw_source.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to get signed data size.");
+	}
 	unsigned int sig_data_size = ntohl(n);
 	
 	// get signed data
 	CryptoPP::StringSink sig_sink(sig_data);
-	raw_source.TransferTo(sig_sink,(CryptoPP::lword)sig_data_size);
+	if (raw_source.TransferTo(sig_sink,(CryptoPP::lword)sig_data_size) != sig_data_size)
+	{
+		throw std::runtime_error("Incorrect size transferred.");
+	}
 	
 	// get mac size
-	raw_source.GetWord32(n);
+	if (raw_source.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to get mac size.");
+	}
 	unsigned int mac_size = ntohl(n);
 	
 	if (mac_size != hmac.DigestSize())
@@ -326,7 +353,10 @@ bool shacham_waters_private_data::state::check_sig_and_decrypt(byte k_enc[shacha
 	
 	// get mac
 	CryptoPP::StringSink mac_sink(mac_data);
-	raw_source.TransferTo(mac_sink,(CryptoPP::lword)mac_size);
+	if (raw_source.TransferTo(mac_sink,(CryptoPP::lword)mac_size) != mac_size)
+	{
+		throw std::runtime_error("Incorrect size transferred.");
+	}
 	
 	/*
 	std::string str0,str1,str2;
@@ -422,7 +452,10 @@ void shacham_waters_private_data::state::public_interpretation()
 	
 	// get n
 	unsigned int n;
-	raw_source.GetWord32(n);
+	if (raw_source.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to get n.");
+	}
 	_n = ntohl(n);
 }
 
@@ -463,24 +496,40 @@ void shacham_waters_private_data::challenge::deserialize(CryptoPP::BufferedTrans
 	unsigned int n;
 	
 	// get l
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to read l.");
+	}
 	_l = ntohl(n);
 	
 	// get key size
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to read key size.");
+	}
 	_key_sz = ntohl(n);
+	if (_key_sz > shacham_waters_private_data::key_size)
+	{
+		throw std::runtime_error("Invalid key size.");
+	}
 	_key = smart_buffer(new unsigned char[_key_sz]);
 	
 	// read key
-	bt.Get(_key.get(),_key_sz);
+	if (bt.Get(_key.get(),_key_sz) != _key_sz)
+	{
+		throw std::runtime_error("Key corrupted.");
+	}
 	
 	// read B size
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to read B size.");
+	}
 	n = ntohl(n);
 	
 	// read B
 	//std::cout << "Dencoding B in " << n << " bytes." << std::endl;
-	_v_max.Decode(bt,n);
+	_v_max = safe_integer(bt,n);
 }
 
 void shacham_waters_private_data::proof::serialize(CryptoPP::BufferedTransformation &bt) const
@@ -512,26 +561,36 @@ void shacham_waters_private::proof::deserialize(CryptoPP::BufferedTransformation
 {
 	unsigned int n;
 	
-	bt.GetWord32(n); 
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to retrieve proof mu count.");
+	}
 	
 	n = ntohl(n);
 	
 	_mu.clear();
-	_mu.resize(n);
-	for (unsigned int i=0;i<_mu.size();i++)
+	//_mu.resize(n);
+	unsigned int count = n;
+	for (unsigned int i=0;i<count;i++)
 	{
-		bt.GetWord32(n);
+		if (bt.GetWord32(n) != sizeof(unsigned int))
+		{
+			throw std::runtime_error("Unable to retrieve integer size.");
+		}
 		
 		n = ntohl(n);
 		
 		//std::cout << "Dencoding mu_" << i << " in " << n << " bytes." << std::endl;
-		_mu[i].Decode(bt,n);
+		_mu.push_back(safe_integer(bt,n));
 	}
 	
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to read sigma size.");
+	}
 	n = ntohl(n);
 	//std::cout << "Dencoding sigma in " << n << " bytes." << std::endl;
-	_sigma.Decode(bt,n);
+	_sigma = safe_integer(bt,n);
 }
 
 void shacham_waters_private::init(unsigned int prime_size_bytes, unsigned int sectors)
@@ -802,7 +861,10 @@ void shacham_waters_private::deserialize(CryptoPP::BufferedTransformation &bt)
 {
 	unsigned int n;
 	// read key size
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to retrieve key size.");
+	}
 	n = ntohl(n);
 	
 	// check key size
@@ -812,10 +874,16 @@ void shacham_waters_private::deserialize(CryptoPP::BufferedTransformation &bt)
 	}
 	
 	// get key
-	bt.Get(_k_enc,n);
+	if (bt.Get(_k_enc,n) != n)
+	{
+		throw std::runtime_error("Key corrupted.");
+	}
 	
 	// read key size
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to retrieve key size.");
+	}
 	n = ntohl(n);
 	
 	// check key size
@@ -825,21 +893,33 @@ void shacham_waters_private::deserialize(CryptoPP::BufferedTransformation &bt)
 	}
 	
 	// get key
-	bt.Get(_k_mac,n);
+	if (bt.Get(_k_mac,n) != n)
+	{
+		throw std::runtime_error("Key corrupted.");
+	}
 	
 	// read sectors
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to read sector count.");
+	}
 	_sectors = ntohl(n);
 
 	// read sector size
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to read sector size.");
+	}
 	_sector_size = ntohl(n);
 
 	// read p size
-	bt.GetWord32(n);
+	if (bt.GetWord32(n) != sizeof(unsigned int))
+	{
+		throw std::runtime_error("Unable to read p size.");
+	}
 	n = ntohl(n);
 	
 	// read p
 	//std::cout << "Dencoding p in " << n << " bytes." << std::endl;
-	_p.Decode(bt,n);
+	_p = shacham_waters_private_data::safe_integer(bt,n);
 }

@@ -2,7 +2,8 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2014 William T. James
+Copied from from ACMer on Coding for Speed DOT COM
+Additional preprocessing by William T. James, Storj Labs
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

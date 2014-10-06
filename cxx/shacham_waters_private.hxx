@@ -34,6 +34,8 @@ Shacham, Waters, "Compact Proofs of Retrievability"
 
 #pragma once
 
+#include <stdexcept>
+
 #include "heartbeat.hxx"
 #include "seekable_file.hxx"
 #include "prf.hxx"

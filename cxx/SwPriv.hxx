@@ -150,7 +150,7 @@ public:
 		Tthis::PYCXX_ADD_NOARGS_METHOD(  __reduce__, _reduce, "__reduce__()\nReduces the object and returns a tuple of the callable constructor, any arguments to that constructor, and the object state.");
 		Tthis::PYCXX_ADD_NOARGS_METHOD( todict, _todict, "todict()\nReturns a dictionary fully representing this object.");
 		
-		add_method("fromdict", _fromdict, METH_VARARGS | METH_STATIC, "fromdict(dict)\nReturns a new object of this type from the given dictionary.");
+		Tthis::add_method("fromdict", _fromdict, METH_VARARGS | METH_STATIC, "fromdict(dict)\nReturns a new object of this type from the given dictionary.");
 	}
 	
 	static void init_type(const char *T_type_name,const char *doc = "")

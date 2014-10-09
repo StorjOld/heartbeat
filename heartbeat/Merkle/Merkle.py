@@ -43,7 +43,7 @@ class Challenge(object):
     another when requesting verification that they have a complete version
     of a specific file.
     """
-    def __init__(self, seed, index):
+    def __init__(self, seed=0, index=0):
         """Initialization method
 
         :param seed: this is the seed for this challenge, representing the
@@ -83,7 +83,7 @@ class Tag(object):
     up the file
     """
 
-    def __init__(self, tree, chunksz):
+    def __init__(self, tree=MerkleTree(), chunksz=8192):
         """Initialization method
 
         :param tree: this is the stripped merkle tree
@@ -128,9 +128,9 @@ class State(object):
     can be incremented multiple times in order to reach the present state.
     """
     def __init__(self,
-                 index,
-                 seed,
-                 n,
+                 index=0,
+                 seed=0,
+                 n=0,
                  root=None,
                  hmac=None,
                  timestamp=time.time()):
@@ -222,7 +222,7 @@ class State(object):
 
 class Proof(object):
     """The proof class encpasulates proof that a file exists"""
-    def __init__(self, leaf, branch):
+    def __init__(self, leaf=[], branch=MerkleBranch(0)):
         """Initialization method
 
         :param leaf: this is leaf of the merkle tree branch, i.e. the seeded

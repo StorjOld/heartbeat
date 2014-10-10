@@ -239,7 +239,10 @@ class MerkleTree(object):
         :param root: the root node
         """
         # just check the hashes are correct
-        lh = hashlib.sha256(leaf).digest()
+        try:
+            lh = hashlib.sha256(leaf).digest()
+        except:
+            return False
         for i in range(0, branch.get_order()):
             if (branch.get_left(i) != lh and branch.get_right(i) != lh):
                 return False

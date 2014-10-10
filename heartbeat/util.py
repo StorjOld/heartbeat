@@ -27,16 +27,12 @@ import base64
 def hb_encode(obj):
     if (type(obj) is list):
         return list(map(lambda x: hb_encode(x), obj))
-    else:  # elif (type(obj) is bytes):
+    else:
         return base64.b64encode(obj).decode('utf-8')
-    # else:
-    #     return obj
 
 
 def hb_decode(obj):
     if (type(obj) is list):
         return list(map(lambda x: hb_decode(x), obj))
-    else:  # elif (type(obj) is str or type(obj) is unicode):
+    else:
         return base64.b64decode(obj.encode('utf-8'))
-    # else:
-    #     return obj

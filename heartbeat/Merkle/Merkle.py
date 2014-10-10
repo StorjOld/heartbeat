@@ -283,7 +283,7 @@ class Merkle(object):
     def get_public(self):
         """This function returns a Merkle object that has it's key
         stripped."""
-        return Merkle(b'\0'*32)
+        return Merkle(b'')
 
     def encode(self, file, n=256, seed=os.urandom(32), chunksz=8192):
         """This function generates a merkle tree with the leaves as seed file

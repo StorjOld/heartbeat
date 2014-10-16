@@ -26,7 +26,7 @@
 # SOFTWARE.
 
 from .Merkle import Challenge, Tag, State, Proof, Merkle, MerkleHelper        # NOQA
-from .Merkle import DEFAULT_CHUNK_SIZE
+from .Merkle import DEFAULT_CHUNK_SIZE  # NOQA
 from .MerkleTree import MerkleTree     # NOQA
 
 __version__ = "0.1.4"

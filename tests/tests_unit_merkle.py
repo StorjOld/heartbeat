@@ -87,7 +87,10 @@ class TestMerkleTree(unittest.TestCase):
             # check all the leaves
             for j in range(0,i):
                 self.assertTrue(Merkle.MerkleTree.verify_branch(mt.leaves[j],mt.get_branch(j),mt.get_root()))
-                
+
+    def test_invalid_leaf(self):
+        self.assertFalse(Merkle.MerkleTree.verify_branch([],[],None))
+
     def test_get_partner(self):
         for i in range(0,20):
             j = random.randint(0,100)

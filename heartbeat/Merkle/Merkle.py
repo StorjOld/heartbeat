@@ -36,6 +36,11 @@ from .MerkleTree import MerkleTree, MerkleBranch
 from ..exc import HeartbeatError
 from ..util import hb_encode, hb_decode
 
+DEFAULT_CHUNK_SIZE = 8192
+DEFAULT_BUFFER_SIZE = 65536
+DEFAULT_CHALLENGE_COUNT = 256
+DEFAULT_KEY_SIZE = 32
+
 
 # challenge is a the seed and index
 class Challenge(object):
@@ -43,7 +48,7 @@ class Challenge(object):
     another when requesting verification that they have a complete version
     of a specific file.
     """
-    def __init__(self, seed, index):
+    def __init__(self, seed=0, index=0):
         """Initialization method
 
         :param seed: this is the seed for this challenge, representing the
@@ -82,8 +87,7 @@ class Tag(object):
     hashes of each chunk.  it also includes the chunk size used for breaking
     up the file
     """
-
-    def __init__(self, tree, chunksz):
+    def __init__(self, tree=MerkleTree(), chunksz=DEFAULT_CHUNK_SIZE):
         """Initialization method
 
         :param tree: this is the stripped merkle tree
@@ -128,9 +132,9 @@ class State(object):
     can be incremented multiple times in order to reach the present state.
     """
     def __init__(self,
-                 index,
-                 seed,
-                 n,
+                 index=0,
+                 seed=0,
+                 n=0,
                  root=None,
                  hmac=None,
                  timestamp=time.time()):
@@ -222,7 +226,7 @@ class State(object):
 
 class Proof(object):
     """The proof class encpasulates proof that a file exists"""
-    def __init__(self, leaf, branch):
+    def __init__(self, leaf=[], branch=MerkleBranch(0)):
         """Initialization method
 
         :param leaf: this is leaf of the merkle tree branch, i.e. the seeded
@@ -252,13 +256,14 @@ class Merkle(object):
     client generates a key, which is used for the generation of challenges.
     Then the client generates a number of challenges based on this key.
     """
+
     def __init__(self, key=None):
         """Initialization method
 
         :param key: the key for signing the state and generating seeds
         """
         if (key is None):
-            self.key = os.urandom(32)
+            self.key = os.urandom(DEFAULT_KEY_SIZE)
         else:
             self.key = key
 
@@ -283,9 +288,13 @@ class Merkle(object):
     def get_public(self):
         """This function returns a Merkle object that has it's key
         stripped."""
-        return Merkle()
+        return Merkle(b'')
 
-    def encode(self, file, n=256, seed=os.urandom(32), chunksz=8192):
+    def encode(self,
+               file,
+               n=DEFAULT_CHALLENGE_COUNT,
+               seed=os.urandom(DEFAULT_KEY_SIZE),
+               chunksz=DEFAULT_CHUNK_SIZE):
         """This function generates a merkle tree with the leaves as seed file
         hashes, the seed for each leaf being a deterministic seed generated
         from a key.
@@ -383,6 +392,7 @@ class Merkle(object):
 
 class MerkleHelper(object):
     """This object provides several helper functions for the Merkle class"""
+
     @staticmethod
     def get_next_seed(key, seed):
         """This takes a seed and generates the next seed in the sequence.
@@ -395,7 +405,7 @@ class MerkleHelper(object):
         return hmac.new(key, seed, hashlib.sha256).digest()
 
     @staticmethod
-    def get_file_hash(file, seed, bufsz=65536):
+    def get_file_hash(file, seed, bufsz=DEFAULT_BUFFER_SIZE):
         """This method generates a secure has of the given file.  Returns the
         hash
 
@@ -413,7 +423,10 @@ class MerkleHelper(object):
         return h.digest()
 
     @staticmethod
-    def get_chunk_hash(file, seed, chunksz=8192, bufsz=65536):
+    def get_chunk_hash(file,
+                       seed,
+                       chunksz=DEFAULT_CHUNK_SIZE,
+                       bufsz=DEFAULT_BUFFER_SIZE):
         """returns a hash of a chunk of the file provided.  the position of
         the chunk is determined by the seed.  additionally, the hmac of the
         chunk is calculated from the seed.

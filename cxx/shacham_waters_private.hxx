@@ -34,6 +34,8 @@ Shacham, Waters, "Compact Proofs of Retrievability"
 
 #pragma once
 
+#include <stdexcept>
+
 #include "heartbeat.hxx"
 #include "seekable_file.hxx"
 #include "prf.hxx"
@@ -46,10 +48,31 @@ Shacham, Waters, "Compact Proofs of Retrievability"
 #include <cryptopp/integer.h>
 #include <cryptopp/nbtheory.h>
 
+
+
 class shacham_waters_private_data 
 {
 public:
 	static const unsigned int key_size = 32;
+	
+	class safe_integer : public CryptoPP::Integer
+	{
+	public:
+		safe_integer(CryptoPP::BufferedTransformation &bt, size_t byteCount)
+		{
+			if (byteCount > max_size)
+			{
+				throw std::runtime_error("Maximum integer size exceeded");
+			}
+			if (bt.MaxRetrievable() < byteCount)
+			{
+				throw std::runtime_error("Integer not retrievable.");
+			}
+			Decode(bt,byteCount);
+		}
+	private:
+		static const unsigned int max_size = 1024;
+	};
 
 	class tag : public serializable 
 	{
@@ -67,6 +90,8 @@ public:
 	class state : public serializable 
 	{
 	public:
+		static const unsigned int max_raw_size = 2048;
+	
 		state() : _encrypted_and_signed(false), _n(0), _raw_sz(0) {}
 		
 		state(const state &s);
@@ -152,7 +177,7 @@ public:
 class shacham_waters_private : public heartbeat<shacham_waters_private_data,shacham_waters_private>, public serializable
 {	
 public:
-	shacham_waters_private() : _sectors(0), _sector_size(0) {}
+	shacham_waters_private() : _sectors(0), _sector_size(0), _public(false) {}
 	
 	void gen()
 	{
@@ -184,6 +209,7 @@ public:
 	void deserialize(CryptoPP::BufferedTransformation &bt);
 	
 private:
+	bool _public;
 	byte _k_enc[shacham_waters_private_data::key_size];
 	byte _k_mac[shacham_waters_private_data::key_size];
 
@@ -191,4 +217,6 @@ private:
 	size_t _sector_size;
 	
 	CryptoPP::Integer _p;
+	
+	static const byte _flag_public = 0x01;
 };

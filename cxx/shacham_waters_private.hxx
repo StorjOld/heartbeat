@@ -92,7 +92,7 @@ public:
 	public:
 		static const unsigned int max_raw_size = 2048;
 	
-		state() : _encrypted_and_signed(false), _n(0), _raw_sz(0) {}
+		state() : _n(0), _raw_sz(0), _encrypted_and_signed(false)  {}
 		
 		state(const state &s);
 		
@@ -134,7 +134,7 @@ public:
 	class challenge : public serializable 
 	{
 	public:
-		challenge() : _key_sz(0), _l(0) {}
+		challenge() :  _l(0), _key_sz(0) {}
 	
 		unsigned int get_l() const { return _l; }
 		void set_l(unsigned int l) { _l = l; }
@@ -177,7 +177,7 @@ public:
 class shacham_waters_private : public heartbeat<shacham_waters_private_data,shacham_waters_private>, public serializable
 {	
 public:
-	shacham_waters_private() : _sectors(0), _sector_size(0), _public(false) {}
+	shacham_waters_private() : _public(false), _sectors(0), _sector_size(0) {}
 	
 	void gen()
 	{

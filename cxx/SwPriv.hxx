@@ -229,7 +229,7 @@ public:
 	{
 		try {
 			// std::cout << "rich compare called." << std::endl;
-			bool c;
+			bool c = false;
 			
 			const Tthis *obj = Py::PythonClassObject<Tthis>( other ).getCxxObject();
 			

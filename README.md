@@ -14,7 +14,7 @@ The libraries accept a file that is a binary readable file-like object that impl
 
 The file tag is a potentially large set of information that matches the particular file that is stored.
 
-The state is a possibly encrypted and signed set of data that represents some of the information about how the tags were generated, and allows verification of the file by the client.  In a publicly verificable scheme, the state information would not be encrypted, and might not be necessary.  Additionally, sometimes the state contains state information for generation of the next challenges.  It can be stored on the client or the server, since it will be signed and encrypted in most cases.
+The state is a possibly encrypted and signed set of data that represents some of the information about how the tags were generated, and allows verification of the file by the client.  In a publicly verifiable scheme, the state information would not be encrypted, and might not be necessary.  Additionally, sometimes the state contains state information for generation of the next challenges.  It can be stored on the client or the server, since it will be signed and encrypted in most cases.
 
 The challenge is a set of data that informs the server how to calculate a proof.  It is not predictable by the server and therefore the response cannot be predetermined.
 
@@ -57,7 +57,7 @@ After a time has passed, when an auditor wants to verify the challenge, if neces
 challenge = beat.gen_challenge(state)
 ```
 
-This should generate a challenge key which is unique.  This step may or may not be necessary, since in some schemes the challenge information could be drawn by the server from another source (for instance, last hash of bitcoin blockchain header).  In the publically verifiable case it should be possible to call `public_beat.gen_challenge()` and in many cases it is possible to call the static message `heartbeat.gen_challenge()`.  Then, the challenge, and possibly the public_beat if not already sent, (and in some cases the updated state), are sent to the server who proves the file existance by running:
+This should generate a challenge key which is unique.  This step may or may not be necessary, since in some schemes the challenge information could be drawn by the server from another source (for instance, last hash of bitcoin blockchain header).  In the publicly verifiable case it should be possible to call `public_beat.gen_challenge()` and in many cases it is possible to call the static message `heartbeat.gen_challenge()`.  Then, the challenge, and possibly the public_beat if not already sent, (and in some cases the updated state), are sent to the server who proves the file existance by running:
 
 ```python
 with open('path/to/file','rb') as f:

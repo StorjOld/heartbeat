@@ -40,6 +40,8 @@ inline void swap(uint32_t *i)
 	r[2] = buf;
 }
 
+#ifndef htonl
+
 inline uint32_t htonl(uint32_t hostint)
 {
 #ifndef __BIG_ENDIAN__
@@ -52,6 +54,10 @@ inline uint32_t htonl(uint32_t hostint)
 	return hostint;
 }
 
+#endif
+
+#ifndef ntohl
+
 inline uint32_t ntohl(uint32_t netint)
 {
 #ifndef __BIG_ENDIAN__
@@ -63,3 +69,5 @@ inline uint32_t ntohl(uint32_t netint)
 #endif
 	return netint;
 }
+
+#endif

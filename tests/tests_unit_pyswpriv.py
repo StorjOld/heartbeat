@@ -36,35 +36,35 @@ from decimal import Decimal
 import pickle
 
 from heartbeat.exc import HeartbeatError
-from heartbeat import PySwPriv
+from heartbeat import PySwizzle
 
 from GenericCorrectnessTests import GenericCorrectnessTests
 
 class TestKeyedPRF(unittest.TestCase):
     def test_pad(self):
         data0 = b"test data 0"
-        pdata0 = PySwPriv.KeyedPRF.pad(data0,15)
+        pdata0 = PySwizzle.KeyedPRF.pad(data0,15)
         self.assertEqual(data0+b"\0\0\0\0",pdata0)
         
-        pdata0 = PySwPriv.KeyedPRF.pad(data0,7)
+        pdata0 = PySwizzle.KeyedPRF.pad(data0,7)
         self.assertEqual(data0[0:7],pdata0)
         
     def test_consistency(self):
         k = os.urandom(32)
-        f1 = PySwPriv.KeyedPRF(k,10000)
-        f2 = PySwPriv.KeyedPRF(k,10000)
+        f1 = PySwizzle.KeyedPRF(k,10000)
+        f2 = PySwizzle.KeyedPRF(k,10000)
         for i in range(0,100):
             self.assertEqual(f1.eval(i),f2.eval(i))
     
 class TestCorrectness(unittest.TestCase):
     def test_correctness(self):
-        GenericCorrectnessTests.generic_correctness_test(self,PySwPriv.PySwPriv)
+        GenericCorrectnessTests.generic_correctness_test(self,PySwizzle.PySwizzle)
     def test_scheme(self):
-        GenericCorrectnessTests.generic_scheme_test(self,PySwPriv.PySwPriv)
+        GenericCorrectnessTests.generic_scheme_test(self,PySwizzle.PySwizzle)
 
 class TestPySwiv(unittest.TestCase):
     def test_encryption(self):
-        state = PySwPriv.State(os.urandom(32),os.urandom(32),100)
+        state = PySwizzle.State(os.urandom(32),os.urandom(32),100)
         k = os.urandom(32)
         state.encrypt(k)
         state.encrypt(k)
@@ -77,19 +77,19 @@ class TestPySwiv(unittest.TestCase):
         self.assertEqual("Signature invalid on state.",ex_msg)
         
         k = os.urandom(32)
-        state = PySwPriv.State(os.urandom(32), os.urandom(32), 100, False, None, None, k)
+        state = PySwizzle.State(os.urandom(32), os.urandom(32), 100, False, None, None, k)
         
         self.assertEqual(state.hmac,state.get_hmac(k))
     
     def test_initialization(self):
         k = b"test pass phrase"
-        beat = PySwPriv.PySwPriv(10,k)
+        beat = PySwizzle.PySwizzle(10,k)
         self.assertEqual(beat.key,k)
     
     def test_sectors(self):
         memfile = io.BytesIO(os.urandom(10))
         
-        beat = PySwPriv.PySwPriv(10)
+        beat = PySwizzle.PySwizzle(10)
         
         (tag,state) = beat.encode(memfile)
             

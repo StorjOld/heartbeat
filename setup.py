@@ -54,17 +54,17 @@ class build_ext_subclass(build_ext):
                 e.libraries = libs[c]
         build_ext.build_extensions(self)
 
-swpriv_sources = ['cxx/shacham_waters_private.cxx', 'cxx/SwPriv.cxx', 'cxx/base64.cxx']
+swizzle_sources = ['cxx/shacham_waters_private.cxx', 'cxx/Swizzle.cxx', 'cxx/base64.cxx']
 pycxx_sources = ['cxx/pycxx/Src/cxxsupport.cxx',
                  'cxx/pycxx/Src/cxx_extensions.cxx',
                  'cxx/pycxx/Src/cxxextensions.c',
                  'cxx/pycxx/Src/IndirectPythonInterface.cxx']
 
-all_sources = swpriv_sources + pycxx_sources
+all_sources = swizzle_sources + pycxx_sources
 
-swpriv = Extension('heartbeat.SwPriv',
-                   include_dirs=['cxx/pycxx','cxx'],
-                   sources=all_sources)
+swizzle = Extension('heartbeat.Swizzle',
+                    include_dirs=['cxx/pycxx','cxx'],
+                    sources=all_sources)
 
 setup(
     name='storj-heartbeat',
@@ -77,7 +77,7 @@ setup(
     install_requires=[
         'pycrypto >= 2.6.1',
     ],
-    packages=['heartbeat', 'heartbeat.Merkle', 'heartbeat.OneHash', 'heartbeat.PySwPriv'],
-    ext_modules=[swpriv],
+    packages=['heartbeat', 'heartbeat.Merkle', 'heartbeat.OneHash', 'heartbeat.PySwizzle'],
+    ext_modules=[swizzle],
     cmdclass={'build_ext': build_ext_subclass}
 )

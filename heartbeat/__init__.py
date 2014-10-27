@@ -27,9 +27,9 @@
 
 __version__ = "0.1.4"
 
-import heartbeat.SwPriv    # NOQA
+import heartbeat.Swizzle    # NOQA
 import heartbeat.Merkle    # NOQA
-import heartbeat.PySwPriv  # NOQA
+import heartbeat.PySwizzle  # NOQA
 
 
-Heartbeat = heartbeat.SwPriv.SwPriv
+Heartbeat = heartbeat.Swizzle.Swizzle

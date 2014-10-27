@@ -36,21 +36,21 @@ from decimal import Decimal
 import pickle
 
 from heartbeat.exc import HeartbeatError
-from heartbeat import SwPriv
+from heartbeat import Swizzle
 
 from GenericCorrectnessTests import GenericCorrectnessTests
    
 class TestSubClasses(unittest.TestCase):
     def setUp(self):
-        self.challenge1 = SwPriv.Challenge()
-        self.challenge2 = SwPriv.Challenge()
-        self.tag1 = SwPriv.Tag()
-        self.tag2 = SwPriv.Tag()
-        self.state1 = SwPriv.State()
-        self.state2 = SwPriv.State()
-        self.proof1 = SwPriv.Proof()
-        self.proof2 = SwPriv.Proof()
-        self.beat1 = SwPriv.SwPriv()
+        self.challenge1 = Swizzle.Challenge()
+        self.challenge2 = Swizzle.Challenge()
+        self.tag1 = Swizzle.Tag()
+        self.tag2 = Swizzle.Tag()
+        self.state1 = Swizzle.State()
+        self.state2 = Swizzle.State()
+        self.proof1 = Swizzle.Proof()
+        self.proof2 = Swizzle.Proof()
+        self.beat1 = Swizzle.Swizzle()
 
     def tearDown(self):
         del self.challenge1
@@ -71,7 +71,7 @@ class TestSubClasses(unittest.TestCase):
     
     def test_comparison(self):
         beat2 = pickle.loads(pickle.dumps(self.beat1))
-        beat3 = SwPriv.SwPriv()
+        beat3 = Swizzle.Swizzle()
         
         self.assertEqual(self.beat1,beat2)
         self.assertNotEqual(self.beat1,beat3)
@@ -116,44 +116,44 @@ class TestSubClasses(unittest.TestCase):
         
     def test_serialization(self):
         dict = self.beat1.todict()
-        beat2 = SwPriv.SwPriv.fromdict(dict)
+        beat2 = Swizzle.Swizzle.fromdict(dict)
         self.assertEqual(self.beat1,beat2)
         
         with self.assertRaises(HeartbeatError) as ex:
-            beat3 = SwPriv.SwPriv.fromdict('invalid object')
+            beat3 = Swizzle.Swizzle.fromdict('invalid object')
         
         dict = self.challenge1.todict()
-        chal3 = SwPriv.SwPriv.challenge_type().fromdict(dict)
+        chal3 = Swizzle.Swizzle.challenge_type().fromdict(dict)
         self.assertEqual(self.challenge1,chal3)
         
         with self.assertRaises(HeartbeatError) as ex:
-            chal3 = SwPriv.SwPriv.challenge_type().fromdict('invalid object')
+            chal3 = Swizzle.Swizzle.challenge_type().fromdict('invalid object')
         
         key = os.urandom(self.state1.keysize())
         self.state1.encrypt(key,key,True)
         dict = self.state1.todict()
-        state3 = SwPriv.SwPriv.state_type().fromdict(dict)
+        state3 = Swizzle.Swizzle.state_type().fromdict(dict)
         
         with self.assertRaises(HeartbeatError) as ex:
-            state3 = SwPriv.SwPriv.state_type().fromdict('invalid object')
+            state3 = Swizzle.Swizzle.state_type().fromdict('invalid object')
         
         dict = self.tag1.todict()
-        tag3 = SwPriv.SwPriv.tag_type().fromdict(dict)
+        tag3 = Swizzle.Swizzle.tag_type().fromdict(dict)
         self.assertEqual(self.tag1,tag3)
         
         with self.assertRaises(HeartbeatError) as ex:
-            tag3 = SwPriv.SwPriv.tag_type().fromdict('invalid object')
+            tag3 = Swizzle.Swizzle.tag_type().fromdict('invalid object')
             
         dict = self.proof1.todict()
-        proof3 = SwPriv.SwPriv.proof_type().fromdict(dict)
+        proof3 = Swizzle.Swizzle.proof_type().fromdict(dict)
         self.assertEqual(self.proof1,proof3)
         
         with self.assertRaises(HeartbeatError) as ex:
-            proof3 = SwPriv.SwPriv.proof_type().fromdict('invalid object')
+            proof3 = Swizzle.Swizzle.proof_type().fromdict('invalid object')
 
-class TestSwPriv(unittest.TestCase):
+class TestSwizzle(unittest.TestCase):
     def test_exceptions(self):
-        state = SwPriv.State()
+        state = Swizzle.State()
         with self.assertRaises(HeartbeatError) as ex:
             state.__setstate__()
         
@@ -187,7 +187,7 @@ class TestSwPriv(unittest.TestCase):
         self.assertEqual("Encryption key must be "+str(key_len)+" bytes in length.  Use keysize() to retrieve the key size.",ex_msg)
     
     def test_size(self):
-        beat = SwPriv.SwPriv()
+        beat = Swizzle.Swizzle()
         
         with open('files/test7.txt','rb') as file:
             file.seek(0,2)
@@ -205,9 +205,9 @@ class TestSwPriv(unittest.TestCase):
     
 class TestCorrectness(unittest.TestCase):
     def test_correctness(self):
-        GenericCorrectnessTests.generic_correctness_test(self,SwPriv.SwPriv)
+        GenericCorrectnessTests.generic_correctness_test(self,Swizzle.Swizzle)
     def test_scheme(self):
-        GenericCorrectnessTests.generic_scheme_test(self,SwPriv.SwPriv)
+        GenericCorrectnessTests.generic_scheme_test(self,Swizzle.Swizzle)
         
         
 if __name__ == '__main__':

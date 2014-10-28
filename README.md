@@ -4,7 +4,7 @@ heartbeat
 
 This is the API for heartbeat which is for proving the existance of a file on a remote server without downloading the entire file.  In theory there are both publicly and privately verifiable schemes.  Publicly verifiable schemes work even when the data auditor does not have access to any more information than the person storing the data.  Privately verifiable schemes work only when the auditor has access to secrets that the storer does not have.
 
-Right now there are three working implementations of this scheme.  Merkle, SwPriv, and PySwPriv.  See Implementations below for more information.
+Right now there are three working implementations of this scheme.  Merkle, Swizzle, and PySwizzle.  See Implementations below for more information.
 
 #### Overview
 
@@ -20,7 +20,7 @@ The challenge is a set of data that informs the server how to calculate a proof.
 
 The proof is a set of data that represents proof that the server has read access to the complete file contents.
 
-For transferring of data between client and server the `tag`, `state`, `challenge`, and `proof` objects can be serialized to JSON through the use of the `todict()` and static `fromdict()` methods.
+For transferring of data between client and server the _tag_, _state_, _challenge_, and _proof_ objects can be serialized to JSON through the use of the `todict()` and static `fromdict()` methods.
 
 For local storage of these objects, they also provide `__getstate__()`, `__setstate__()` and `__reduce__()` functions so that the `pickle` library can be used.
 
@@ -83,7 +83,7 @@ This is a merkle tree hash proof of storage scheme.  It works by pre-generating 
 
 The current implementation uses a random chunk of the file for each challenge, so any one challenge cannot verify the presence of the entire file.  In addition, the `state` must be transmitted back to the server after it has been modified by the `gen_challenge()`.  Some information must be maintained in order to ensure that an old state is not returned by the server.  The state contains a timestamp field which was the `time.gmtime()` at which the state was created.  This information could be used if heartbeats are regular.  If heartbeats are irregular, then an index must be locally maintained for each remote file, and then checked against the state as the state is received from the server.  Or, the state could be maintained locally.
 
-##### SwPriv
+##### Swizzle
 
 This is a homomorphic linear authentication scheme based on work by Shacham and Waters, see Shacham, Waters "Compact proofs of Retrievability".  Please see that paper or look at the code for details of the implementation.  From the paper:
 
@@ -120,13 +120,13 @@ sigma ?= alpha * mu + sum(v_i * f_k(i))
 
 Please see the paper or the code for more details.  This scheme as described above obviously requires 2x storage on the server since the file tags are the same size as the file.  However, it is possible to reduce the storage requirement significantly at the cost of increasing the communication by a small amount, which the implementation currently does.  By default it reduces the extra storage requirement by 10 times, so that the storage requirement is 1.1x.  The advantage of this scheme is that it is stateless, avoiding the issue of maintaining a state for each file as above, and also there is no limit to the number of challenges that can be issued.
 
-##### PySwPriv
+##### PySwizzle
 
-This is the same as SwPriv but written in pure python.  It is significantly slower (understandably) but provides basically the same functionality.
+This is the same as Swizzle but written in pure python.  It is significantly slower (understandably) but provides basically the same functionality.
 
 #### Installation
 
-To build the heartbeat modules, including C++ SwPriv python extension module, first install Crypto++.  On a debian based system, the following should suffice:
+To build the heartbeat modules, including C++ Swizzle python extension module, first install Crypto++.  On a debian based system, the following should suffice:
 
 ```
 sudo apt-get install libcrypto++-dev

@@ -57,7 +57,7 @@ class TestHeartbeat(unittest.TestCase):
     def test_type(self):
         b = Heartbeat()
         
-        self.assertIsInstance(b, heartbeat.SwPriv.SwPriv)
+        self.assertIsInstance(b, heartbeat.Swizzle.Swizzle)
         
 class TestHeartbeatError(unittest.TestCase):
         

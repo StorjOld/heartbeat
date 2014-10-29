@@ -27,18 +27,18 @@ THE SOFTWARE.
 //#define CRYPTOPP_IMPORTS
 //#include <cryptopp/dll.h>
 
-#include "SwPriv.hxx"
+#include "Swizzle.hxx"
 #include <Python.h>
 #include <CXX/Objects.hxx>
 #include <iostream>
 
 #if PY_MAJOR_VERSION == 2
-#define PyInit_SwPriv initSwPriv
+#define PyInit_Swizzle initSwizzle
 #endif
 
-Py::Object SwPriv::PyHeartbeatException::_exception = Py::Object();
+Py::Object Swizzle::PyHeartbeatException::_exception = Py::Object();
 
-extern "C" PyObject *PyInit_SwPriv()
+extern "C" PyObject *PyInit_Swizzle()
 {
 	static Module* module = new Module;
 	return module->module().ptr();

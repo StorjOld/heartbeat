@@ -25,6 +25,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .PySwPriv import KeyedPRF, Challenge, Tag, State, Proof, PySwPriv  # NOQA
+from .PySwizzle import KeyedPRF, Challenge, Tag, State, Proof, PySwizzle  # NOQA
 
 __version__ = "0.1.4"

@@ -270,7 +270,7 @@ class Proof(object):
         return self
 
 
-class PySwPriv(object):
+class PySwizzle(object):
     """This class encapsulates the proof of storage engine for the Shacham
     Waters Private scheme.
     """
@@ -307,18 +307,18 @@ class PySwPriv(object):
 
     @staticmethod
     def fromdict(dict):
-        """Takes a dictionary as an argument and returns a new PySwPriv
+        """Takes a dictionary as an argument and returns a new PySwizzle
         object from the dictionary.
 
         :param dict: the dictionary to convert
         """
-        return PySwPriv(dict["sectors"],
-                        hb_decode(dict["key"]),
-                        dict["prime"])
+        return PySwizzle(dict["sectors"],
+                         hb_decode(dict["key"]),
+                         dict["prime"])
 
     def get_public(self):
         """Gets a public version of the object with the key stripped."""
-        return PySwPriv(self.sectors, None, self.prime)
+        return PySwizzle(self.sectors, None, self.prime)
 
     def encode(self, file):
         """This function returns a (tag,state) tuple that is calculated for

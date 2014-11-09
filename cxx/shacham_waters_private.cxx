@@ -746,13 +746,17 @@ void shacham_waters_private::prove(proof &p, seekable_file &f, const challenge &
 	
 	p.mu().clear();
 	p.mu().resize(_sectors);
+	
+	bool check_all = c.get_l() >= t.sigma().size();
+	unsigned int n = check_all ? t.sigma().size() : c.get_l();
 	//std::cout << "Sectors: " << _sectors << std::endl;
 	for (unsigned int j=0;j<_sectors;j++)
 	{
 		//p.mu().at(j) = CryptoPP::Integer(); // this is called implicitly
-		for (unsigned int i=0;i<c.get_l();i++)
+		for (unsigned int i=0;i<n;i++)
 		{
-			size_t pos = indexer.evaluate(i).ConvertToLong()*chunk_size + j*_sector_size;
+			unsigned int index = check_all ? i : indexer.evaluate(i).ConvertToLong();
+			size_t pos = index*chunk_size + j*_sector_size;
 			if (f.seek(pos) == pos)
 			{
 				size_t bytes_read = f.read(buffer.get(),_sector_size);
@@ -769,10 +773,11 @@ void shacham_waters_private::prove(proof &p, seekable_file &f, const challenge &
 	
 	//p.sigma() = CryptoPP::Integer();
 	//std::cout << "Calculating sigma... t.sigma().size() = " << t.sigma().size() << std::endl;
-	for (unsigned int i=0;i<c.get_l();i++)
+	for (unsigned int i=0;i<n;i++)
 	{
 		//std::cout << "sigma += v_" << i << " * sigma_" << indexer.evaluate(i) << std::endl;
-		p.sigma() += v.evaluate(i) * t.sigma().at(indexer.evaluate(i).ConvertToLong());
+		int index = check_all ? i : indexer.evaluate(i).ConvertToLong();
+		p.sigma() += v.evaluate(i) * t.sigma().at(index);
 		p.sigma() %= _p;
 	}
 	
@@ -810,9 +815,13 @@ bool shacham_waters_private::verify(const proof &p, const challenge &c, const st
 	s.set_f_limit(_p);
 	s.set_alpha_limit(_p);
 	
-	for (unsigned int i=0;i<c.get_l();i++)
+	bool check_all = c.get_l() >= s.get_n();
+	unsigned int n = check_all ? s.get_n() : c.get_l();
+	
+	for (unsigned int i=0;i<n;i++)
 	{
-		rhs += v.evaluate(i) * s.f(indexer.evaluate(i).ConvertToLong());
+		unsigned int index = check_all ? i : indexer.evaluate(i).ConvertToLong();
+		rhs += v.evaluate(i) * s.f(index);
 		rhs %= _p;
 	}
 	

@@ -17,7 +17,7 @@ class TestCase(object):
         self.fraction = encode_fraction
 
 
-beats = [TestCase(heartbeat.SwPriv.SwPriv,1.0),
+beats = [TestCase(heartbeat.Swizzle.Swizzle,1.0),
          TestCase(heartbeat.Merkle.Merkle,heartbeat.Merkle.DEFAULT_CHUNK_SIZE/size)]
 
 for case in beats:

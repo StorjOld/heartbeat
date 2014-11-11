@@ -36,9 +36,34 @@ from ..util import hb_encode, hb_decode
 # leaves:   0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 0 - 0 - 0 - 0 - 0 - 0 - 0
 
 
+class MerkleLeaf(object):
+
+    def __init__(self, index, blob):
+        self.index = index
+        self.blob = blob
+
+    def __eq__(self, other):
+        return (self.index == other.index
+                and self.blob == other.blob)
+
+    def get_hash(self):
+        h = hashlib.sha256(self.blob)
+        h.update(str(self.index).encode())
+        return h.digest()
+
+    def todict(self):
+        return {'index': self.index,
+                'blob': hb_encode(self.blob)}
+
+    @staticmethod
+    def fromdict(dict):
+        return MerkleLeaf(dict['index'], hb_decode(dict['blob']))
+
+
 class MerkleBranch(object):
+
     def __init__(self, order):
-        self.rows = [(b'', b'')]*order
+        self.rows = [(b'', b'')] * order
 
     def __eq__(self, other):
         return self.rows == other.rows
@@ -57,26 +82,28 @@ class MerkleBranch(object):
 
     def todict(self):
         return {'rows': list(map(lambda x: (hb_encode(x[0]),
-                hb_encode(x[1])), self.rows))}
+                                            hb_encode(x[1])), self.rows))}
 
     @staticmethod
     def fromdict(dict):
         self = MerkleBranch(len(dict['rows']))
         self.rows = list(map(lambda x: (hb_decode(x[0]),
-                         hb_decode(x[1])), dict['rows']))
+                                        hb_decode(x[1])), dict['rows']))
         return self
 
 
 class MerkleTree(object):
+
     """This provides a simple MerkleTree implementation for use in the Merkle
     proof of storage scheme.  A leaf refers to the bottom level of the tree,
     while a branch is a list of pairs between the leaf and the root, not
     including the leaf or root.
 
     Generally, this is designed to be a static tree, in that you add the
-    leaves using the `add_lead()` method, and then construct the tree using
+    leaves using the `add_leaf()` method, and then construct the tree using
     the `build()` method.
     """
+
     def __init__(self):
         """Initialization method
 
@@ -94,23 +121,24 @@ class MerkleTree(object):
     def todict(self):
         return {'nodes': hb_encode(self.nodes),
                 'order': self.order,
-                'leaves': hb_encode(self.leaves)}
+                'leaves': list(map(lambda x: x.todict(), self.leaves))}
 
     @staticmethod
     def fromdict(dict):
         self = MerkleTree()
         self.nodes = hb_decode(dict['nodes'])
         self.order = dict['order']
-        self.leaves = hb_decode(dict['leaves'])
+        self.leaves = list(
+            map(lambda x: MerkleLeaf.fromdict(x), dict['leaves']))
         return self
 
-    def add_leaf(self, leaf):
+    def add_leaf(self, leaf_blob):
         """Adds a leaf to the list of leaves.  Does not build the tree so call
         `build()` to construct the rest of the tree from the added leaves.
 
-        :param leaf: the leaf to add.  should be a hashable object
+        :param leaf_blob: the leaf payload to add.  should be a hashable object
         """
-        self.leaves.append(leaf)
+        self.leaves.append(MerkleLeaf(len(self.leaves), leaf_blob))
 
     def build(self):
         """Builds the tree from the leaves that have been added.
@@ -118,23 +146,21 @@ class MerkleTree(object):
         This function populates the tree from the leaves down non-recursively
         """
         self.order = MerkleTree.get_order(len(self.leaves))
-        n = 2**self.order
-        self.nodes = [b'']*2*n
+        n = 2 ** self.order
+        self.nodes = [b''] * 2 * n
 
         # populate lowest nodes with leaf hashes
         for j in range(0, n):
             if (j < len(self.leaves)):
-                h = hashlib.sha256()
-                h.update(self.leaves[j])
-                self.nodes[j+n-1] = h.digest()
+                self.nodes[j + n - 1] = self.leaves[j].get_hash()
             else:
                 break
 
         # now populate the entire tree
-        for i in range(1, self.order+1):
-            p = 2**(self.order-i)
+        for i in range(1, self.order + 1):
+            p = 2 ** (self.order - i)
             for j in range(0, p):
-                k = p+j-1
+                k = p + j - 1
                 h = hashlib.sha256()
                 l = self.nodes[MerkleTree.get_left_child(k)]
                 if (len(l) > 0):
@@ -152,13 +178,13 @@ class MerkleTree(object):
         :param i: the leaf identifying the branch to retrieve
         """
         branch = MerkleBranch(self.order)
-        j = i + 2**self.order - 1
+        j = i + 2 ** self.order - 1
 
         for k in range(0, self.order):
             if (self.is_left(j)):
-                branch.set_row(k, (self.nodes[j], self.nodes[j+1]))
+                branch.set_row(k, (self.nodes[j], self.nodes[j + 1]))
             else:
-                branch.set_row(k, (self.nodes[j-1], self.nodes[j]))
+                branch.set_row(k, (self.nodes[j - 1], self.nodes[j]))
             j = MerkleTree.get_parent(j)
 
         return branch
@@ -177,7 +203,7 @@ class MerkleTree(object):
 
         :param i: the node id specifying the node to get the parent of
         """
-        return (i+1)//2-1
+        return (i + 1) // 2 - 1
 
     @staticmethod
     def get_partner(i):
@@ -186,9 +212,9 @@ class MerkleTree(object):
         :param i: the node id to get the partner of
         """
         if MerkleTree.is_left(i):
-            return i+1
+            return i + 1
         else:
-            return i-1
+            return i - 1
 
     @staticmethod
     def is_left(i):
@@ -204,7 +230,7 @@ class MerkleTree(object):
 
         :param i: the node id to get the left child of
         """
-        return (i+1)*2-1
+        return (i + 1) * 2 - 1
 
     @staticmethod
     def get_right_child(i):
@@ -212,7 +238,7 @@ class MerkleTree(object):
 
         :param i: the node id to get the right child of
         """
-        return (i+1)*2
+        return (i + 1) * 2
 
     @staticmethod
     def get_order(n):
@@ -240,7 +266,7 @@ class MerkleTree(object):
         """
         # just check the hashes are correct
         try:
-            lh = hashlib.sha256(leaf).digest()
+            lh = leaf.get_hash()
         except:
             return False
         for i in range(0, branch.get_order()):

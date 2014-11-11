@@ -202,6 +202,8 @@ class TestCorrectness(unittest.TestCase):
         GenericCorrectnessTests.generic_correctness_test(self,Merkle.Merkle)
     def test_scheme(self):
         GenericCorrectnessTests.generic_scheme_test(self,Merkle.Merkle)
+    def test_repeated(self):
+        GenericCorrectnessTests.generic_test_repeated_challenge(self,Merkle.Merkle)
         
         
 if __name__ == '__main__':

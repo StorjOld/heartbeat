@@ -16,6 +16,19 @@ class GenericCorrectnessTests(object):
             proof = pub.prove(file,chal,tag)
         test.assertFalse(priv.verify(proof,chal,state))
     
+    @staticmethod
+    def generic_test_repeated_challenge(test,hb,fn1='files/test.txt'):
+        priv = hb()
+        pub = priv.get_public()
+        with open(fn1,'rb') as f:
+            (tag, state) = priv.encode(f)
+        chal1 = priv.gen_challenge(state)
+        with open(fn1,'rb') as f:
+            proof1 = pub.prove(f,chal1,tag)
+        test.assertTrue(priv.verify(proof1,chal1,state))
+        # now we generate a new challenge and verify that the old challenge does not work
+        chal2 = priv.gen_challenge(state)
+        test.assertFalse(priv.verify(proof1,chal2,state))
     
     @staticmethod
     def generic_scheme_test(test,hb,n=20,fn='files/test.txt'):

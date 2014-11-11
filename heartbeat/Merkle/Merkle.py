@@ -32,7 +32,7 @@ import time
 from Crypto.Hash import HMAC
 from Crypto.Hash import SHA256
 
-from .MerkleTree import MerkleTree, MerkleBranch
+from .MerkleTree import MerkleTree, MerkleBranch, MerkleLeaf
 from ..exc import HeartbeatError
 from ..util import hb_encode, hb_decode
 
@@ -44,10 +44,12 @@ DEFAULT_KEY_SIZE = 32
 
 # challenge is a the seed and index
 class Challenge(object):
+
     """The Challenge class represents a challenge one node can pose to
     another when requesting verification that they have a complete version
     of a specific file.
     """
+
     def __init__(self, seed=0, index=0):
         """Initialization method
 
@@ -82,11 +84,13 @@ class Challenge(object):
 
 # tag is the stripped merkle tree
 class Tag(object):
+
     """The Tag class represents the file tag that is a stripped merkle
     tree, that is a merkle tree without the leaves, which are the seeded
     hashes of each chunk.  it also includes the chunk size used for breaking
     up the file
     """
+
     def __init__(self, tree=MerkleTree(), chunksz=DEFAULT_CHUNK_SIZE):
         """Initialization method
 
@@ -118,6 +122,7 @@ class Tag(object):
 
 
 class State(object):
+
     """The State class represents the state of a file, which can be encrypted
     and stored on the server, or held plaintext by the client.  It is mutable,
     i.e. it will change every time a challenge is issued, since it holds the
@@ -131,6 +136,7 @@ class State(object):
     old state.  If the server does send back an old state, the index and seed
     can be incremented multiple times in order to reach the present state.
     """
+
     def __init__(self,
                  index=0,
                  seed=0,
@@ -225,7 +231,9 @@ class State(object):
 
 
 class Proof(object):
+
     """The proof class encpasulates proof that a file exists"""
+
     def __init__(self, leaf=[], branch=MerkleBranch(0)):
         """Initialization method
 
@@ -241,17 +249,18 @@ class Proof(object):
                 self.branch == other.branch)
 
     def todict(self):
-        return {'leaf': hb_encode(self.leaf),
+        return {'leaf': self.leaf.todict(),
                 'branch': self.branch.todict()}
 
     @staticmethod
     def fromdict(dict):
-        leaf = hb_decode(dict['leaf'])
+        leaf = MerkleLeaf.fromdict(dict['leaf'])
         branch = MerkleBranch.fromdict(dict['branch'])
         return Proof(leaf, branch)
 
 
 class Merkle(object):
+
     """This class represents a heartbeat based on a merkle tree hash.  The
     client generates a key, which is used for the generation of challenges.
     Then the client generates a number of challenges based on this key.
@@ -348,7 +357,10 @@ class Merkle(object):
         :param challenge: the challenge to use for generating this proof
         :param tag: the file tag as provided from the client
         """
-        leaf = MerkleHelper.get_chunk_hash(file, challenge.seed, tag.chunksz)
+        leaf = MerkleLeaf(challenge.index,
+                          MerkleHelper.get_chunk_hash(file,
+                                                      challenge.seed,
+                                                      tag.chunksz))
         return Proof(leaf, tag.tree.get_branch(challenge.index))
 
     def verify(self, proof, challenge, state):
@@ -361,6 +373,8 @@ class Merkle(object):
         of the merkle tree, for verification.
         """
         state.checksig(self.key)
+        if (proof.leaf.index != challenge.index):
+            return False
         return MerkleTree.verify_branch(proof.leaf,
                                         proof.branch,
                                         state.root)
@@ -391,6 +405,7 @@ class Merkle(object):
 
 
 class MerkleHelper(object):
+
     """This object provides several helper functions for the Merkle class"""
 
     @staticmethod
@@ -441,9 +456,9 @@ class MerkleHelper(object):
         file.seek(0, 2)
         filesz = file.tell()
         if (filesz < chunksz):
-            chunksz = filesz//10
+            chunksz = filesz // 10
         random.seed(seed)
-        i = random.randint(0, filesz-chunksz)
+        i = random.randint(0, filesz - chunksz)
         file.seek(i)
         read = 0
         if (chunksz < bufsz):

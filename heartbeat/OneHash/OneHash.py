@@ -35,6 +35,7 @@ from ..exc import HeartbeatError
 
 
 class Challenge(object):
+
     """ The Challenge class represents a challenge one node can pose to
     another when requesting verification that they have a complete version
     of a specific file.
@@ -59,13 +60,13 @@ class Challenge(object):
 
 
 class OneHash(object):
+
     """ A small library used to create and verify hash challenges
     so Node A can verify that Node B has a specified file.
     """
 
     def __init__(self, filepath, secret=None):
         # Check if the file exists
-
         """ Initialization method
 
         :param filepath: Valid path to file

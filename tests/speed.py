@@ -8,7 +8,7 @@ print('This tests the three libraries for speed.  Please note,\n'
       'of the file, and so the speed number has been adjusted to\n'
       'compensate for this fact.\n')
 
-size = 1e6  
+size = 1e6
 n=10
 
 class TestCase(object):

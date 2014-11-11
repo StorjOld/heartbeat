@@ -31,6 +31,7 @@ from Crypto.Util import number
 
 
 class KeyedPRF(object):
+
     """KeyedPRF is a psuedo random function. It hashes the input, pads it to
     the correct output length, and then encrypts it with AES. Finally it
     checks that the result is within the desired range. If it is it returns
@@ -49,7 +50,7 @@ class KeyedPRF(object):
         if (len(data) > length):
             return data[0:length]
         else:
-            return data + b"\0"*(length-len(data))
+            return data + b"\0" * (length - len(data))
 
     def __init__(self, key, range):
         """Initialization method
@@ -66,18 +67,18 @@ class KeyedPRF(object):
         # certain byte size but we want to restrict it to within a
         # certain bit size because we're trying to find numbers within
         # a certain range this will speed it up
-        self.mask = (1 << number.size(self.range))-1
+        self.mask = (1 << number.size(self.range)) - 1
 
     def eval(self, x):
         """This method returns the evaluation of the function with input x
 
         :param x: this is the input as a Long
         """
-        aes = AES.new(self.key, AES.MODE_CFB, "\0"*AES.block_size)
+        aes = AES.new(self.key, AES.MODE_CFB, "\0" * AES.block_size)
         while True:
             nonce = 0
-            data = KeyedPRF.pad(SHA256.new(str(x+nonce).encode()).digest(),
-                                (number.size(self.range)+7)//8)
+            data = KeyedPRF.pad(SHA256.new(str(x + nonce).encode()).digest(),
+                                (number.size(self.range) + 7) // 8)
             num = self.mask & number.bytes_to_long(aes.encrypt(data))
             if (num < self.range):
                 return num
@@ -85,9 +86,11 @@ class KeyedPRF(object):
 
 
 class Challenge(object):
+
     """The challenge object that represents a challenge posed to the server
     for proof of storage of a file.
     """
+
     def __init__(self, chunks, v_max, key):
         """Initialization method
 
@@ -117,8 +120,10 @@ class Challenge(object):
 
 
 class Tag(object):
+
     """The file tag, generated before uploading by the client.
     """
+
     def __init__(self):
         """Initialization method
         """
@@ -142,9 +147,11 @@ class Tag(object):
 
 
 class State(object):
+
     """The state which contains two psueod random function keys for generating
     the coeffients for the file tag and verification.
     """
+
     def __init__(self, f_key, alpha_key, chunks=0,
                  encrypted=False, iv=None, hmac=None, key=None):
         """Initialization method
@@ -244,8 +251,10 @@ class State(object):
 
 
 class Proof(object):
+
     """This class encapsulates proof of storage
     """
+
     def __init__(self):
         """Initialization method"""
         self.mu = list()
@@ -271,9 +280,11 @@ class Proof(object):
 
 
 class PySwizzle(object):
+
     """This class encapsulates the proof of storage engine for the Shacham
     Waters Private scheme.
     """
+
     def __init__(self, sectors=10, key=None, prime=None, primebits=1024):
         """Initialization method
 
@@ -296,7 +307,7 @@ class PySwizzle(object):
         else:
             self.prime = prime
         self.sectors = sectors
-        self.sectorsize = self.prime.bit_length()//8
+        self.sectorsize = self.prime.bit_length() // 8
 
     def todict(self):
         """Returns a dictionary fully representing the state of this object
@@ -383,13 +394,13 @@ class PySwizzle(object):
         :param chal: the challenge to use for proving
         :param tag: the file tag
         """
-        chunk_size = self.sectors*self.sectorsize
+        chunk_size = self.sectors * self.sectorsize
 
         index = KeyedPRF(chal.key, len(tag.sigma))
         v = KeyedPRF(chal.key, chal.v_max)
 
         proof = Proof()
-        proof.mu = [0]*self.sectors
+        proof.mu = [0] * self.sectors
         proof.sigma = 0
 
         for i in range(0, chal.chunks):

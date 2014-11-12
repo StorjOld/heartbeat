@@ -177,14 +177,20 @@ public:
 class shacham_waters_private : public heartbeat<shacham_waters_private_data,shacham_waters_private>, public serializable
 {	
 public:
-	shacham_waters_private() : _public(false), _sectors(0), _sector_size(0) {}
+	shacham_waters_private() 
+		: 
+		_public(false), 
+		_sectors(0), 
+		_sector_size(0),
+		_check_fraction(1.0)
+	{}
 	
 	void gen()
 	{
 		init();
 	}
 
-	void init(unsigned int prime_size_bytes = 128, unsigned int sectors = 10);
+	void init(double check_fraction = 1.0, unsigned int sectors = 10, unsigned int prime_size_bytes = 128);
 	
 	void get_public(shacham_waters_private &h) const;
 	
@@ -215,6 +221,7 @@ private:
 
 	unsigned int _sectors;
 	size_t _sector_size;
+	double _check_fraction;
 	
 	CryptoPP::Integer _p;
 	

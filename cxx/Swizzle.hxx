@@ -454,13 +454,32 @@ public:
 		//std::cout << "Swizzle constructor called..." << std::endl;
 		try 
 		{
-			gen();
-			
+			if (!kwds.hasKey("initialize") || kwds["initialize"].isTrue())
+			{
+				// we initialize now
+				init(args);
+			}
 			//std::cout << "heartbeat generated." << std::endl;
 		}
 		catch (const std::exception &e)
 		{
 			throw PyHeartbeatException(e.what());
+		}
+	}
+	
+	void init(Py::Tuple &args)
+	{
+		if (args.size() > 1)
+		{
+			shacham_waters_private::init(Py::Float(args[0]),(long)Py::Long(args[1]));
+		}
+		else if (args.size() > 0)
+		{
+			shacham_waters_private::init(Py::Float(args[0]));			
+		}
+		else
+		{
+			shacham_waters_private::init();
 		}
 	}
 
@@ -486,7 +505,11 @@ prove(file,challenge,tag) which returns a proof that should be sent back to\n\
 the client for verification.\n\
 verify(proof,challenge,state) which returns a boolean representing whether the\n\
 proof is valid given the challenge and file state.  This function will decypt\n\
-the state if necessary.\n");
+the state if necessary.\n\
+Constructor:\n\
+heartbeat.Swizzle.Swizzle(check_fraction = 1.0)\n\
+The check fraction is the fraction of the file that will be checked on each\n\
+challenge.\n");
 		
 		PYCXX_ADD_NOARGS_METHOD( get_public, _get_public, "get_public()\nReturns the public version of this object which is stripped\n\
 of the secret verification data." );
@@ -515,7 +538,9 @@ the state if necessary." );
 		try 
 		{
 			Py::Callable class_type( Swizzle::type() );
-			Py::PythonClassObject<Swizzle> pyobj( class_type.apply( Py::Tuple() ) );
+			Py::Dict k;
+			k["initialize"] = Py::False();
+			Py::PythonClassObject<Swizzle> pyobj( class_type.apply( Py::Tuple(), k ) );
 			Swizzle *obj = pyobj.getCxxObject();
 		
 			get_public(*obj);

@@ -266,15 +266,23 @@ class Merkle(object):
     Then the client generates a number of challenges based on this key.
     """
 
-    def __init__(self, key=None):
+    def __init__(self, check_fraction=None, key=None):
         """Initialization method
 
+        :param check_fraction: the fraction of the file to check during 
+            challenges.  if none, will check the default amount defined by
+            DEFAULT_CHUNK_SIZE
         :param key: the key for signing the state and generating seeds
         """
         if (key is None):
             self.key = os.urandom(DEFAULT_KEY_SIZE)
         else:
             self.key = key
+
+        if (check_fraction is not None):
+            self.check_fraction = check_fraction
+        else:
+            self.check_fraction = None
 
     def __eq__(self, other):
         return self.key == other.key
@@ -302,8 +310,8 @@ class Merkle(object):
     def encode(self,
                file,
                n=DEFAULT_CHALLENGE_COUNT,
-               seed=os.urandom(DEFAULT_KEY_SIZE),
-               chunksz=DEFAULT_CHUNK_SIZE):
+               seed=None,
+               chunksz=None):
         """This function generates a merkle tree with the leaves as seed file
         hashes, the seed for each leaf being a deterministic seed generated
         from a key.
@@ -311,9 +319,21 @@ class Merkle(object):
         :param file: a file like object that supports the `read()`, `seek()`
         and `tell()` methods
         :param n: the number of challenges to generate
-        :param chunksz: the chunk size for breaking up the file.
-        :param seed: the root seed for this batch of challenges.
+        :param seed: the root seed for this batch of challenges.  by default 
+            generates a random seed
+        :param chunksz: the chunk size for breaking up the file: the amount
+            of the file that will be checked by each challenge.  defaults
+            to the chunk size defined by check_fraction
         """
+        if (seed is None):
+            seed = os.urandom(DEFAULT_KEY_SIZE)
+        if (chunksz is None):
+            if (self.check_fraction is not None):
+                file.seek(0,2)
+                filesz = file.tell()
+                chunksz = int(self.check_fraction * filesz)
+            else:
+                chunksz = DEFAULT_CHUNK_SIZE
         mt = MerkleTree()
         state = State(0, seed, n)
         seed = MerkleHelper.get_next_seed(self.key, state.seed)
@@ -456,7 +476,7 @@ class MerkleHelper(object):
         file.seek(0, 2)
         filesz = file.tell()
         if (filesz < chunksz):
-            chunksz = filesz // 10
+            chunksz = filesz
         random.seed(seed)
         i = random.randint(0, filesz - chunksz)
         file.seek(i)

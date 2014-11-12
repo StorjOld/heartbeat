@@ -136,12 +136,11 @@ class TestMerkle(unittest.TestCase):
 
     def test_init(self):
         k = os.urandom(32)
-        beat = Merkle.Merkle(k)
+        beat = Merkle.Merkle(key=k)
         self.assertEqual(k,beat.key)
 
     def test_run_out_of_challenges(self):
-        k = os.urandom(32)
-        beat = Merkle.Merkle(k)
+        beat = Merkle.Merkle()
 
         # encode with 200 challenges
         with open('files/test.txt','rb') as file:
@@ -157,9 +156,9 @@ class TestMerkle(unittest.TestCase):
     def test_comparison(self):
         k = os.urandom(32)
         k3 = os.urandom(32)
-        beat1 = Merkle.Merkle(k)
-        beat2 = Merkle.Merkle(k)
-        beat3 = Merkle.Merkle(k3)
+        beat1 = Merkle.Merkle(key=k)
+        beat2 = Merkle.Merkle(key=k)
+        beat3 = Merkle.Merkle(key=k3)
         
         s = os.urandom(32)
         s3 = os.urandom(32)

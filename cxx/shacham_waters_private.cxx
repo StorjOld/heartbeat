@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 */
 
-//#define CRYPTOPP_IMPORTS 
+//#define CRYPTOPP_IMPORTS
 //#include <cryptopp/dll.h>
 
 #include "shacham_waters_private.hxx"
@@ -593,8 +593,10 @@ void shacham_waters_private::proof::deserialize(CryptoPP::BufferedTransformation
 	_sigma = safe_integer(bt,n);
 }
 
-void shacham_waters_private::init(unsigned int prime_size_bytes, unsigned int sectors)
+void shacham_waters_private::init(double check_fraction, unsigned int sectors, unsigned int prime_size_bytes)
 {
+	_check_fraction = check_fraction;
+
 	//std::cout << "this = 0x" << std::hex << (int)this << std::endl;
 	//std::cout << "Initializing shacham waters private, prime bytes: " << prime_size_bytes << ", sectors: " << sectors << "..." << std::endl;
 	CryptoPP::AutoSeededRandomPool rng;
@@ -623,6 +625,7 @@ void shacham_waters_private::init(unsigned int prime_size_bytes, unsigned int se
 
 void shacham_waters_private::get_public(shacham_waters_private &h) const
 {
+	h._check_fraction = _check_fraction;
 	h._p = _p;
 	h._sectors = _sectors;
 	h._sector_size = _sector_size;
@@ -706,7 +709,8 @@ void shacham_waters_private::gen_challenge(challenge &c, const state &s_enc)
 	{
 		throw std::runtime_error("Signature check or decryption failed in generating challenge.  State of remote file cannot be verified.");
 	}
-	gen_challenge(c,s.get_n(),_p);
+	unsigned int l = unsigned int(_check_fraction * s.get_n());
+	gen_challenge(c,l,_p);
 }
 
 void shacham_waters_private::gen_challenge(challenge &c, unsigned int l, const CryptoPP::Integer &B)

@@ -129,10 +129,10 @@ This is the same as Swizzle but written in pure python.  It is significantly slo
 To build the heartbeat modules, including C++ Swizzle python extension module, first install Crypto++.  On a debian based system, the following should suffice:
 
 ```
-sudo apt-get install libcrypto++-dev
+sudo apt-get install libcrypto++-dev libgmp-dev
 ```
 
-On windows you will need to source the libcrypto library, build it, and then make sure that the Crypto++ headers are in your include path and cryptlib is on the library search path for your compiler.
+On windows you will need to source the libcrypto library, build it, and then make sure that the Crypto++ headers are in your include path and cryptlib is on the library search path for your compiler.  In addition, if you want fast math, install libgmp and add to your library path.
 
 Then install the module:
 

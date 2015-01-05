@@ -709,7 +709,7 @@ void shacham_waters_private::gen_challenge(challenge &c, const state &s_enc)
 	{
 		throw std::runtime_error("Signature check or decryption failed in generating challenge.  State of remote file cannot be verified.");
 	}
-	unsigned int l = unsigned int(_check_fraction * s.get_n());
+	unsigned int l = (unsigned int)(_check_fraction * s.get_n());
 	gen_challenge(c,l,_p);
 }
 

@@ -81,7 +81,7 @@ public:
 	{
 		//std::cout << "entered PyBytesSink::append()" << std::endl;
 		char *c_ptr;
-		ssize_t size = py_get_size(_buffer);
+		Py_ssize_t size = py_get_size(_buffer);
 		if (_offset + n > (size_t)size)
 		{
 			// resize

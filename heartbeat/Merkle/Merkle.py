@@ -269,7 +269,7 @@ class Merkle(object):
     def __init__(self, check_fraction=None, key=None):
         """Initialization method
 
-        :param check_fraction: the fraction of the file to check during 
+        :param check_fraction: the fraction of the file to check during
             challenges.  if none, will check the default amount defined by
             DEFAULT_CHUNK_SIZE
         :param key: the key for signing the state and generating seeds
@@ -319,7 +319,7 @@ class Merkle(object):
         :param file: a file like object that supports the `read()`, `seek()`
         and `tell()` methods
         :param n: the number of challenges to generate
-        :param seed: the root seed for this batch of challenges.  by default 
+        :param seed: the root seed for this batch of challenges.  by default
             generates a random seed
         :param chunksz: the chunk size for breaking up the file: the amount
             of the file that will be checked by each challenge.  defaults
@@ -329,7 +329,7 @@ class Merkle(object):
             seed = os.urandom(DEFAULT_KEY_SIZE)
         if (chunksz is None):
             if (self.check_fraction is not None):
-                file.seek(0,2)
+                file.seek(0, 2)
                 filesz = file.tell()
                 chunksz = int(self.check_fraction * filesz)
             else:

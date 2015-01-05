@@ -30,7 +30,7 @@ __version__ = "0.1.4"
 import heartbeat.Swizzle    # NOQA
 import heartbeat.Merkle    # NOQA
 import heartbeat.PySwizzle  # NOQA
-from exc import HeartbeatError  # NOQA
+from .exc import HeartbeatError  # NOQA
 
 
 Heartbeat = heartbeat.Swizzle.Swizzle

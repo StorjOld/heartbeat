@@ -49,7 +49,7 @@ with open('path/to/file','rb') as f:
     (tag,state) = beat.encode(f)
 ```
 
-The tag encapsulates data about the file which will be used by a server to verify that it has stored the file.  The file, tag and state information are sent to server (tag may or may not be quite large).  The state information will be signed and/or encrypted.  The state information is information that can be outsourced but is necessary for verification.  State and tag are sent to the server for storage.  These are separate because in some cases the state information needs to be transmitted apart from the tag.  The client should maintain the heartbeat because it contains the private keys for generation and verification of challenges.
+The tag encapsulates data about the file which will be used by a server to verify that it has stored the file.  The file, tag and state information are sent to the server (tag may or may not be quite large).  The state information will be signed and/or encrypted.  The state information is information that can be outsourced but is necessary for verification.  State and tag are sent to the server for storage.  These are separate because in some cases the state information needs to be transmitted apart from the tag.  The client should maintain the heartbeat because it contains the private keys for generation and verification of challenges.
 
 After a time has passed, when an auditor wants to verify the challenge, if necessary he should request the state back from the server.  Then, he can generate a challenge:
 

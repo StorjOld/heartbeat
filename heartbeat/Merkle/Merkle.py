@@ -234,7 +234,7 @@ class Proof(object):
 
     """The proof class encpasulates proof that a file exists"""
 
-    def __init__(self, leaf=[], branch=MerkleBranch(0)):
+    def __init__(self, leaf=MerkleLeaf(0,bytes()), branch=MerkleBranch(0)):
         """Initialization method
 
         :param leaf: this is leaf of the merkle tree branch, i.e. the seeded
@@ -290,7 +290,7 @@ class Merkle(object):
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
-        return {'key': hb_encode(self.key)}
+        return {'key': hb_encode(self.key), 'check_fraction': self.check_fraction}
 
     @staticmethod
     def fromdict(dict):
@@ -300,12 +300,13 @@ class Merkle(object):
         :param dict: the dictionary to convert
         """
         key = hb_decode(dict['key'])
-        return Merkle(key)
+        check_fraction = dict['check_fraction']
+        return Merkle(check_fraction, key)
 
     def get_public(self):
         """This function returns a Merkle object that has it's key
         stripped."""
-        return Merkle(b'')
+        return Merkle(self.check_fraction, b'')
 
     def encode(self,
                file,

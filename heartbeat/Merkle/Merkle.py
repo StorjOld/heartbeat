@@ -25,7 +25,6 @@
 import hashlib
 import hmac
 import os
-import random
 import time
 
 
@@ -493,4 +492,3 @@ class MerkleHelper(object):
             if (read >= chunksz):
                 break
         return h.digest()
-        

@@ -34,7 +34,7 @@ from Crypto.Hash import SHA256
 
 from .MerkleTree import MerkleTree, MerkleBranch, MerkleLeaf
 from ..exc import HeartbeatError
-from ..util import hb_encode, hb_decode
+from ..util import hb_encode, hb_decode, KeyedPRF
 
 DEFAULT_CHUNK_SIZE = 8192
 DEFAULT_BUFFER_SIZE = 65536
@@ -479,8 +479,8 @@ class MerkleHelper(object):
         filesz = file.tell()
         if (filesz < chunksz):
             chunksz = filesz
-        random.seed(seed)
-        i = random.randint(0, filesz - chunksz)
+        prf = KeyedPRF(seed, filesz - chunksz + 1)
+        i = prf.eval(0)
         file.seek(i)
         read = 0
         if (chunksz < bufsz):
@@ -493,3 +493,4 @@ class MerkleHelper(object):
             if (read >= chunksz):
                 break
         return h.digest()
+        

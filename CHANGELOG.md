@@ -2,7 +2,9 @@
 
 ### Master
 
+### 0.1.8
 
+* [BUGFIX] Fixed equality calculation to check for proofs.
 
 ### 0.1.7
 

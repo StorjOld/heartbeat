@@ -43,7 +43,8 @@ class MerkleLeaf(object):
         self.blob = blob
 
     def __eq__(self, other):
-        return (self.index == other.index
+        return (isinstance(other, MerkleLeaf)
+                and self.index == other.index
                 and self.blob == other.blob)
 
     def get_hash(self):
@@ -66,7 +67,7 @@ class MerkleBranch(object):
         self.rows = [(b'', b'')] * order
 
     def __eq__(self, other):
-        return self.rows == other.rows
+        return isinstance(other, MerkleBranch) and self.rows == other.rows
 
     def get_left(self, i):
         return self.rows[i][0]
@@ -114,7 +115,8 @@ class MerkleTree(object):
         self.leaves = list()
 
     def __eq__(self, other):
-        return (self.nodes == other.nodes and
+        return (isinstance(other, MerkleTree) and 
+                self.nodes == other.nodes and
                 self.order == other.order and
                 self.leaves == other.leaves)
 

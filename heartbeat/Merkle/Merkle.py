@@ -61,7 +61,9 @@ class Challenge(object):
         self.index = index
 
     def __eq__(self, other):
-        return isinstance(other, Challenge) and self.seed == other.seed and self.index == other.index
+        return (isinstance(other, Challenge) and
+                self.seed == other.seed and
+                self.index == other.index)
 
     def todict(self):
         """Returns a dictionary fully representing the state of this object
@@ -100,7 +102,9 @@ class Tag(object):
         self.chunksz = chunksz
 
     def __eq__(self, other):
-        return isinstance(other, Tag) and self.tree == other.tree and self.chunksz == other.chunksz
+        return (isinstance(other, Tag) and
+                self.tree == other.tree and
+                self.chunksz == other.chunksz)
 
     def todict(self):
         """Returns a dictionary fully representing the state of this object
@@ -161,7 +165,7 @@ class State(object):
         self.timestamp = timestamp
 
     def __eq__(self, other):
-        return (isinstance(other, State) and 
+        return (isinstance(other, State) and
                 self.index == other.index and
                 self.seed == other.seed and
                 self.n == other.n and

@@ -115,7 +115,7 @@ class MerkleTree(object):
         self.leaves = list()
 
     def __eq__(self, other):
-        return (isinstance(other, MerkleTree) and 
+        return (isinstance(other, MerkleTree) and
                 self.nodes == other.nodes and
                 self.order == other.order and
                 self.leaves == other.leaves)

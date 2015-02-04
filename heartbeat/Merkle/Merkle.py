@@ -333,10 +333,10 @@ class Merkle(object):
         """
         if (seed is None):
             seed = os.urandom(DEFAULT_KEY_SIZE)
+        file.seek(0, 2)
+        filesz = file.tell()
         if (chunksz is None):
             if (self.check_fraction is not None):
-                file.seek(0, 2)
-                filesz = file.tell()
                 chunksz = int(self.check_fraction * filesz)
             else:
                 chunksz = DEFAULT_CHUNK_SIZE
@@ -344,8 +344,7 @@ class Merkle(object):
         state = State(0, seed, n)
         seed = MerkleHelper.get_next_seed(self.key, state.seed)
         for i in range(0, n):
-            file.seek(0)
-            leaf = MerkleHelper.get_chunk_hash(file, seed, chunksz)
+            leaf = MerkleHelper.get_chunk_hash(file, seed, filesz, chunksz)
             mt.add_leaf(leaf)
             seed = MerkleHelper.get_next_seed(self.key, seed)
         mt.build()
@@ -382,11 +381,11 @@ class Merkle(object):
         :param file: a file that supports `read()`, `seek()` and `tell()`
         :param challenge: the challenge to use for generating this proof
         :param tag: the file tag as provided from the client
-        """
+        """        
         leaf = MerkleLeaf(challenge.index,
                           MerkleHelper.get_chunk_hash(file,
                                                       challenge.seed,
-                                                      tag.chunksz))
+                                                      chunksz=tag.chunksz))
         return Proof(leaf, tag.tree.get_branch(challenge.index))
 
     def verify(self, proof, challenge, state):
@@ -466,6 +465,7 @@ class MerkleHelper(object):
     @staticmethod
     def get_chunk_hash(file,
                        seed,
+                       filesz=None,
                        chunksz=DEFAULT_CHUNK_SIZE,
                        bufsz=DEFAULT_BUFFER_SIZE):
         """returns a hash of a chunk of the file provided.  the position of
@@ -479,21 +479,22 @@ class MerkleHelper(object):
         :param chunksz: the size of the chunk to check
         :param bufsz: an optional buffer size to use for reading the file.
         """
-        file.seek(0, 2)
-        filesz = file.tell()
+        if (filesz is None):
+            file.seek(0, 2)
+            filesz = file.tell()
         if (filesz < chunksz):
             chunksz = filesz
         prf = KeyedPRF(seed, filesz - chunksz + 1)
         i = prf.eval(0)
         file.seek(i)
-        read = 0
-        if (chunksz < bufsz):
-            bufsz = chunksz
         h = hmac.new(seed, None, hashlib.sha256)
         while (True):
+            if (chunksz < bufsz):
+                bufsz = chunksz
             buffer = file.read(bufsz)
             h.update(buffer)
-            read += len(buffer)
-            if (read >= chunksz):
+            chunksz -= len(buffer)
+            assert(chunksz >= 0)
+            if (chunksz == 0):
                 break
         return h.digest()

@@ -1,6 +1,9 @@
 # heartbeat Changelog
 
-### Master
+### 0.1.9
+
+* [BUGFIX] Fixed buffering error in Merkle
+* [ENHANCEMENT] Added filesz parameter for prove and encode methods incase file size is known in advance for optimization.
 
 ### 0.1.8
 

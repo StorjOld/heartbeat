@@ -388,7 +388,7 @@ class Merkle(object):
         :param tag: the file tag as provided from the client
         :param filesz: optional filesz parameter.  if not specified, the
             filesz will be detected by seeking to the end of the stream
-        """        
+        """
         leaf = MerkleLeaf(challenge.index,
                           MerkleHelper.get_chunk_hash(file,
                                                       challenge.seed,

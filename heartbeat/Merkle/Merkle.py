@@ -317,7 +317,8 @@ class Merkle(object):
                file,
                n=DEFAULT_CHALLENGE_COUNT,
                seed=None,
-               chunksz=None):
+               chunksz=None,
+               filesz=None):
         """This function generates a merkle tree with the leaves as seed file
         hashes, the seed for each leaf being a deterministic seed generated
         from a key.
@@ -330,11 +331,15 @@ class Merkle(object):
         :param chunksz: the chunk size for breaking up the file: the amount
             of the file that will be checked by each challenge.  defaults
             to the chunk size defined by check_fraction
+        :param filesz: optional size of the file.  if not specified, file size
+            will be detected by seeking to the end of the file and reading the
+            position
         """
         if (seed is None):
             seed = os.urandom(DEFAULT_KEY_SIZE)
-        file.seek(0, 2)
-        filesz = file.tell()
+        if (filesz is None):
+            file.seek(0, 2)
+            filesz = file.tell()
         if (chunksz is None):
             if (self.check_fraction is not None):
                 chunksz = int(self.check_fraction * filesz)
@@ -373,7 +378,7 @@ class Merkle(object):
         state.sign(self.key)
         return chal
 
-    def prove(self, file, challenge, tag):
+    def prove(self, file, challenge, tag, filesz=None):
         """Returns a proof of ownership of the given file based on the
         challenge.  The proof consists of a hash of the specified file chunk
         and the complete merkle branch.
@@ -381,10 +386,13 @@ class Merkle(object):
         :param file: a file that supports `read()`, `seek()` and `tell()`
         :param challenge: the challenge to use for generating this proof
         :param tag: the file tag as provided from the client
+        :param filesz: optional filesz parameter.  if not specified, the
+            filesz will be detected by seeking to the end of the stream
         """        
         leaf = MerkleLeaf(challenge.index,
                           MerkleHelper.get_chunk_hash(file,
                                                       challenge.seed,
+                                                      filesz=filesz,
                                                       chunksz=tag.chunksz))
         return Proof(leaf, tag.tree.get_branch(challenge.index))
 
@@ -446,11 +454,11 @@ class MerkleHelper(object):
 
     @staticmethod
     def get_file_hash(file, seed, bufsz=DEFAULT_BUFFER_SIZE):
-        """This method generates a secure has of the given file.  Returns the
+        """This method generates a secure hash of the given file.  Returns the
         hash
 
         :param file: a file like object to get a hash of.  should support
-        `read()`
+            `read()`
         :param seed: the seed to use for key of the HMAC function
         :param bufsz: an optional buffer size to use for reading the file
         """

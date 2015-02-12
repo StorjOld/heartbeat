@@ -1,6 +1,8 @@
 # heartbeat Changelog
 
-### Master
+### 0.1.10
+
+* [BUGFIX] Fixed type error where comparison of two different types resulted in type error instead of False.  Now it just returns True on not equal and False for all other comparisons if the types are different.
 
 ### 0.1.9
 

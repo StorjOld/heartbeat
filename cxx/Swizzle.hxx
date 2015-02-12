@@ -230,17 +230,41 @@ public:
 		try {
 			// std::cout << "rich compare called." << std::endl;
 			bool c = false;
+			const Tthis *obj;
 			
-			const Tthis *obj = Py::PythonClassObject<Tthis>( other ).getCxxObject();
-			
-			switch (op)
+			try
 			{
-				case Py_LT: throw Py::NotImplementedError("Less than operator is not implemented.");
-				case Py_LE: throw Py::NotImplementedError("Less than or equal to operator is not implemented.");
-				case Py_EQ: c = this->get_state() == obj->get_state(); break;
-				case Py_NE: c = this->get_state() != obj->get_state(); break;
-				case Py_GT: throw Py::NotImplementedError("Greater than operator is not implemented.");
-				case Py_GE: throw Py::NotImplementedError("Greater than or equal to operator is not implemented.");
+				obj = Py::PythonClassObject<Tthis>( other ).getCxxObject();
+			} catch (Py::TypeError &e)
+			{
+				e.clear();
+				obj = 0;
+			}
+			
+			if (obj)
+			{
+				switch (op)
+				{
+					case Py_LT: throw Py::NotImplementedError("Less than operator is not implemented.");
+					case Py_LE: throw Py::NotImplementedError("Less than or equal to operator is not implemented.");
+					case Py_EQ: c = this->get_state() == obj->get_state(); break;
+					case Py_NE: c = this->get_state() != obj->get_state(); break;
+					case Py_GT: throw Py::NotImplementedError("Greater than operator is not implemented.");
+					case Py_GE: throw Py::NotImplementedError("Greater than or equal to operator is not implemented.");
+				}
+			}
+			else
+			{
+				// types are not the same
+				switch (op)
+				{
+					case Py_LT: c = false; break;
+					case Py_LE: c = false; break;
+					case Py_EQ: c = false; break;
+					case Py_NE: c = true; break;
+					case Py_GT: c = false; break;
+					case Py_GE: c = false; break;
+				}
 			}
 			
 			// std::cout << "comparison yielded: " << c << std::endl;

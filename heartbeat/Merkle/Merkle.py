@@ -92,7 +92,7 @@ class Tag(object):
     up the file
     """
 
-    def __init__(self, tree=MerkleTree(), chunksz=DEFAULT_CHUNK_SIZE):
+    def __init__(self, tree=MerkleTree(), chunksz=DEFAULT_CHUNK_SIZE, filesz=None):
         """Initialization method
 
         :param tree: this is the stripped merkle tree
@@ -100,17 +100,20 @@ class Tag(object):
         """
         self.tree = tree
         self.chunksz = chunksz
+        self.filesz = filesz
 
     def __eq__(self, other):
         return (isinstance(other, Tag) and
                 self.tree == other.tree and
-                self.chunksz == other.chunksz)
+                self.chunksz == other.chunksz and
+                self.filesz == other.filesz)
 
     def todict(self):
         """Returns a dictionary fully representing the state of this object
         """
         return {'tree': self.tree.todict(),
-                'chunksz': self.chunksz}
+                'chunksz': self.chunksz,
+                'filesz': self.filesz}
 
     @staticmethod
     def fromdict(dict):
@@ -121,7 +124,8 @@ class Tag(object):
         """
         tree = MerkleTree.fromdict(dict['tree'])
         chunksz = dict['chunksz']
-        return Tag(tree, chunksz)
+        filesz = dict['filesz']
+        return Tag(tree, chunksz, filesz)
 
 
 class State(object):
@@ -355,7 +359,7 @@ class Merkle(object):
         mt.build()
         state.root = mt.get_root()
         mt.strip_leaves()
-        tag = Tag(mt, chunksz)
+        tag = Tag(mt, chunksz, filesz)
         state.sign(self.key)
         return (tag, state)
 
@@ -378,7 +382,7 @@ class Merkle(object):
         state.sign(self.key)
         return chal
 
-    def prove(self, file, challenge, tag, filesz=None):
+    def prove(self, file, challenge, tag):
         """Returns a proof of ownership of the given file based on the
         challenge.  The proof consists of a hash of the specified file chunk
         and the complete merkle branch.
@@ -392,7 +396,7 @@ class Merkle(object):
         leaf = MerkleLeaf(challenge.index,
                           MerkleHelper.get_chunk_hash(file,
                                                       challenge.seed,
-                                                      filesz=filesz,
+                                                      filesz=tag.filesz,
                                                       chunksz=tag.chunksz))
         return Proof(leaf, tag.tree.get_branch(challenge.index))
 

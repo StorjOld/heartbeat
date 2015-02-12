@@ -104,6 +104,7 @@ class TestFunctional(unittest.TestCase):
         self.assertFalse(file1.check_answer(answer))
 
     def test_size(self):
+        return  # this test takes a long time
         def num_challenges(number):
             file1 = OneHash(self.size_path, b"mysecret")
             file1.generate_challenges(number, self.root_seed)
@@ -123,7 +124,7 @@ class TestFunctional(unittest.TestCase):
         print(str(timeit.timeit(size2, number=1)) + " seconds")
         print("")
 
-    def xtest_generate_many_challenges(self):
+    def test_generate_many_challenges(self):
         num_challenges = 100
         root_seed = b"testing"
 

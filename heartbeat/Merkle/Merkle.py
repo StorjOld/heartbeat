@@ -92,7 +92,10 @@ class Tag(object):
     up the file
     """
 
-    def __init__(self, tree=MerkleTree(), chunksz=DEFAULT_CHUNK_SIZE, filesz=None):
+    def __init__(self,
+                 tree=MerkleTree(),
+                 chunksz=DEFAULT_CHUNK_SIZE,
+                 filesz=None):
         """Initialization method
 
         :param tree: this is the stripped merkle tree

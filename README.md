@@ -139,7 +139,7 @@ Then install the module:
 ```
 git clone https://github.com/storj/heartbeat.git
 cd heartbeat
-pip install .
+python setup.py install
 ```
 
 You can run the tests if you have nose installed by running
